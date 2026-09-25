@@ -28,7 +28,7 @@ export default function ConstantAcceleration() {
 
   // ─── Refs de simulación ─────────────────────────────────────
   const rafRef        = useRef<number>(0)
-  const pauseAccRef   = useRef<number>(0)  // tiempo acumulado antes de pause
+  const pauseAccRef   = useRef<number>(0)
   const lastTsRef     = useRef<number>(0)
   const runningRef    = useRef(false)
 
@@ -76,106 +76,108 @@ export default function ConstantAcceleration() {
 
       const state = computeKinematics(params, t)
       const carX  = worldToCanvas(state.x, W)
-      const baseY = H * 0.62
+      const baseY = H * 0.60
 
-      // ── Fondo ────────────────────────────────────────────────
-      // Degradado cielo oscuro → suelo
+      // Fondo del Laboratorio / Cielo
       const sky = ctx.createLinearGradient(0, 0, 0, H)
-      sky.addColorStop(0, '#080808')
-      sky.addColorStop(0.6, '#0f0f0f')
-      sky.addColorStop(0.6, '#111111')
-      sky.addColorStop(1, '#080808')
+      sky.addColorStop(0, '#f8fafc')
+      sky.addColorStop(0.6, '#e2e8f0')
+      sky.addColorStop(1, '#cbd5e1')
       ctx.fillStyle = sky
       ctx.fillRect(0, 0, W, H)
 
-      // ── Carretera ────────────────────────────────────────────
-      const roadH  = H * 0.22
+      // Pista de Experimentación
+      const roadH  = H * 0.24
       const roadY  = baseY - 4
-      ctx.fillStyle = '#1a1a1a'
+      ctx.fillStyle = '#1e293b'
       ctx.fillRect(0, roadY, W, roadH)
 
-      // Líneas de carretera animadas
-      ctx.strokeStyle = 'rgba(255,255,255,0.18)'
+      // Líneas punteadas de la pista
+      ctx.strokeStyle = '#ffffff'
       ctx.lineWidth = 2
-      ctx.setLineDash([30, 22])
-      ctx.lineDashOffset = -(state.x * 4) % 52
+      ctx.setLineDash([24, 18])
+      ctx.lineDashOffset = -(state.x * 4) % 42
       ctx.beginPath()
       ctx.moveTo(0, roadY + roadH / 2)
       ctx.lineTo(W, roadY + roadH / 2)
       ctx.stroke()
       ctx.setLineDash([])
 
-      // Bordes de carretera
-      ctx.strokeStyle = 'rgba(255,255,255,0.35)'
-      ctx.lineWidth = 2
+      // Bordes de la pista
+      ctx.strokeStyle = '#c8a932'
+      ctx.lineWidth = 3
       ctx.beginPath()
       ctx.moveTo(0, roadY)
       ctx.lineTo(W, roadY)
-      ctx.moveTo(0, roadY + roadH - 1)
-      ctx.lineTo(W, roadY + roadH - 1)
       ctx.stroke()
 
-      // ── Perspectiva / líneas de horizonte ────────────────────
-      ctx.strokeStyle = 'rgba(255,255,255,0.04)'
-      ctx.lineWidth = 1
-      for (let i = 1; i <= 3; i++) {
-        const lx = (i / 4) * W
-        ctx.beginPath()
-        ctx.moveTo(lx, 0)
-        ctx.lineTo(lx, roadY)
-        ctx.stroke()
-      }
+      ctx.strokeStyle = '#64748b'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.moveTo(0, roadY + roadH)
+      ctx.lineTo(W, roadY + roadH)
+      ctx.stroke()
 
-      // ── Escala numérica (metros) ──────────────────────────────
-      const tickStep = 10 // metros entre ticks
-      ctx.font = '10px IBM Plex Mono, monospace'
-      ctx.fillStyle = 'rgba(255,255,255,0.2)'
+      // Escala numérica métrica
+      const tickStep = 10
+      ctx.font = '700 9px "JetBrains Mono", monospace'
+      ctx.fillStyle = '#475569'
       ctx.textAlign = 'center'
-      ctx.strokeStyle = 'rgba(255,255,255,0.1)'
+      ctx.strokeStyle = '#94a3b8'
       ctx.lineWidth = 1
+
       for (let m = Math.ceil(WORLD_MIN / tickStep) * tickStep; m <= WORLD_MAX; m += tickStep) {
         const tx = worldToCanvas(m, W)
         ctx.beginPath()
-        ctx.moveTo(tx, roadY + roadH - 6)
+        ctx.moveTo(tx, roadY + roadH)
         ctx.lineTo(tx, roadY + roadH + 6)
         ctx.stroke()
         ctx.fillText(`${m}m`, tx, roadY + roadH + 18)
       }
 
-      // ── Barrera verde ─────────────────────────────────────────
+      // ── Barrera Verde (Sensor 1) ──────────────────────────────
       const gx = worldToCanvas(barrierGreen, W)
-      ctx.strokeStyle = hitGreen ? 'rgba(200,255,200,0.9)' : 'rgba(180,255,180,0.7)'
+      ctx.strokeStyle = hitGreen ? '#10b981' : 'rgba(16, 185, 129, 0.7)'
       ctx.lineWidth = 3
       ctx.beginPath()
-      ctx.moveTo(gx, roadY - 8)
+      ctx.moveTo(gx, roadY - 14)
       ctx.lineTo(gx, roadY + roadH + 8)
       ctx.stroke()
-      // Flag verde
-      drawFlag(ctx, gx, roadY - 8, '#22c55e', '⬥')
+      drawSensorFlag(ctx, gx, roadY - 14, '#10b981', 'S₁')
 
-      // ── Barrera roja ──────────────────────────────────────────
+      // ── Barrera Roja (Sensor 2) ───────────────────────────────
       const rx = worldToCanvas(barrierRed, W)
-      ctx.strokeStyle = hitRed ? 'rgba(255,200,200,0.9)' : 'rgba(255,160,160,0.7)'
+      ctx.strokeStyle = hitRed ? '#ef4444' : 'rgba(239, 68, 68, 0.7)'
       ctx.lineWidth = 3
       ctx.beginPath()
-      ctx.moveTo(rx, roadY - 8)
+      ctx.moveTo(rx, roadY - 14)
       ctx.lineTo(rx, roadY + roadH + 8)
       ctx.stroke()
-      drawFlag(ctx, rx, roadY - 8, '#ef4444', '⬥')
+      drawSensorFlag(ctx, rx, roadY - 14, '#ef4444', 'S₂')
 
-      // ── Auto ─────────────────────────────────────────────────
-      if (carX >= -60 && carX <= W + 60) {
+      // ── Móvil / Vehículo Experimental ────────────────────────
+      if (carX >= -80 && carX <= W + 80) {
         drawCar(ctx, carX, baseY, state.v)
       }
 
-      // ── Indicadores numéricos ────────────────────────────────
-      ctx.font = 'bold 11px IBM Plex Mono, monospace'
+      // ── HUD Telemetría Superior ──────────────────────────────
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.92)'
+      ctx.strokeStyle = '#cbd5e1'
+      ctx.lineWidth = 1
+      roundRect(ctx, 12, 10, 260, 68, 8)
+      ctx.fill()
+      ctx.stroke()
+
+      ctx.font = '700 11px "JetBrains Mono", monospace'
       ctx.textAlign = 'left'
-      ctx.fillStyle = 'rgba(255,255,255,0.7)'
-      ctx.fillText(`x = ${state.x.toFixed(2)} m`, 12, 20)
-      ctx.fillText(`v = ${state.v.toFixed(2)} m/s`, 12, 36)
-      ctx.fillText(`a = ${state.a.toFixed(2)} m/s²`, 12, 52)
-      ctx.fillText(`t = ${t.toFixed(2)} s`, 12, 68)
+      ctx.fillStyle = '#059669'
+      ctx.fillText(`x(t) = ${state.x.toFixed(2)} m`, 22, 28)
+      ctx.fillStyle = '#0891b2'
+      ctx.fillText(`v(t) = ${state.v.toFixed(2)} m/s`, 22, 44)
+      ctx.fillStyle = '#7c3aed'
+      ctx.fillText(`a(t) = ${state.a.toFixed(2)} m/s²`, 22, 60)
+      ctx.fillStyle = '#24346c'
+      ctx.fillText(`t = ${t.toFixed(2)} s`, 160, 60)
     },
     [params, mainCtx, mainSize, worldToCanvas, barrierGreen, barrierRed, hitGreen, hitRed]
   )
@@ -193,10 +195,9 @@ export default function ConstantAcceleration() {
       pauseAccRef.current += dt
 
       const t = pauseAccRef.current
-
-      // Detección de barreras
       const state = computeKinematics(params, t)
 
+      // Detección de barreras / sensores
       if (!hitGreen) {
         const prevX = computeKinematics(params, Math.max(0, t - dt)).x
         if ((prevX < barrierGreen && state.x >= barrierGreen) ||
@@ -218,11 +219,8 @@ export default function ConstantAcceleration() {
       }
 
       setElapsed(t)
-
-      // Dibujar escena
       drawMain(t)
 
-      // Gráficas
       chartX.push(t, state.x)
       chartV.push(t, state.v)
       chartA.push(t, state.a)
@@ -255,6 +253,12 @@ export default function ConstantAcceleration() {
     handleReset()
   }
 
+  const applyPreset = (x0: number, v0: number, a: number) => {
+    setDraft({ x0: String(x0), v0: String(v0), a: String(a) })
+    setParams({ x0, v0, a })
+    handleReset()
+  }
+
   const handleReset = useCallback(() => {
     runningRef.current = false
     cancelAnimationFrame(rafRef.current)
@@ -266,13 +270,14 @@ export default function ConstantAcceleration() {
     setTimeRed(null)
     setHitGreen(false)
     setHitRed(false)
-    chartX.reset(); chartV.reset(); chartA.reset()
+    chartX.reset()
+    chartV.reset()
+    chartA.reset()
     drawMain(0)
   }, [drawMain, chartX, chartV, chartA])
 
   const handlePlay = () => {
     if (running) {
-      // Pausar
       runningRef.current = false
       cancelAnimationFrame(rafRef.current)
       setRunning(false)
@@ -282,26 +287,24 @@ export default function ConstantAcceleration() {
     }
   }
 
-  // Dibujo inicial
   useEffect(() => { drawMain(0) }, [drawMain])
-
-  // Cleanup
   useEffect(() => () => { cancelAnimationFrame(rafRef.current) }, [])
 
   // ─── Arrastre de barreras sobre canvas ───────────────────────
   const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const rect   = mainCanvas.current!.getBoundingClientRect()
+    if (!mainCanvas.current) return
+    const rect = mainCanvas.current.getBoundingClientRect()
     const px = (e.clientX - rect.left) * (mainSize.width / rect.width)
 
     const gxW = worldToCanvas(barrierGreen, mainSize.width)
     const rxW = worldToCanvas(barrierRed,   mainSize.width)
 
-    if (Math.abs(px - gxW) < 20) {
+    if (Math.abs(px - gxW) < 22) {
       draggingBarrier.current = 'green'
-      mainCanvas.current!.setPointerCapture(e.pointerId)
-    } else if (Math.abs(px - rxW) < 20) {
+      mainCanvas.current.setPointerCapture(e.pointerId)
+    } else if (Math.abs(px - rxW) < 22) {
       draggingBarrier.current = 'red'
-      mainCanvas.current!.setPointerCapture(e.pointerId)
+      mainCanvas.current.setPointerCapture(e.pointerId)
     }
   }
 
@@ -318,7 +321,6 @@ export default function ConstantAcceleration() {
 
   const handleCanvasPointerUp = () => { draggingBarrier.current = null }
 
-  // ─── Render ──────────────────────────────────────────────────
   const formatTime = (t: number | null, running_: boolean) => {
     if (t === null && !running_) return '——:——'
     if (t === null) return '00:00.00'
@@ -327,9 +329,11 @@ export default function ConstantAcceleration() {
     return `${String(mins).padStart(2, '0')}:${secs.toFixed(2).padStart(5, '0')}`
   }
 
+  const deltaT = timeGreen !== null && timeRed !== null ? Math.abs(timeRed - timeGreen) : null
+
   return (
     <div className={styles.sim}>
-      {/* ── Canvas principal ──────────────────────────────────── */}
+      {/* ── Canvas Principal ──────────────────────────────────── */}
       <div className={styles.canvasWrap}>
         <canvas
           ref={mainCanvas}
@@ -337,218 +341,257 @@ export default function ConstantAcceleration() {
           onPointerDown={handleCanvasPointerDown}
           onPointerMove={handleCanvasPointerMove}
           onPointerUp={handleCanvasPointerUp}
-          aria-label="Escena de movimiento con aceleración constante"
+          aria-label="Escena cinemática interactiva"
         />
+
+        <div className={styles.barrierHint}>
+          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>drag_indicator</span>
+          <span>Arrastra los sensores S₁ y S₂ en la pista</span>
+        </div>
       </div>
 
-      {/* ── Panel de control ─────────────────────────────────── */}
-      <div className={styles.panel}>
-        {/* Parámetros */}
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Parámetros</h3>
-          <div className={styles.fields}>
+      {/* ── Transport Bar / Controles de Ejecución ─────────────── */}
+      <div className={styles.transportBar}>
+        <div className={styles.transportButtons}>
+          <button
+            className={`btn ${running ? 'btn--secondary' : 'btn--primary'}`}
+            onClick={handlePlay}
+            id="btn-play-pause"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              {running ? 'pause' : 'play_arrow'}
+            </span>
+            {running ? 'Pausar Simulación' : 'Iniciar Simulación'}
+          </button>
+
+          <button className="btn btn--secondary" onClick={handleReset} id="btn-reset">
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>restart_alt</span>
+            Reiniciar
+          </button>
+
+          <button
+            className={`btn ${slowMode ? 'btn--gold' : 'btn--ghost'}`}
+            onClick={() => setSlowMode((s) => !s)}
+            id="btn-slow-motion"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>slow_motion_video</span>
+            Cámara Lenta (0.1x)
+          </button>
+        </div>
+
+        {/* Presets Rápidos */}
+        <div className={styles.presetsRow}>
+          <span className={styles.presetsLabel}>Preajustes:</span>
+          <button className={styles.presetChip} onClick={() => applyPreset(0, 10, 0)}>
+            MRU (a = 0)
+          </button>
+          <button className={styles.presetChip} onClick={() => applyPreset(0, 0, 2)}>
+            MRUV (a = 2 m/s²)
+          </button>
+          <button className={styles.presetChip} onClick={() => applyPreset(0, 15, -1.5)}>
+            Frenado (a = -1.5)
+          </button>
+        </div>
+      </div>
+
+      {/* ── Panel de Parámetros y Sensores Fotopuerta ──────────── */}
+      <div className={styles.panelGrid}>
+        {/* Card 1: Parámetros Cinemáticos */}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <div className={styles.cardTitleGroup}>
+              <span className="material-symbols-outlined" style={{ color: 'var(--corporate)' }}>tune</span>
+              <span className={styles.cardTitle}>Condiciones Iniciales</span>
+            </div>
+            <button className="btn btn--primary btn--sm" onClick={handleApply} disabled={running}>
+              Aplicar Cambios
+            </button>
+          </div>
+
+          <div className={styles.fieldsGrid}>
             <label className={styles.field}>
-              <span className={styles.fieldLabel}>x₀ (m)</span>
+              <span className={styles.fieldLabel}>Posición Inicial x₀ (m)</span>
               <input
                 className="input"
                 type="number"
                 step="1"
                 value={draft.x0}
-                onChange={e => setDraft(d => ({ ...d, x0: e.target.value }))}
-                onKeyDown={e => e.key === 'Enter' && handleApply()}
+                onChange={(e) => setDraft((d) => ({ ...d, x0: e.target.value }))}
+                onKeyDown={(e) => e.key === 'Enter' && handleApply()}
                 disabled={running}
               />
             </label>
+
             <label className={styles.field}>
-              <span className={styles.fieldLabel}>v₀ (m/s)</span>
+              <span className={styles.fieldLabel}>Velocidad Inicial v₀ (m/s)</span>
               <input
                 className="input"
                 type="number"
                 step="0.5"
                 value={draft.v0}
-                onChange={e => setDraft(d => ({ ...d, v0: e.target.value }))}
-                onKeyDown={e => e.key === 'Enter' && handleApply()}
+                onChange={(e) => setDraft((d) => ({ ...d, v0: e.target.value }))}
+                onKeyDown={(e) => e.key === 'Enter' && handleApply()}
                 disabled={running}
               />
             </label>
+
             <label className={styles.field}>
-              <span className={styles.fieldLabel}>a (m/s²)</span>
+              <span className={styles.fieldLabel}>Aceleración a (m/s²)</span>
               <input
                 className="input"
                 type="number"
                 step="0.5"
                 value={draft.a}
-                onChange={e => setDraft(d => ({ ...d, a: e.target.value }))}
-                onKeyDown={e => e.key === 'Enter' && handleApply()}
+                onChange={(e) => setDraft((d) => ({ ...d, a: e.target.value }))}
+                onKeyDown={(e) => e.key === 'Enter' && handleApply()}
                 disabled={running}
               />
             </label>
           </div>
-          <button className="btn btn--secondary" onClick={handleApply} disabled={running} style={{ width: '100%' }}>
-            Aplicar
-          </button>
-        </section>
+        </div>
 
-        {/* Controles */}
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Controles</h3>
-          <div className={styles.controls}>
-            <button className="btn btn--primary" onClick={handlePlay} id="btn-play-pause">
-              {running ? '⏸ Pausar' : '▶ Iniciar'}
-            </button>
-            <button className="btn btn--secondary" onClick={handleReset} id="btn-reset">
-              ↺ Reiniciar
-            </button>
-            <button
-              className={`btn btn--ghost ${slowMode ? styles.slowActive : ''}`}
-              onClick={() => setSlowMode(s => !s)}
-              id="btn-slow-motion"
-            >
-              🐌 Cámara lenta
-            </button>
-          </div>
-        </section>
-
-        {/* Barreras */}
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Barreras</h3>
-          <p className={styles.hint}>Arrastra las barreras en el canvas</p>
-          <div className={styles.fields}>
-            <label className={styles.field}>
-              <span className={styles.fieldLabel} style={{ color: '#86efac' }}>Verde (m)</span>
-              <input
-                className="input"
-                type="number"
-                value={barrierGreen}
-                onChange={e => setBarrierGreen(Number(e.target.value))}
-              />
-            </label>
-            <label className={styles.field}>
-              <span className={styles.fieldLabel} style={{ color: '#fca5a5' }}>Roja (m)</span>
-              <input
-                className="input"
-                type="number"
-                value={barrierRed}
-                onChange={e => setBarrierRed(Number(e.target.value))}
-              />
-            </label>
-          </div>
-        </section>
-
-        {/* Relojes */}
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Relojes</h3>
-          <div className={styles.clocks}>
-            <div className={styles.clock}>
-              <span className={styles.clockLabel}>Tiempo general</span>
-              <span className={styles.clockDisplay}>{formatTime(elapsed, running)}</span>
+        {/* Card 2: Sensores de Tiempo (Fotopuertas) */}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <div className={styles.cardTitleGroup}>
+              <span className="material-symbols-outlined" style={{ color: 'var(--gold)' }}>timer</span>
+              <span className={styles.cardTitle}>Cronometría y Fotopuertas</span>
             </div>
-            <div className={`${styles.clock} ${hitGreen ? styles.clockHit : ''}`}>
-              <span className={styles.clockLabel} style={{ color: '#86efac' }}>⬥ Barrera verde</span>
-              <span className={styles.clockDisplay}>{timeGreen ? formatTime(timeGreen, false) : '——:——'}</span>
+            {deltaT !== null && (
+              <span className={styles.deltaBadge}>
+                Δt = {deltaT.toFixed(2)} s
+              </span>
+            )}
+          </div>
+
+          <div className={styles.clocksGrid}>
+            <div className={styles.clockCard}>
+              <span className={styles.clockLabel}>Tiempo General (t)</span>
+              <span className={styles.clockValue}>{formatTime(elapsed, running)}</span>
             </div>
-            <div className={`${styles.clock} ${hitRed ? styles.clockHit : ''}`}>
-              <span className={styles.clockLabel} style={{ color: '#fca5a5' }}>⬥ Barrera roja</span>
-              <span className={styles.clockDisplay}>{timeRed ? formatTime(timeRed, false) : '——:——'}</span>
+
+            <div className={`${styles.clockCard} ${hitGreen ? styles.clockGreenActive : ''}`}>
+              <div className={styles.clockHeader}>
+                <span className={styles.dotGreen} />
+                <span className={styles.clockLabel}>Sensor S₁ ({barrierGreen} m)</span>
+              </div>
+              <span className={styles.clockValue}>
+                {timeGreen !== null ? `${timeGreen.toFixed(2)} s` : 'Esperando...'}
+              </span>
+            </div>
+
+            <div className={`${styles.clockCard} ${hitRed ? styles.clockRedActive : ''}`}>
+              <div className={styles.clockHeader}>
+                <span className={styles.dotRed} />
+                <span className={styles.clockLabel}>Sensor S₂ ({barrierRed} m)</span>
+              </div>
+              <span className={styles.clockValue}>
+                {timeRed !== null ? `${timeRed.toFixed(2)} s` : 'Esperando...'}
+              </span>
             </div>
           </div>
-        </section>
+        </div>
       </div>
 
-      {/* ── Gráficas ─────────────────────────────────────────── */}
-      <div className={styles.charts}>
-        <div className={styles.chartWrap}>
-          <div className={styles.chartLabel}>x-t (posición)</div>
-          <canvas ref={chartXRef} className={styles.chart} />
+      {/* ── Gráficas Sincrónicas de Telemetría ─────────────────── */}
+      <div className={styles.chartsSection}>
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <span className={styles.chartBadgeX}>x-t</span>
+            <span className={styles.chartTitle}>Posición vs Tiempo</span>
+          </div>
+          <canvas ref={chartXRef} className={styles.chartCanvas} />
         </div>
-        <div className={styles.chartWrap}>
-          <div className={styles.chartLabel}>v-t (velocidad)</div>
-          <canvas ref={chartVRef} className={styles.chart} />
+
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <span className={styles.chartBadgeV}>v-t</span>
+            <span className={styles.chartTitle}>Velocidad vs Tiempo</span>
+          </div>
+          <canvas ref={chartVRef} className={styles.chartCanvas} />
         </div>
-        <div className={styles.chartWrap}>
-          <div className={styles.chartLabel}>a-t (aceleración)</div>
-          <canvas ref={chartARef} className={styles.chart} />
+
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <span className={styles.chartBadgeA}>a-t</span>
+            <span className={styles.chartTitle}>Aceleración vs Tiempo</span>
+          </div>
+          <canvas ref={chartARef} className={styles.chartCanvas} />
         </div>
       </div>
     </div>
   )
 }
 
-/* ─── Dibujo del auto ────────────────────────────────────────── */
 function drawCar(ctx: CanvasRenderingContext2D, cx: number, baseY: number, v: number) {
-  const w = 72, h = 28
+  const w = 76
+  const h = 26
   const x = cx - w / 2
 
-  // Sombra del auto
-  ctx.fillStyle = 'rgba(0,0,0,0.4)'
+  // Sombra del vehículo
+  ctx.fillStyle = 'rgba(0,0,0,0.35)'
   ctx.beginPath()
-  ctx.ellipse(cx, baseY + 8, w * 0.42, 6, 0, 0, Math.PI * 2)
+  ctx.ellipse(cx, baseY + 6, w * 0.44, 5, 0, 0, Math.PI * 2)
   ctx.fill()
 
-  // Carrocería inferior
-  ctx.fillStyle = '#d4d4d4'
+  // Chasis principal (Azul Real #2563EB)
+  ctx.fillStyle = '#2563eb'
   ctx.beginPath()
   roundRect(ctx, x, baseY - h, w, h, 6)
   ctx.fill()
 
-  // Cabina
-  ctx.fillStyle = '#f5f5f5'
+  // Franja corporativa dorada (#C8A932)
+  ctx.fillStyle = '#c8a932'
+  ctx.fillRect(x + 4, baseY - h + 14, w - 8, 3)
+
+  // Cabina del vehículo
+  ctx.fillStyle = '#1e293b'
   ctx.beginPath()
-  roundRect(ctx, x + 14, baseY - h - 18, w - 26, 20, [4, 4, 0, 0])
+  roundRect(ctx, x + 16, baseY - h - 14, w - 32, 16, [4, 4, 0, 0])
   ctx.fill()
 
-  // Ventanas
-  ctx.fillStyle = '#1a1a1a'
+  // Cristales
+  ctx.fillStyle = '#93c5fd'
   ctx.beginPath()
-  roundRect(ctx, x + 16, baseY - h - 16, 16, 14, 2)
+  roundRect(ctx, x + 18, baseY - h - 12, 16, 12, 2)
   ctx.fill()
   ctx.beginPath()
-  roundRect(ctx, x + 34, baseY - h - 16, 18, 14, 2)
+  roundRect(ctx, x + 38, baseY - h - 12, 18, 12, 2)
   ctx.fill()
 
-  // Faro delantero (depende de dirección de v)
-  ctx.fillStyle = 'rgba(255,255,255,0.85)'
+  // Faros
+  ctx.fillStyle = '#fef08a'
   if (v >= 0) {
     ctx.beginPath()
-    ctx.ellipse(x + w - 4, baseY - h + 8, 4, 5, 0, 0, Math.PI * 2)
+    ctx.ellipse(x + w - 3, baseY - h + 8, 3, 4, 0, 0, Math.PI * 2)
     ctx.fill()
   } else {
     ctx.beginPath()
-    ctx.ellipse(x + 4, baseY - h + 8, 4, 5, 0, 0, Math.PI * 2)
+    ctx.ellipse(x + 3, baseY - h + 8, 3, 4, 0, 0, Math.PI * 2)
     ctx.fill()
   }
 
   // Ruedas
-  drawWheel(ctx, x + 14, baseY + 1, v)
-  drawWheel(ctx, x + w - 14, baseY + 1, v)
-
-  // Borde del auto
-  ctx.strokeStyle = 'rgba(255,255,255,0.15)'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  roundRect(ctx, x, baseY - h, w, h, 6)
-  ctx.stroke()
+  drawWheel(ctx, x + 16, baseY + 1, v)
+  drawWheel(ctx, x + w - 16, baseY + 1, v)
 }
 
 function drawWheel(ctx: CanvasRenderingContext2D, cx: number, cy: number, v: number) {
-  const r = 10
-  // Llanta
-  ctx.fillStyle = '#222'
+  const r = 9
+  ctx.fillStyle = '#0f172a'
   ctx.beginPath()
   ctx.arc(cx, cy, r, 0, Math.PI * 2)
   ctx.fill()
 
-  // Aro
-  ctx.strokeStyle = '#888'
-  ctx.lineWidth = 2
+  ctx.strokeStyle = '#94a3b8'
+  ctx.lineWidth = 1.5
   ctx.beginPath()
   ctx.arc(cx, cy, r - 2, 0, Math.PI * 2)
   ctx.stroke()
 
-  // Radios animados
   const angle = (Date.now() / 100 * v * 0.1) % (Math.PI * 2)
-  ctx.strokeStyle = 'rgba(255,255,255,0.5)'
-  ctx.lineWidth = 1.5
+  ctx.strokeStyle = '#ffffff'
+  ctx.lineWidth = 1.2
   for (let i = 0; i < 4; i++) {
     const a = angle + (i * Math.PI) / 2
     ctx.beginPath()
@@ -556,6 +599,28 @@ function drawWheel(ctx: CanvasRenderingContext2D, cx: number, cy: number, v: num
     ctx.lineTo(cx + Math.cos(a) * (r - 2), cy + Math.sin(a) * (r - 2))
     ctx.stroke()
   }
+}
+
+function drawSensorFlag(ctx: CanvasRenderingContext2D, x: number, y: number, color: string, label: string) {
+  ctx.strokeStyle = color
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.moveTo(x, y)
+  ctx.lineTo(x, y - 22)
+  ctx.stroke()
+
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.moveTo(x, y - 22)
+  ctx.lineTo(x + 16, y - 16)
+  ctx.lineTo(x, y - 10)
+  ctx.closePath()
+  ctx.fill()
+
+  ctx.font = '700 8px "JetBrains Mono", monospace'
+  ctx.fillStyle = '#ffffff'
+  ctx.textAlign = 'center'
+  ctx.fillText(label, x + 7, y - 14)
 }
 
 function roundRect(
@@ -567,6 +632,7 @@ function roundRect(
     ctx.roundRect(x, y, w, h, radii as number)
   } else {
     const r = Array.isArray(radii) ? radii[0] : radii
+    ctx.beginPath()
     ctx.moveTo(x + r, y)
     ctx.lineTo(x + w - r, y)
     ctx.quadraticCurveTo(x + w, y, x + w, y + r)
@@ -578,23 +644,4 @@ function roundRect(
     ctx.quadraticCurveTo(x, y, x + r, y)
     ctx.closePath()
   }
-}
-
-function drawFlag(ctx: CanvasRenderingContext2D, x: number, y: number, color: string, _icon: string) {
-  // Poste
-  ctx.strokeStyle = color
-  ctx.lineWidth = 2
-  ctx.beginPath()
-  ctx.moveTo(x, y)
-  ctx.lineTo(x, y - 24)
-  ctx.stroke()
-
-  // Banderín
-  ctx.fillStyle = color
-  ctx.beginPath()
-  ctx.moveTo(x, y - 24)
-  ctx.lineTo(x + 14, y - 18)
-  ctx.lineTo(x, y - 12)
-  ctx.closePath()
-  ctx.fill()
 }

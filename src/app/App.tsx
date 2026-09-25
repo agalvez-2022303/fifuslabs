@@ -16,6 +16,15 @@ const ForceComposition = lazy(
 const VectorRepresentation = lazy(
   () => import('./simulations/vector-representation/VectorRepresentation')
 )
+const DistanciaDesplazamiento = lazy(
+  () => import('./simulations/distancia-desplazamiento/DistanciaDesplazamiento')
+)
+const VelocidadRapidez = lazy(
+  () => import('./simulations/velocidad-rapidez/VelocidadRapidez')
+)
+const AlcancesEncuentros = lazy(
+  () => import('./simulations/alcances-encuentros/AlcancesEncuentros')
+)
 
 function SimulationLoader() {
   return (
@@ -87,6 +96,36 @@ export default function App() {
           <SimulationShell slug="vectores">
             <Suspense fallback={<SimulationLoader />}>
               <VectorRepresentation />
+            </Suspense>
+          </SimulationShell>
+        }
+      />
+      <Route
+        path="/sim/distancia-desplazamiento"
+        element={
+          <SimulationShell slug="distancia-desplazamiento">
+            <Suspense fallback={<SimulationLoader />}>
+              <DistanciaDesplazamiento />
+            </Suspense>
+          </SimulationShell>
+        }
+      />
+      <Route
+        path="/sim/velocidad-rapidez"
+        element={
+          <SimulationShell slug="velocidad-rapidez">
+            <Suspense fallback={<SimulationLoader />}>
+              <VelocidadRapidez />
+            </Suspense>
+          </SimulationShell>
+        }
+      />
+      <Route
+        path="/sim/alcances-encuentros"
+        element={
+          <SimulationShell slug="alcances-encuentros">
+            <Suspense fallback={<SimulationLoader />}>
+              <AlcancesEncuentros />
             </Suspense>
           </SimulationShell>
         }
