@@ -49,13 +49,13 @@ export function useAnimationLoop(callback: FrameCallback) {
     runningRef.current = false
     cancelAnimationFrame(rafRef.current)
     lastTimeRef.current = 0
-    elapsedRef.current = 0
   }, [])
 
   const pause = useCallback(() => {
     if (!runningRef.current) return
     runningRef.current = false
     cancelAnimationFrame(rafRef.current)
+    lastTimeRef.current = 0
     pausedAtRef.current = elapsedRef.current
   }, [])
 
@@ -63,31 +63,16 @@ export function useAnimationLoop(callback: FrameCallback) {
     if (runningRef.current) return
     runningRef.current = true
     lastTimeRef.current = 0
-    // Restaura el elapsed acumulado
-    const savedElapsed = pausedAtRef.current
-    const resumeTime   = { current: 0 }
-
-    const resumeLoop = (timestamp: number) => {
-      if (!runningRef.current) return
-      if (resumeTime.current === 0) resumeTime.current = timestamp
-
-      const dt = Math.min((timestamp - (resumeTime.current || timestamp)) / 1000, 0.1)
-      resumeTime.current = timestamp
-      elapsedRef.current = savedElapsed + (timestamp - (resumeTime.current - dt * 1000)) / 1000
-
-      callbackRef.current(dt, elapsedRef.current)
-      rafRef.current = requestAnimationFrame(resumeLoop)
-    }
-
-    rafRef.current = requestAnimationFrame(resumeLoop)
-    runningRef.current = true
-  }, [])
+    rafRef.current = requestAnimationFrame(loop)
+  }, [loop])
 
   const reset = useCallback(() => {
-    stop()
+    runningRef.current = false
+    cancelAnimationFrame(rafRef.current)
+    lastTimeRef.current = 0
     elapsedRef.current = 0
     pausedAtRef.current = 0
-  }, [stop])
+  }, [])
 
   // Limpieza al desmontar
   useEffect(() => {

@@ -30,17 +30,28 @@ export function useCanvasRenderer() {
       const entry = entries[0]
       const { width, height } = entry.contentRect
 
-      canvas.width  = Math.round(width  * dpr)
-      canvas.height = Math.round(height * dpr)
+      if (width <= 0 || height <= 0) return
+
+      const targetW = Math.round(width * dpr)
+      const targetH = Math.round(height * dpr)
+
+      // Solo asignar dimensiones y resetear buffer si el tamaño en píxeles realmente cambió
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width  = targetW
+        canvas.height = targetH
+        const ctx = ctxRef.current
+        if (ctx) {
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+        }
+      }
+
       canvas.style.width  = `${width}px`
       canvas.style.height = `${height}px`
 
-      const ctx = ctxRef.current
-      if (ctx) {
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      }
-
-      setSize({ width, height, dpr })
+      setSize(prev => {
+        if (prev.width === width && prev.height === height && prev.dpr === dpr) return prev
+        return { width, height, dpr }
+      })
     })
 
     observer.observe(canvas)

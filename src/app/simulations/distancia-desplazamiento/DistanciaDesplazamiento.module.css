@@ -1,10 +1,302 @@
+/* ═══════════════════════════════════════════════════════════════════
+   DistanciaDesplazamiento.module.css
+   Estilos para la simulación de Distancia vs. Desplazamiento.
+   Basados en el Design System Stitch de FísicaLab.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Layout raíz ──────────────────────────────────────────────── */
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
+  gap: var(--sp-4);
   width: 100%;
 }
 
+/* ─── Secciones colapsables ─────────────────────────────────────── */
+.section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.sectionToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid transparent;
+  transition: background var(--transition-fast);
+}
+
+.sectionToggle:hover {
+  background: var(--surface-alt);
+}
+
+.sectionToggle[aria-expanded="true"] {
+  border-bottom-color: var(--border-light);
+}
+
+.sectionTitle {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--corporate);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.sectionBody {
+  padding: var(--sp-4);
+}
+
+/* ─── Sección de Teoría ─────────────────────────────────────────── */
+.theoryGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+}
+
+@media (min-width: 768px) {
+  .theoryGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1200px) {
+  .theoryGrid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.theoryCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--sp-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.theoryCardBlue {
+  border-left: 3px solid var(--corporate);
+}
+
+.theoryCardAmber {
+  border-left: 3px solid #d97706;
+}
+
+.theoryCardGreen {
+  border-left: 3px solid #059669;
+}
+
+.theoryCardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.theoryTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0;
+}
+
+.scalarBadge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: #eff6ff;
+  color: var(--corporate);
+  border: 1px solid #c7d2fe;
+}
+
+.vectorBadge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.theoryBody {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.theoryList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+}
+
+.theoryList li {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  padding-left: var(--sp-3);
+  position: relative;
+  line-height: 1.5;
+}
+
+.theoryList li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--corporate);
+  font-weight: 700;
+}
+
+.formulaBlock {
+  background: var(--surface-alt);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-3);
+  overflow-x: auto;
+  text-align: center;
+}
+
+.formulaBlock .katex-display {
+  margin: 0;
+}
+
+/* ─── Explicación de fórmula (párrafos de teoría extendida) ─────── */
+.formulaExplain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.formulaExplain p {
+  margin: 0;
+}
+
+/* ─── Ejemplo educativo ─────────────────────────────────────────── */
+.exampleBox {
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  border-left: 3px solid #6366f1;
+  border-radius: var(--radius-md);
+  padding: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exampleTitle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #4f46e5;
+}
+
+.exampleText {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ─── Tabla comparativa ─────────────────────────────────────────── */
+.comparisonTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.compRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.compRow:last-child {
+  border-bottom: none;
+}
+
+.compHeader {
+  padding: 5px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  background: var(--surface-alt);
+  text-align: center;
+}
+
+.compHeader + .compHeader {
+  border-left: 1px solid var(--border-light);
+}
+
+.compCell {
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.compCell + .compCell {
+  border-left: 1px solid var(--border-light);
+}
+
+/* Ecuaciones inline */
+.equationList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.eqRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surface-alt);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.eqLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.eqFormula {
+  overflow-x: auto;
+}
+
+/* ─── Sub-Header / Presets ──────────────────────────────────────── */
 .subHeader {
   display: flex;
   flex-direction: column;
@@ -66,10 +358,11 @@
   border-color: var(--corporate) !important;
 }
 
+/* ─── Grilla principal ──────────────────────────────────────────── */
 .gridWorkbench {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--sp-5);
+  gap: var(--sp-4);
   align-items: start;
 }
 
@@ -82,9 +375,10 @@
 .column {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-4);
+  gap: var(--sp-3);
 }
 
+/* ─── Cards genéricas ───────────────────────────────────────────── */
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -127,27 +421,7 @@
   border: 1px solid var(--border);
 }
 
-.radioOption {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-2) var(--sp-3);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.radioOption:hover {
-  background: var(--surface-alt);
-}
-
-.radioOptionActive {
-  border-color: var(--corporate);
-  background: rgba(36, 52, 108, 0.04);
-}
-
+/* ─── Tabla de waypoints ────────────────────────────────────────── */
 .tableWrap {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -182,6 +456,27 @@
   border-bottom: none;
 }
 
+/* ─── Filas de info ─────────────────────────────────────────────── */
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-xs);
+  padding: var(--sp-1) 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.infoLabel {
+  color: var(--text-muted);
+}
+
+.infoValue {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--corporate);
+}
+
+/* ─── Slider ────────────────────────────────────────────────────── */
 .sliderRow {
   display: flex;
   justify-content: space-between;
@@ -195,6 +490,127 @@
   cursor: pointer;
 }
 
+.slider:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ─── Entrada manual de coordenadas ───────────────────────────── */
+.coordsCard {
+  background: var(--surface-alt);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.coordGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.coordGroupTitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--corporate);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.coordInputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-2);
+}
+
+.inputField {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px 8px;
+}
+
+.inputField:focus-within {
+  border-color: var(--corporate);
+  box-shadow: 0 0 0 2px rgba(36, 52, 108, 0.1);
+}
+
+.inputPrefix {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.numInput {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.numInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.speedInputGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.speedLabel {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.speedInputWrap {
+  display: flex;
+  align-items: center;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 3px 8px;
+  min-width: 90px;
+}
+
+.unitSuffix {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-left: 2px;
+  white-space: nowrap;
+}
+
+/* ─── Preview de coordenadas aplicadas ──────────────────────────── */
+.coordPreview {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+}
+
+/* ─── Checkbox de capas ─────────────────────────────────────────── */
 .layerCheckbox {
   display: flex;
   align-items: center;
@@ -204,29 +620,46 @@
   cursor: pointer;
 }
 
+/* ─── Controles de transporte ───────────────────────────────────── */
 .transportGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--sp-2);
 }
 
-/* Center stage */
+/* ─── Banner de completado ──────────────────────────────────────── */
+.completedBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: #059669;
+}
+
+/* ─── Stage central ─────────────────────────────────────────────── */
 .stageCard {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  padding: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
 }
 
+/* ─── Telemetría HUD ────────────────────────────────────────────── */
 .telemetryGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--sp-3);
-  padding: var(--sp-3);
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
   background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -252,9 +685,10 @@
 
 .telemetryValue {
   font-family: var(--font-mono);
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   font-weight: 800;
   color: var(--corporate);
+  line-height: 1.2;
 }
 
 .telemetryUnit {
@@ -264,19 +698,24 @@
   margin-left: 4px;
 }
 
+/* ─── Canvas del plano cartesiano ───────────────────────────────── */
 .svgStageWrapper {
   position: relative;
   width: 100%;
-  height: 380px;
-  background: #fbfcfe;
+  height: 260px;
+  background: #f8fafc;
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
+@media (min-width: 768px) {
+  .svgStageWrapper {
+    height: 300px;
+  }
+}
+
+/* ─── Barra de progreso ─────────────────────────────────────────── */
 .progressBarContainer {
   display: flex;
   flex-direction: column;
@@ -285,7 +724,7 @@
 
 .progressBar {
   width: 100%;
-  height: 8px;
+  height: 6px;
   background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
@@ -296,41 +735,105 @@
   height: 100%;
   background: var(--corporate);
   border-radius: var(--radius-full);
-  transition: width 0.1s linear;
+  transition: width 0.08s linear;
 }
 
-.miniChartGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-3);
-  padding-top: var(--sp-3);
-  border-top: 1px solid var(--border-light);
-}
-
-@media (min-width: 640px) {
-  .miniChartGrid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.miniChartCard {
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--sp-3);
+/* ─── Sección de gráficas ───────────────────────────────────────── */
+.chartsSection {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--border-light);
 }
 
+.chartsHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.chartGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-2);
+}
+
+@media (min-width: 640px) {
+  .chartGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.chartCard {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: var(--radius-lg);
+  padding: var(--sp-2) var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chartLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* PROBLEMA 2 FIX: reducido de 68px a 56px para mejor distribución */
+.chartCanvas {
+  width: 100%;
+  height: 56px;
+  position: relative;
+}
+
+.chartNote {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: right;
+  line-height: 1.2;
+}
+
+/* ─── Panel de resultados (columna derecha) ─────────────────────── */
+.positionGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.posRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-1) 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: var(--text-xs);
+}
+
+.posLabel {
+  color: var(--text-muted);
+}
+
+.posValue {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ─── Big value ─────────────────────────────────────────────────── */
 .bigValue {
   font-family: var(--font-mono);
-  font-size: 2.25rem;
+  font-size: 2rem;
   font-weight: 800;
   color: var(--corporate);
   line-height: 1;
 }
 
+/* ─── Formula box ───────────────────────────────────────────────── */
 .formulaBox {
   background: var(--surface-alt);
   border: 1px solid var(--border);
@@ -343,6 +846,17 @@
   gap: 4px;
 }
 
+.formulaInline {
+  overflow-x: auto;
+  text-align: center;
+  padding: var(--sp-1) 0;
+}
+
+.formulaInline .katex-display {
+  margin: 0;
+}
+
+/* ─── Eficiencia ────────────────────────────────────────────────── */
 .efficiencyBar {
   width: 100%;
   height: 6px;
@@ -356,8 +870,10 @@
   height: 100%;
   background: #d97706;
   border-radius: var(--radius-full);
+  transition: width 0.15s ease;
 }
 
+/* ─── Concept card (nota didáctica) ────────────────────────────── */
 .conceptCard {
   background: #fffbeb;
   border: 1px solid #fef3c7;

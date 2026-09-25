@@ -44,7 +44,7 @@ export function useLiveChart(config: ChartConfig) {
     (ctx: CanvasRenderingContext2D, w: number, h: number) => {
       const data = dataRef.current
       const lineColor = config.color ?? '#ffffff'
-      const padding = { top: 20, right: 12, bottom: 28, left: 44 }
+      const padding = { top: 12, right: 10, bottom: 22, left: 34 }
       const chartW = w - padding.left - padding.right
       const chartH = h - padding.top - padding.bottom
 
@@ -74,44 +74,60 @@ export function useLiveChart(config: ChartConfig) {
       ctx.stroke()
 
       // Labels de ejes
-      ctx.font = '10px IBM Plex Mono, monospace'
-      ctx.fillStyle = 'rgba(255,255,255,0.45)'
+      ctx.font = '9px IBM Plex Mono, monospace'
+      ctx.fillStyle = 'rgba(255,255,255,0.65)'
       ctx.textAlign = 'right'
 
-      if (data.length < 2) return
-
       // Escala
-      const tMin = data[0].t
-      const tMax = data[data.length - 1].t
+      const tMin = data.length > 0 ? data[0].t : 0
+      const tMax = data.length > 1 ? data[data.length - 1].t : Math.max(tMin + 5, 5)
       const values = data.map(d => d.value)
-      let yMin = config.autoScale !== false ? Math.min(...values) : config.yMin ?? 0
-      let yMax = config.autoScale !== false ? Math.max(...values) : config.yMax ?? 10
+      let yMin = values.length > 0 && config.autoScale !== false ? Math.min(...values) : config.yMin ?? 0
+      let yMax = values.length > 0 && config.autoScale !== false ? Math.max(...values) : config.yMax ?? 10
       if (yMin === yMax) { yMin -= 1; yMax += 1 }
 
       // Tick labels Y
       for (let i = 0; i <= gridLines; i++) {
         const v = yMax - (i / gridLines) * (yMax - yMin)
         const y = padding.top + (i / gridLines) * chartH
-        ctx.fillText(v.toFixed(1), padding.left - 4, y + 3)
+        ctx.fillText(v.toFixed(1), padding.left - 3, y + 3)
       }
 
-      // Etiqueta Y
+      // Tick labels X
+      ctx.textAlign = 'center'
+      ctx.fillText(tMin.toFixed(1), padding.left, padding.top + chartH + 11)
+      ctx.fillText(tMax.toFixed(1), padding.left + chartW, padding.top + chartH + 11)
+
+      // Etiqueta Y con unidades
       ctx.save()
       ctx.translate(10, padding.top + chartH / 2)
       ctx.rotate(-Math.PI / 2)
       ctx.textAlign = 'center'
-      ctx.fillStyle = 'rgba(255,255,255,0.35)'
-      ctx.font = '9px IBM Plex Mono, monospace'
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'
+      ctx.font = 'bold 9px IBM Plex Mono, monospace'
       ctx.fillText(`${config.label} (${config.unitY})`, 0, 0)
       ctx.restore()
 
-      // Etiqueta X
+      // Etiqueta X con unidades
       ctx.textAlign = 'center'
-      ctx.fillStyle = 'rgba(255,255,255,0.35)'
-      ctx.font = '9px IBM Plex Mono, monospace'
-      ctx.fillText(`t (${config.unitX})`, padding.left + chartW / 2, h - 4)
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'
+      ctx.font = 'bold 9px IBM Plex Mono, monospace'
+      ctx.fillText(`t (${config.unitX})`, padding.left + chartW / 2, h - 2)
 
-      // Línea de datos
+      if (data.length === 0) return
+
+      if (data.length === 1) {
+        const p = data[0]
+        const lx = padding.left
+        const ly = padding.top + chartH - ((p.value - yMin) / (yMax - yMin)) * chartH
+        ctx.fillStyle = lineColor
+        ctx.beginPath()
+        ctx.arc(lx, ly, 3, 0, Math.PI * 2)
+        ctx.fill()
+        return
+      }
+
+      // Línea de datos (data.length >= 2)
       ctx.strokeStyle = lineColor
       ctx.lineWidth = 1.5
       ctx.lineJoin = 'round'
