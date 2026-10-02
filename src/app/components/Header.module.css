@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════════════════════════════
+﻿/* ═══════════════════════════════════════════════════════════════
    Header — Top Bar + Sidebar lateral
    ═══════════════════════════════════════════════════════════════ */
 
@@ -8,12 +8,14 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 200;
+  width: 100%;
+  z-index: 100;
   height: var(--header-h);
   background-color: var(--corporate);
   border-bottom: 1px solid var(--corporate-dark);
   box-shadow: 0 4px 12px rgba(11, 28, 48, 0.18);
   color: var(--white);
+  box-sizing: border-box;
 }
 
 .topBarInner {
@@ -21,8 +23,11 @@
   align-items: center;
   gap: var(--sp-3);
   height: 100%;
+  width: 100%;
+  max-width: var(--max-w-content);
+  margin: 0 auto;
   padding: 0 var(--sp-4);
-  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── Hamburger button ──────────────────────────────────────────── */
