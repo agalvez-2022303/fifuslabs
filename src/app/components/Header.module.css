@@ -1,12 +1,16 @@
 .header {
   position: sticky;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 100;
   height: var(--header-h);
   background-color: var(--corporate);
   border-bottom: 1px solid var(--corporate-dark);
   box-shadow: 0 4px 12px rgba(11, 28, 48, 0.15);
   color: var(--white);
+  box-sizing: border-box;
 }
 
 .inner {
@@ -15,9 +19,11 @@
   justify-content: space-between;
   gap: var(--sp-4);
   height: 100%;
+  width: 100%;
   max-width: var(--max-w-content);
   margin: 0 auto;
   padding: 0 var(--sp-4);
+  box-sizing: border-box;
 }
 
 @media (min-width: 768px) {

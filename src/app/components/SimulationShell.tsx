@@ -8,12 +8,53 @@ import katex from 'katex'
 import 'katex/dist/katex.min.css'
 
 /** Renderiza una expresión LaTeX a HTML usando KaTeX */
-function renderLatex(expr: string): string {
+function renderLatex(expr: string, displayMode = false): string {
   try {
-    return katex.renderToString(expr, { throwOnError: false, displayMode: false })
+    return katex.renderToString(expr, { throwOnError: false, displayMode })
   } catch {
     return expr
   }
+}
+
+/** Formatea texto didáctico procesando expresiones LaTeX inline ($...$) y de bloque ($$...$$), negritas y saltos de línea */
+function formatTheoryText(text: string): string {
+  // 1. Bloques LaTeX $$ ... $$ (display mode)
+  let result = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
+    return `<div class="${styles.katexDisplayBlock}">${renderLatex(math.trim(), true)}</div>`
+  })
+
+  // 2. Expresiones LaTeX inline $ ... $
+  result = result.replace(/\$([^$\n]+?)\$/g, (_, math) => {
+    return renderLatex(math.trim(), false)
+  })
+
+  // 3. Negritas **texto**
+  result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+
+  // 4. Cursivas sencillas *texto*
+  result = result.replace(/(^|[^*])\*(?!\*)([^*]+?)\*(?!\*)/g, '$1<em>$2</em>')
+
+  // 5. Saltos de línea simples dentro de párrafos
+  result = result.replace(/\n/g, '<br/>')
+
+  return result
+}
+
+/** Renderiza una variable o símbolo matemático a HTML usando KaTeX */
+function renderMathSymbol(expr: string): string {
+  if (!expr) return ''
+  const trimmed = expr.trim()
+  // Si viene envuelta en delimitadores $ o $$, los removemos para KaTeX
+  if (/^\${1,2}([\s\S]+?)\${1,2}$/.test(trimmed)) {
+    const math = trimmed.replace(/^\${1,2}|\${1,2}$/g, '').trim()
+    return renderLatex(math, false)
+  }
+  // Si contiene $...$ intercalado con texto regular, usamos formatTheoryText
+  if (trimmed.includes('$')) {
+    return formatTheoryText(trimmed)
+  }
+  // Renderizar directamente como expresión matemática KaTeX
+  return renderLatex(trimmed, false)
 }
 
 interface Props {
@@ -117,9 +158,7 @@ export default function SimulationShell({ slug, children }: Props) {
                       <p
                         key={i}
                         dangerouslySetInnerHTML={{
-                          __html: p
-                            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                            .replace(/\n/g, '<br/>'),
+                          __html: formatTheoryText(p),
                         }}
                       />
                     ))}
@@ -135,9 +174,12 @@ export default function SimulationShell({ slug, children }: Props) {
                       <p className={styles.formulaDesc}>{f.descripcion}</p>
                       {f.variables && f.variables.length > 0 && (
                         <div className={styles.variables}>
-                          {f.variables.map(v => (
-                            <div key={v.simbolo} className={styles.variable}>
-                              <code className={styles.varSymbol}>{v.simbolo}</code>
+                          {f.variables.map((v, vIdx) => (
+                            <div key={`${v.simbolo}-${vIdx}`} className={styles.variable}>
+                              <span
+                                className={styles.varSymbol}
+                                dangerouslySetInnerHTML={{ __html: renderMathSymbol(v.simbolo) }}
+                              />
                               <span className={styles.varDesc}>{v.descripcion}</span>
                               <span className={styles.varUnit}>[{v.unidad}]</span>
                             </div>
@@ -180,8 +222,14 @@ export default function SimulationShell({ slug, children }: Props) {
                   <div className={styles.glossaryList}>
                     {content.glosario.map(g => (
                       <div key={g.termino} className={styles.glossaryCard}>
-                        <dt className={styles.glossaryTerm}>{g.termino}</dt>
-                        <dd className={styles.glossaryDef}>{g.definicion}</dd>
+                        <dt
+                          className={styles.glossaryTerm}
+                          dangerouslySetInnerHTML={{ __html: formatTheoryText(g.termino) }}
+                        />
+                        <dd
+                          className={styles.glossaryDef}
+                          dangerouslySetInnerHTML={{ __html: formatTheoryText(g.definicion) }}
+                        />
                       </div>
                     ))}
                   </div>
