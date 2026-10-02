@@ -422,6 +422,7 @@
 
 /* ─── Desktop Sidebar ────────────────────────────────────────── */
 .desktopInfo {
+<<<<<<< HEAD
   display: none;
 }
 
@@ -433,6 +434,13 @@
     position: sticky;
     top: calc(var(--header-h) + var(--sp-4));
   }
+=======
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  position: sticky;
+  top: var(--sp-4);
+>>>>>>> c197d6a067b97eb283a3d32bde5ab31f92eb82e1
 }
 
 .desktopCard {
