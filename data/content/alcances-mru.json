@@ -1,0 +1,37 @@
+{
+  "slug": "alcances-mru",
+  "teoria": "En el **Movimiento Rectilíneo Uniforme (MRU)**, la velocidad vectorial de los cuerpos se mantiene constante y la aceleración es nula (a = 0).\n\nCuando dos móviles comparten una misma trayectoria rectilínea unidimensional, se presentan dos fenómenos principales:\n\n**1. Alcance:** Ocurre cuando dos móviles se desplazan en el mismo sentido y el móvil retrasado tiene mayor velocidad (vA > vB).\n\n**2. Encuentro:** Ocurre cuando los dos móviles viajan en sentidos opuestos (uno hacia el otro), reduciendo la distancia que los separa a una rapidez relativa igual a la suma de sus rapideces escalares.",
+  "formulas": [
+    {
+      "nombre": "Ecuación Horaria de Posición",
+      "expresion": "x(t) = x_0 + v \\cdot t",
+      "descripcion": "Calcula la posición del móvil en cualquier instante de tiempo.",
+      "variables": [
+        { "simbolo": "x(t)", "descripcion": "Posición final", "unidad": "m" },
+        { "simbolo": "x_0", "descripcion": "Posición inicial", "unidad": "m" },
+        { "simbolo": "v", "descripcion": "Velocidad constante", "unidad": "m/s" },
+        { "simbolo": "t", "descripcion": "Tiempo", "unidad": "s" }
+      ]
+    },
+    {
+      "nombre": "Tiempo de Alcance / Encuentro",
+      "expresion": "t = \\frac{x_{B0} - x_{A0}}{v_A - v_B}",
+      "descripcion": "Instante en que ambos móviles coinciden en la misma posición espacial.",
+      "variables": [
+        { "simbolo": "t", "descripcion": "Tiempo de cruce", "unidad": "s" },
+        { "simbolo": "x_{A0}, x_{B0}", "descripcion": "Posiciones iniciales", "unidad": "m" },
+        { "simbolo": "v_A, v_B", "descripcion": "Velocidades con signo", "unidad": "m/s" }
+      ]
+    }
+  ],
+  "unidades": [
+    { "magnitud": "Posición", "unidad": "metro", "simbolo": "m" },
+    { "magnitud": "Tiempo", "unidad": "segundo", "simbolo": "s" },
+    { "magnitud": "Velocidad", "unidad": "metro por segundo", "simbolo": "m/s" }
+  ],
+  "glosario": [
+    { "termino": "Móvil", "definicion": "Cuerpo puntual idealizado en movimiento." },
+    { "termino": "Alcance", "definicion": "Cruce entre móviles que se desplazan en el mismo sentido." },
+    { "termino": "Encuentro", "definicion": "Cruce entre móviles que se desplazan en sentidos opuestos." }
+  ]
+}

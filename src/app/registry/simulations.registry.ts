@@ -3,14 +3,7 @@
  *
  * Registro central de simulaciones del frontend.
  * Cada entrada tiene la metadata estática necesaria para renderizar
- * la tarjeta en Home y cargar el componente lazy.
- *
- * Para agregar la simulación #4:
- *   1. Añadir una entrada aquí con el slug, categoría, etc.
- *   2. Crear el componente en src/app/simulations/<slug>/
- *   3. Agregar la Route en App.tsx con React.lazy
- *   4. Insertar el registro en data/simulations.json (para la API)
- *   5. Crear data/content/<slug>.json (para el contenido didáctico)
+ * la tarjeta en Home y navegar al Dashboard del Tema.
  */
 
 import type { CategoryId, DifficultyLevel, SimulationStatus } from '@physicslab/shared-types'
@@ -26,7 +19,7 @@ export interface SimulationEntry {
   orden: number
   icono: string
   etiquetas: string[]
-  /** Ruta de la simulación en el router */
+  /** Ruta al dashboard del tema o simulación */
   path: string
 }
 
@@ -42,7 +35,7 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     orden: 1,
     icono: '↗',
     etiquetas: ['vectores', 'coordenadas', 'polar', 'rectangular', 'geográfico', 'práctica'],
-    path: '/sim/vectores',
+    path: '/tema/vectores',
   },
   {
     id: 'sim-001',
@@ -52,10 +45,10 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     categoriaId: 'mecanica',
     dificultad: 'basico',
     estado: 'active',
-    orden: 1,
+    orden: 2,
     icono: '→',
-    etiquetas: ['cinemática', 'MRUA', 'gráficas'],
-    path: '/sim/movimiento-aceleracion-constante',
+    etiquetas: ['cinemática', 'MRUA', 'gráficas', 'aceleración', 'velocidad'],
+    path: '/tema/movimiento-aceleracion-constante',
   },
   {
     id: 'sim-002',
@@ -65,10 +58,10 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     categoriaId: 'mecanica',
     dificultad: 'basico',
     estado: 'active',
-    orden: 2,
+    orden: 3,
     icono: '△',
-    etiquetas: ['estática', 'equilibrio', 'vectores'],
-    path: '/sim/tres-fuerzas-equilibrio',
+    etiquetas: ['estática', 'equilibrio', 'vectores', 'fuerzas'],
+    path: '/tema/tres-fuerzas-equilibrio',
   },
   {
     id: 'sim-003',
@@ -78,10 +71,23 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     categoriaId: 'mecanica',
     dificultad: 'basico',
     estado: 'active',
-    orden: 3,
+    orden: 4,
     icono: '⊕',
     etiquetas: ['vectores', 'suma vectorial', 'resultante', 'analítico'],
-    path: '/sim/suma-vectores',
+    path: '/tema/suma-vectores',
+  },
+  {
+    id: 'sim-013',
+    slug: 'alcances-mru',
+    titulo: 'Alcances y Encuentros MRU',
+    descripcionCorta: 'Simulación 1D de móviles en persecución o sentidos opuestos con resolución analítica y escala dinámica.',
+    categoriaId: 'mecanica',
+    dificultad: 'basico',
+    estado: 'active',
+    orden: 5,
+    icono: 'compare_arrows',
+    etiquetas: ['cinemática', 'MRU', 'alcance', 'encuentro', 'gráficas', 'tiempo'],
+    path: '/tema/alcances-mru',
   },
   {
     id: 'sim-011',
@@ -91,10 +97,10 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     categoriaId: 'mecanica',
     dificultad: 'basico',
     estado: 'active',
-    orden: 4,
+    orden: 6,
     icono: 'route',
     etiquetas: ['cinemática', 'distancia', 'desplazamiento', 'trayectoria', 'escalar', 'vectorial'],
-    path: '/sim/distancia-desplazamiento',
+    path: '/tema/distancia-desplazamiento',
   },
   {
     id: 'sim-012',
@@ -104,23 +110,10 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     categoriaId: 'mecanica',
     dificultad: 'intermedio',
     estado: 'active',
-    orden: 5,
+    orden: 7,
     icono: 'speed',
     etiquetas: ['cinemática', 'velocidad', 'rapidez', 'órbita', 'vectorial'],
-    path: '/sim/velocidad-rapidez',
-  },
-  {
-    id: 'sim-013',
-    slug: 'alcances-encuentros',
-    titulo: 'Alcances y Encuentros en MRU',
-    descripcionCorta: 'Simulación 1D de móviles en persecución o sentidos opuestos con resolución analítica y gráfica.',
-    categoriaId: 'mecanica',
-    dificultad: 'basico',
-    estado: 'active',
-    orden: 6,
-    icono: 'compare_arrows',
-    etiquetas: ['cinemática', 'MRU', 'alcance', 'encuentro', 'gráficas', 'tiempo'],
-    path: '/sim/alcances-encuentros',
+    path: '/tema/velocidad-rapidez',
   },
   // ─── Próximamente ──────────────────────────────────────────────
   {
@@ -131,10 +124,10 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     categoriaId: 'mecanica',
     dificultad: 'basico',
     estado: 'coming-soon',
-    orden: 4,
+    orden: 8,
     icono: '◷',
     etiquetas: ['péndulo', 'oscilación'],
-    path: '/sim/pendulo-simple',
+    path: '/tema/pendulo-simple',
   },
   {
     id: 'sim-005',
@@ -144,10 +137,10 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     categoriaId: 'mecanica',
     dificultad: 'basico',
     estado: 'coming-soon',
-    orden: 5,
+    orden: 9,
     icono: '⌒',
     etiquetas: ['proyectil', 'parábola'],
-    path: '/sim/tiro-parabolico',
+    path: '/tema/tiro-parabolico',
   },
   {
     id: 'sim-006',
@@ -157,10 +150,10 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     categoriaId: 'mecanica',
     dificultad: 'basico',
     estado: 'coming-soon',
-    orden: 6,
+    orden: 10,
     icono: '⌀',
     etiquetas: ['resorte', 'elasticidad'],
-    path: '/sim/ley-de-hooke',
+    path: '/tema/ley-de-hooke',
   },
   {
     id: 'sim-007',
@@ -173,7 +166,7 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     orden: 1,
     icono: '≋',
     etiquetas: ['onda', 'amplitud', 'frecuencia'],
-    path: '/sim/onda-transversal',
+    path: '/tema/onda-transversal',
   },
   {
     id: 'sim-008',
@@ -186,7 +179,7 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     orden: 1,
     icono: '⚡',
     etiquetas: ['campo eléctrico', 'Coulomb'],
-    path: '/sim/campo-electrico',
+    path: '/tema/campo-electrico',
   },
   {
     id: 'sim-009',
@@ -199,7 +192,7 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     orden: 1,
     icono: '◑',
     etiquetas: ['espejos', 'óptica'],
-    path: '/sim/espejo-convergente',
+    path: '/tema/espejo-convergente',
   },
   {
     id: 'sim-010',
@@ -212,7 +205,7 @@ export const SIMULATIONS_REGISTRY: SimulationEntry[] = [
     orden: 1,
     icono: '♨',
     etiquetas: ['Carnot', 'termodinámica'],
-    path: '/sim/ciclo-carnot',
+    path: '/tema/ciclo-carnot',
   },
 ]
 
