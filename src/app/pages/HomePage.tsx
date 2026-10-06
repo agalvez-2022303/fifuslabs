@@ -12,22 +12,22 @@ import {
 import styles from './HomePage.module.css'
 
 const CATEGORY_NAMES: Record<string, string> = {
-  mecanica:           'Mecánica',
+  mecanica:             'Mecánica Clásica & Cinemática',
   'oscilaciones-ondas': 'Oscilaciones y Ondas',
-  electrodinamica:    'Electrodinámica',
-  optica:             'Óptica',
-  termodinamica:      'Termodinámica',
-  relatividad:        'Teoría de la Relatividad',
-  'fisica-atomica':   'Física Atómica',
-  'fisica-nuclear':   'Física Nuclear',
-  'estado-solido':    'Estado Sólido',
+  electrodinamica:      'Electrodinámica & Campo Eléctrico',
+  optica:               'Óptica Geométrica',
+  termodinamica:        'Termodinámica',
+  relatividad:          'Teoría de la Relatividad',
+  'fisica-atomica':     'Física Atómica',
+  'fisica-nuclear':     'Física Nuclear',
+  'estado-solido':      'Estado Sólido',
 }
 
 const CATEGORIES = Object.keys(CATEGORY_NAMES)
 
 export default function HomePage() {
-  const [search, setSearch]   = useState('')
-  const [filter, setFilter]   = useState<string>('todas')
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState<string>('todas')
 
   const availableSims = useMemo(
     () => (SHOW_COMING_SOON ? SIMULATIONS_REGISTRY : SIMULATIONS_REGISTRY.filter(s => s.estado === 'active')),
@@ -48,68 +48,100 @@ export default function HomePage() {
     <div className={styles.page}>
       <Header />
 
-      {/* ─── Hero ───────────────────────────────────────────────── */}
+      {/* ─── Hero Section ────────────────────────────────────────── */}
       <section className={styles.hero}>
         <HeroCanvas />
         <div className={styles.heroContent}>
-          <div className={styles.heroLabel}>Laboratorio de Física</div>
+          <div className={styles.heroBadge}>
+            <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--gold)' }}>
+              science
+            </span>
+            <span>LABORATORIO VIRTUAL DE FÍSICA FUNDAMENTAL</span>
+          </div>
+
           <h1 className={styles.heroTitle}>
-            Simulaciones <span className={styles.heroAccent}>Interactivas</span>
+            Simuladores <span className={styles.heroAccent}>Computacionales</span>
           </h1>
+
           <p className={styles.heroSubtitle}>
-            Ajusta parámetros en tiempo real, visualiza vectores y analiza fenómenos
-            físicos con gráficas sincronizadas.
+            Modelado analítico en tiempo real con precisión matemática (IEEE 754 Float64),
+            visualización gráfica sincrónica y cálculo vectorial interactivo.
           </p>
-          <div className={styles.heroStats}>
-            <div className={styles.stat}>
-              <span className={styles.statNum}>3</span>
-              <span className={styles.statLabel}>Simulaciones</span>
+
+          {/* Telemetry Metrics Bar */}
+          <div className={styles.metricsDeck}>
+            <div className={styles.metricCard}>
+              <div className={styles.metricValue}>
+                <span className={styles.metricNumber}>{availableSims.length}</span>
+                <span className={styles.metricSuffix}>Módulos</span>
+              </div>
+              <span className={styles.metricLabel}>Simuladores Disponibles</span>
             </div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}>
-              <span className={styles.statNum}>100%</span>
-              <span className={styles.statLabel}>Interactivo</span>
+
+            <div className={styles.metricDivider} />
+
+            <div className={styles.metricCard}>
+              <div className={styles.metricValue}>
+                <span className={styles.metricNumber}>60.0</span>
+                <span className={styles.metricSuffix}>FPS</span>
+              </div>
+              <span className={styles.metricLabel}>Renderizado Sincrónico</span>
             </div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}>
-              <span className={styles.statNum}>SI</span>
-              <span className={styles.statLabel}>Unidades</span>
+
+            <div className={styles.metricDivider} />
+
+            <div className={styles.metricCard}>
+              <div className={styles.metricValue}>
+                <span className={styles.metricNumber}>Float64</span>
+              </div>
+              <span className={styles.metricLabel}>Precisión IEEE 754</span>
+            </div>
+
+            <div className={styles.metricDivider} />
+
+            <div className={styles.metricCard}>
+              <div className={styles.metricValue}>
+                <span className={styles.metricNumber}>100%</span>
+              </div>
+              <span className={styles.metricLabel}>Parámetros Dinámicos</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── Búsqueda y filtros ──────────────────────────────────── */}
-      <section className={styles.controls}>
+      {/* ─── Control Bar (Search + Categories) ───────────────────── */}
+      <section className={styles.controlsBar}>
         <div className={styles.controlsInner}>
-          {/* Buscador */}
+          {/* Search Box */}
           <div className={styles.searchWrap}>
-            <span className={styles.searchIcon} aria-hidden="true">⌕</span>
+            <span className={`material-symbols-outlined ${styles.searchIcon}`} aria-hidden="true">
+              search
+            </span>
             <input
               id="search-simulations"
               type="search"
-              className={`input ${styles.search}`}
-              placeholder="Buscar simulación..."
+              className={styles.searchInput}
+              placeholder="Buscar simulación o concepto (p. ej. vectores, MRUA, cinemática)..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               aria-label="Buscar simulaciones"
             />
           </div>
 
-          {/* Filtros de categoría */}
-          <div className={styles.filters} role="group" aria-label="Filtrar por categoría">
+          {/* Category Filter Pills */}
+          <div className={styles.filtersGroup} role="group" aria-label="Filtrar por categoría">
             <button
-              className={`${styles.filterBtn} ${filter === 'todas' ? styles.filterActive : ''}`}
+              className={`${styles.filterPill} ${filter === 'todas' ? styles.filterPillActive : ''}`}
               onClick={() => setFilter('todas')}
             >
-              Todas
+              Todas las áreas
             </button>
             {CATEGORIES.filter(cat =>
               availableSims.some(s => s.categoriaId === cat)
             ).map(cat => (
               <button
                 key={cat}
-                className={`${styles.filterBtn} ${filter === cat ? styles.filterActive : ''}`}
+                className={`${styles.filterPill} ${filter === cat ? styles.filterPillActive : ''}`}
                 onClick={() => setFilter(cat)}
               >
                 {CATEGORY_NAMES[cat]}
@@ -119,18 +151,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── Grid de simulaciones ────────────────────────────────── */}
+      {/* ─── Simulation Catalog Grid ─────────────────────────────── */}
       <main className={styles.main} id="simulaciones">
         {showSearch ? (
-          // Vista plana cuando hay filtro/búsqueda
-          <section className={styles.category}>
-            <div className={styles.categoryHeader}>
-              <h2 className={styles.categoryTitle}>
-                {filtered.length > 0
-                  ? `${filtered.length} simulación${filtered.length !== 1 ? 'es' : ''}`
-                  : 'Sin resultados'}
-              </h2>
+          <section className={styles.categorySection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionTitleRow}>
+                <span className="material-symbols-outlined" style={{ color: 'var(--corporate)', fontSize: '20px' }}>
+                  filter_list
+                </span>
+                <h2 className={styles.sectionTitle}>
+                  {filtered.length > 0
+                    ? `Resultados (${filtered.length} módulo${filtered.length !== 1 ? 's' : ''})`
+                    : 'Sin resultados'}
+                </h2>
+              </div>
             </div>
+
             {filtered.length > 0 ? (
               <div className={styles.grid}>
                 {filtered.map((sim, i) => (
@@ -138,19 +175,29 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <div className={styles.empty}>
-                <span className={styles.emptyIcon}>◎</span>
-                <p>No se encontraron simulaciones para &quot;{search}&quot;</p>
+              <div className={styles.emptyState}>
+                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--slate-muted)' }}>
+                  search_off
+                </span>
+                <p>No se encontraron simulaciones que coincidan con &quot;{search}&quot;</p>
               </div>
             )}
           </section>
         ) : (
-          // Vista agrupada por categorías
           Object.entries(byCategory).map(([catId, sims]) => (
-            <section key={catId} className={styles.category}>
-              <div className={styles.categoryHeader}>
-                <h2 className={styles.categoryTitle}>{CATEGORY_NAMES[catId]}</h2>
+            <section key={catId} className={styles.categorySection}>
+              <div className={styles.sectionHeader}>
+                <div className={styles.sectionTitleRow}>
+                  <span className="material-symbols-outlined" style={{ color: 'var(--corporate)', fontSize: '22px' }}>
+                    token
+                  </span>
+                  <h2 className={styles.sectionTitle}>{CATEGORY_NAMES[catId] ?? catId}</h2>
+                </div>
+                <span className={styles.sectionCount}>
+                  {sims.length} módulo{sims.length !== 1 ? 's' : ''}
+                </span>
               </div>
+
               <div className={styles.grid}>
                 {sims.map((sim, i) => (
                   <SimulationCard key={sim.id} simulation={sim} index={i} />
@@ -161,12 +208,20 @@ export default function HomePage() {
         )}
       </main>
 
-      {/* ─── Footer ──────────────────────────────────────────────── */}
+      {/* ─── Academic & Scientific Footer ────────────────────────── */}
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
-          <span className={styles.footerLogo}>Kinal Simulator</span>
-          <span className={styles.footerText}>
-            Simulaciones Interactivas de Física
+          <div className={styles.footerBrand}>
+            <div className={styles.footerLogoIcon}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>science</span>
+            </div>
+            <div>
+              <span className={styles.footerTitle}>FísicaLab Engine v2.4</span>
+              <p className={styles.footerSub}>Plataforma de Simulación y Análisis de Física Fundamental</p>
+            </div>
+          </div>
+          <span className={styles.footerTech}>
+            Modelado Numérico en React & TypeScript
           </span>
         </div>
       </footer>

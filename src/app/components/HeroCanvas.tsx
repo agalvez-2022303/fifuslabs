@@ -2,14 +2,7 @@ import { useEffect, useRef } from 'react'
 import styles from './HeroCanvas.module.css'
 
 /**
- * HeroCanvas — escena animada en canvas 2D (sin WebGL, máx rendimiento en móviles)
- *
- * Muestra 3 objetos físicos animados:
- *  1. Péndulo simple con movimiento oscilatorio correcto
- *  2. Trayectoria parabólica de un proyectil con partícula
- *  3. Vectores de fuerza rotando suavemente
- *
- * Reacciona al movimiento del mouse con un efecto parallax sutil.
+ * HeroCanvas — escena animada en canvas 2D con visualización de vectores, péndulo y proyectil
  */
 export default function HeroCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -37,7 +30,6 @@ export default function HeroCanvas() {
     resize()
     window.addEventListener('resize', resize)
 
-    // Mouse / touch parallax
     function onMouseMove(e: MouseEvent) {
       mouseRef.current = {
         x: (e.clientX / window.innerWidth  - 0.5) * 2,
@@ -62,7 +54,6 @@ export default function HeroCanvas() {
     function draw(timestamp: number) {
       rafRef.current = requestAnimationFrame(draw)
 
-      // Limitar a ~60fps para ahorrar batería en móvil
       if (timestamp - lastFrame < FPS_TARGET * 0.8) return
       lastFrame = timestamp
 
@@ -73,16 +64,9 @@ export default function HeroCanvas() {
       const mx = mouseRef.current.x
       const my = mouseRef.current.y
 
-      // ── FONDO: partículas/nodos conectados (campo vectorial) ──────────
       drawFieldLines(ctx, W, H, t, mx, my)
-
-      // ── 1. PÉNDULO ────────────────────────────────────────────────────
       drawPendulum(ctx, W, H, t, mx, my)
-
-      // ── 2. PROYECTIL / PARÁBOLA ───────────────────────────────────────
       drawProjectile(ctx, W, H, t, mx, my)
-
-      // ── 3. VECTORES DE FUERZA ─────────────────────────────────────────
       drawForceVectors(ctx, W, H, t, mx, my)
     }
 
@@ -99,23 +83,20 @@ export default function HeroCanvas() {
   return <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
 }
 
-/* ─── Helpers de dibujo ─────────────────────────────────────────────────── */
-
 function drawFieldLines(
   ctx: CanvasRenderingContext2D,
   W: number, H: number,
   t: number, mx: number, my: number
 ) {
-  // Líneas de cuadrícula animadas muy sutiles — fondo de "campo de física"
-  const spacing = 60
-  ctx.strokeStyle = 'rgba(255,255,255,0.03)'
+  const spacing = 70
+  ctx.strokeStyle = 'rgba(36, 52, 108, 0.06)'
   ctx.lineWidth = 1
   for (let x = 0; x < W + spacing; x += spacing) {
     for (let y = 0; y < H + spacing; y += spacing) {
       const angle = Math.sin(x * 0.01 + t * 0.3) * 0.5 + Math.cos(y * 0.01 + t * 0.2) * 0.5
-      const len = 20
-      const cx = x + mx * 8
-      const cy = y + my * 8
+      const len = 18
+      const cx = x + mx * 6
+      const cy = y + my * 6
       ctx.beginPath()
       ctx.moveTo(cx, cy)
       ctx.lineTo(cx + Math.cos(angle) * len, cy + Math.sin(angle) * len)
@@ -129,68 +110,48 @@ function drawPendulum(
   W: number, H: number,
   t: number, mx: number, my: number
 ) {
-  // Péndulo en el tercio izquierdo
-  const pivotX = W * 0.22 + mx * 6
-  const pivotY = H * 0.15 + my * 3
-  const L = Math.min(H * 0.28, 140)
-  const angle = Math.sin(t * 1.8) * 0.55 // amplitud ≈31°, periodo ~3.5s
+  const pivotX = W * 0.20 + mx * 6
+  const pivotY = H * 0.18 + my * 3
+  const L = Math.min(H * 0.32, 130)
+  const angle = Math.sin(t * 1.8) * 0.5
 
   const bobX = pivotX + Math.sin(angle) * L
   const bobY = pivotY + Math.cos(angle) * L
 
-  // Soporte pivote
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)'
+  ctx.strokeStyle = 'rgba(36, 52, 108, 0.3)'
   ctx.lineWidth = 2
   ctx.beginPath()
-  ctx.moveTo(pivotX - 30, pivotY)
-  ctx.lineTo(pivotX + 30, pivotY)
+  ctx.moveTo(pivotX - 24, pivotY)
+  ctx.lineTo(pivotX + 24, pivotY)
   ctx.stroke()
 
-  // Marca pivot
-  ctx.fillStyle = 'rgba(255,255,255,0.35)'
+  ctx.fillStyle = '#24346C'
   ctx.beginPath()
-  ctx.arc(pivotX, pivotY, 4, 0, Math.PI * 2)
+  ctx.arc(pivotX, pivotY, 3.5, 0, Math.PI * 2)
   ctx.fill()
 
-  // Cuerda con tensión visual (línea recta)
-  ctx.strokeStyle = 'rgba(255,255,255,0.5)'
+  ctx.strokeStyle = 'rgba(36, 52, 108, 0.45)'
   ctx.lineWidth = 1.5
   ctx.beginPath()
   ctx.moveTo(pivotX, pivotY)
   ctx.lineTo(bobX, bobY)
   ctx.stroke()
 
-  // Trayectoria del bob (arco fantasma)
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.arc(pivotX, pivotY, L, Math.PI * 0.5 - 0.6, Math.PI * 0.5 + 0.6)
-  ctx.stroke()
-
-  // Bob — esfera con gradiente radial simulado
-  const bobR = 16
-  const grd = ctx.createRadialGradient(bobX - bobR * 0.3, bobY - bobR * 0.3, 2, bobX, bobY, bobR)
-  grd.addColorStop(0, 'rgba(255,255,255,0.9)')
-  grd.addColorStop(0.5, 'rgba(200,200,200,0.7)')
-  grd.addColorStop(1, 'rgba(80,80,80,0.8)')
+  // Bob
+  const bobR = 14
+  const grd = ctx.createRadialGradient(bobX - 3, bobY - 3, 1, bobX, bobY, bobR)
+  grd.addColorStop(0, '#38bdf8')
+  grd.addColorStop(0.7, '#0284c7')
+  grd.addColorStop(1, '#0369a1')
   ctx.fillStyle = grd
   ctx.beginPath()
   ctx.arc(bobX, bobY, bobR, 0, Math.PI * 2)
   ctx.fill()
 
-  // Sombra del bob (proyección en "suelo")
-  const shadowY = pivotY + L + 20
-  const shadowScale = 0.4 + 0.6 * Math.cos(angle)
-  ctx.fillStyle = 'rgba(255,255,255,0.04)'
-  ctx.beginPath()
-  ctx.ellipse(bobX, shadowY, bobR * shadowScale, 4, 0, 0, Math.PI * 2)
-  ctx.fill()
-
-  // Label
-  ctx.font = '10px IBM Plex Mono, monospace'
-  ctx.fillStyle = 'rgba(255,255,255,0.25)'
+  ctx.font = '10px JetBrains Mono, monospace'
+  ctx.fillStyle = '#64748B'
   ctx.textAlign = 'center'
-  ctx.fillText('Péndulo', pivotX, pivotY - 14)
+  ctx.fillText('Péndulo θ(t)', pivotX, pivotY - 10)
 }
 
 function drawProjectile(
@@ -198,19 +159,17 @@ function drawProjectile(
   W: number, H: number,
   t: number, mx: number, my: number
 ) {
-  // Proyectil en la parte inferior central
   const originX = W * 0.35 + mx * 4
   const originY = H * 0.72 + my * 2
   const maxH = H * 0.22
-  const range = W * 0.3
+  const range = W * 0.28
 
-  // Dibuja la parábola de trayectoria
-  ctx.strokeStyle = 'rgba(255,255,255,0.12)'
+  ctx.strokeStyle = 'rgba(37, 99, 235, 0.25)'
   ctx.lineWidth = 1.5
-  ctx.setLineDash([4, 6])
+  ctx.setLineDash([4, 4])
   ctx.beginPath()
-  for (let i = 0; i <= 100; i++) {
-    const tau = i / 100
+  for (let i = 0; i <= 60; i++) {
+    const tau = i / 60
     const px = originX + tau * range
     const py = originY - 4 * maxH * tau * (1 - tau)
     if (i === 0) ctx.moveTo(px, py)
@@ -219,44 +178,28 @@ function drawProjectile(
   ctx.stroke()
   ctx.setLineDash([])
 
-  // Partícula animada recorriendo la parábola
-  const loopT = (t * 0.55) % 1
+  const loopT = (t * 0.5) % 1
   const px = originX + loopT * range
   const py = originY - 4 * maxH * loopT * (1 - loopT)
 
-  // Estela
-  for (let i = 1; i <= 8; i++) {
-    const trailT = Math.max(0, loopT - i * 0.02)
-    const trailX = originX + trailT * range
-    const trailY = originY - 4 * maxH * trailT * (1 - trailT)
-    ctx.fillStyle = `rgba(255,255,255,${0.12 - i * 0.014})`
-    ctx.beginPath()
-    ctx.arc(trailX, trailY, 5 - i * 0.5, 0, Math.PI * 2)
-    ctx.fill()
-  }
-
-  // Proyectil — esferoide metálico
-  const pr = 10
-  const grd2 = ctx.createRadialGradient(px - 3, py - 3, 1, px, py, pr)
-  grd2.addColorStop(0, 'rgba(255,255,255,0.95)')
-  grd2.addColorStop(0.6, 'rgba(160,160,160,0.85)')
-  grd2.addColorStop(1, 'rgba(40,40,40,0.9)')
+  const pr = 9
+  const grd2 = ctx.createRadialGradient(px - 2, py - 2, 1, px, py, pr)
+  grd2.addColorStop(0, '#fbbf24')
+  grd2.addColorStop(0.8, '#d97706')
+  grd2.addColorStop(1, '#b45309')
   ctx.fillStyle = grd2
   ctx.beginPath()
   ctx.arc(px, py, pr, 0, Math.PI * 2)
   ctx.fill()
 
-  // Vectores velocidad sobre el proyectil
-  const vx = range / 100 * 60
-  const vy = (-4 * maxH * (1 - 2 * loopT)) / 100 * 60
+  const vx = range / 100 * 50
+  const vy = (-4 * maxH * (1 - 2 * loopT)) / 100 * 50
+  drawArrow(ctx, px, py, px + vx * 0.16, py + vy * 0.16, '#0891b2', 1.5)
 
-  drawArrow(ctx, px, py, px + vx * 0.18, py + vy * 0.18, 'rgba(255,255,255,0.6)', 1.5)
-
-  // Label
-  ctx.font = '10px IBM Plex Mono, monospace'
-  ctx.fillStyle = 'rgba(255,255,255,0.25)'
+  ctx.font = '10px JetBrains Mono, monospace'
+  ctx.fillStyle = '#64748B'
   ctx.textAlign = 'center'
-  ctx.fillText('Proyectil', originX + range / 2, originY + 20)
+  ctx.fillText('Trayectoria MRUV', originX + range / 2, originY + 16)
 }
 
 function drawForceVectors(
@@ -264,47 +207,39 @@ function drawForceVectors(
   W: number, H: number,
   t: number, mx: number, my: number
 ) {
-  // Tres vectores convergiendo en un punto — equilibrio de fuerzas
-  const cx = W * 0.75 + mx * 6
-  const cy = H * 0.4  + my * 4
-  const len = Math.min(W * 0.1, 70)
+  const cx = W * 0.76 + mx * 5
+  const cy = H * 0.42 + my * 3
+  const len = Math.min(W * 0.09, 64)
 
+  const colors = ['#2563EB', '#06B6D4', '#7C3AED']
   const angles = [
-    t * 0.25 + Math.PI * 0.5,
-    t * 0.25 + Math.PI * (0.5 + 2/3),
-    t * 0.25 + Math.PI * (0.5 + 4/3),
+    t * 0.2 + Math.PI * 0.5,
+    t * 0.2 + Math.PI * (0.5 + 2/3),
+    t * 0.2 + Math.PI * (0.5 + 4/3),
   ]
 
   angles.forEach((angle, i) => {
-    const brightness = 0.5 + 0.2 * Math.sin(t * 2 + i * Math.PI / 1.5)
-    const color = `rgba(255,255,255,${brightness})`
     const ex = cx + Math.cos(angle) * len
     const ey = cy + Math.sin(angle) * len
-    drawArrow(ctx, cx, cy, ex, ey, color, 2)
+    drawArrow(ctx, cx, cy, ex, ey, colors[i], 2)
 
-    // Etiqueta de magnitud
-    const labelX = cx + Math.cos(angle) * (len + 16)
-    const labelY = cy + Math.sin(angle) * (len + 16)
-    ctx.font = '9px IBM Plex Mono, monospace'
-    ctx.fillStyle = `rgba(255,255,255,${brightness * 0.6})`
+    const labelX = cx + Math.cos(angle) * (len + 14)
+    const labelY = cy + Math.sin(angle) * (len + 14)
+    ctx.font = '10px JetBrains Mono, monospace'
+    ctx.fillStyle = colors[i]
     ctx.textAlign = 'center'
-    ctx.fillText(`F${i+1}`, labelX, labelY)
+    ctx.fillText(`F⃗${i+1}`, labelX, labelY)
   })
 
-  // Nudo central
-  const grd3 = ctx.createRadialGradient(cx, cy, 1, cx, cy, 8)
-  grd3.addColorStop(0, 'rgba(255,255,255,0.95)')
-  grd3.addColorStop(1, 'rgba(150,150,150,0.5)')
-  ctx.fillStyle = grd3
+  ctx.fillStyle = '#172554'
   ctx.beginPath()
-  ctx.arc(cx, cy, 8, 0, Math.PI * 2)
+  ctx.arc(cx, cy, 6, 0, Math.PI * 2)
   ctx.fill()
 
-  // Label
-  ctx.font = '10px IBM Plex Mono, monospace'
-  ctx.fillStyle = 'rgba(255,255,255,0.25)'
+  ctx.font = '10px JetBrains Mono, monospace'
+  ctx.fillStyle = '#64748B'
   ctx.textAlign = 'center'
-  ctx.fillText('Equilibrio', cx, cy + len + 28)
+  ctx.fillText('ΣF⃗ = 0 (Estática)', cx, cy + len + 24)
 }
 
 function drawArrow(
@@ -315,7 +250,7 @@ function drawArrow(
   lineWidth = 2
 ) {
   const angle = Math.atan2(y2 - y1, x2 - x1)
-  const headLen = 9
+  const headLen = 8
 
   ctx.strokeStyle = color
   ctx.fillStyle   = color
@@ -326,7 +261,6 @@ function drawArrow(
   ctx.lineTo(x2, y2)
   ctx.stroke()
 
-  // Cabeza de flecha
   ctx.beginPath()
   ctx.moveTo(x2, y2)
   ctx.lineTo(

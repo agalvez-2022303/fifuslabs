@@ -15,11 +15,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./app/*"],
       "@physicslab/shared-types": ["../packages/shared-types/src"]
-    }
+    },
+    "ignoreDeprecations": "5.0"
   },
   "include": ["app"],
   "references": [{ "path": "./tsconfig.node.json" }]

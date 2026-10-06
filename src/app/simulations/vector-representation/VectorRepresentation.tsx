@@ -70,10 +70,12 @@ export default function VectorRepresentation() {
 
   // ─── Generador de Retos ─────────────────────────────────────
   const generateNewChallenge = useCallback(() => {
-    // Generar vector aleatorio con valores pedagógicos (-8 a 8)
-    let x = (Math.floor(Math.random() * 16) - 8)
-    let y = (Math.floor(Math.random() * 16) - 8)
-    if (x === 0 && y === 0) { x = 3; y = 4 }
+    let x = Math.floor(Math.random() * 16) - 8
+    let y = Math.floor(Math.random() * 16) - 8
+    if (x === 0 && y === 0) {
+      x = 3
+      y = 4
+    }
 
     const modes: InputMode[] = ['rectangular', 'polar', 'geographic']
     const chosenMode = modes[Math.floor(Math.random() * modes.length)]
@@ -109,7 +111,6 @@ export default function VectorRepresentation() {
     const clampedY = parseFloat(Math.max(-15, Math.min(15, newY)).toFixed(2))
     setCoords({ x: clampedX, y: clampedY })
 
-    // Sincronizar inputs geográficos si procede
     const p = rectangularToPolar(clampedX, clampedY)
     const g = polarToGeographic(p.r, p.thetaDeg)
     if (g.primary) setGeoPrimary(g.primary)
@@ -145,42 +146,46 @@ export default function VectorRepresentation() {
 
     ct.clearRect(0, 0, W, H)
 
-    // Fondo
-    ct.fillStyle = '#080808'
+    // Fondo Canvas en tono laboratorio limpio
+    ct.fillStyle = '#ffffff'
     ct.fillRect(0, 0, W, H)
 
     const cx = W / 2
     const cy = H / 2
 
-    // Grilla cartesiana
-    ct.strokeStyle = 'rgba(255, 255, 255, 0.04)'
+    // Cuadrícula cartesiana
+    ct.strokeStyle = '#e2e8f0'
     ct.lineWidth = 1
     for (let x = cx % scale; x < W; x += scale) {
-      ct.beginPath(); ct.moveTo(x, 0); ct.lineTo(x, H); ct.stroke()
+      ct.beginPath()
+      ct.moveTo(x, 0)
+      ct.lineTo(x, H)
+      ct.stroke()
     }
     for (let y = cy % scale; y < H; y += scale) {
-      ct.beginPath(); ct.moveTo(0, y); ct.lineTo(W, y); ct.stroke()
+      ct.beginPath()
+      ct.moveTo(0, y)
+      ct.lineTo(W, y)
+      ct.stroke()
     }
 
-    // ── Rosa de los Vientos / Compás Geográfico de fondo ───────
+    // ── Rosa de los Vientos / Compás Geográfico ───────────────
     if (showCompass) {
       ct.save()
       ct.translate(cx, cy)
       const compassRadius = Math.min(W, H) * 0.38
 
-      // Círculo exterior tenue
-      ct.strokeStyle = 'rgba(255, 255, 255, 0.06)'
-      ct.lineWidth = 1.5
+      ct.strokeStyle = '#cbd5e1'
+      ct.lineWidth = 1.2
       ct.setLineDash([3, 3])
       ct.beginPath()
       ct.arc(0, 0, compassRadius, 0, Math.PI * 2)
       ct.stroke()
       ct.setLineDash([])
 
-      // Marcas de 45 grados (NE, NO, SO, SE)
       const subRad = compassRadius * 0.95
       const diagAngles = [Math.PI / 4, (3 * Math.PI) / 4, (5 * Math.PI) / 4, (7 * Math.PI) / 4]
-      ct.strokeStyle = 'rgba(255, 255, 255, 0.08)'
+      ct.strokeStyle = '#e2e8f0'
       diagAngles.forEach((ang) => {
         ct.beginPath()
         ct.moveTo(0, 0)
@@ -188,9 +193,8 @@ export default function VectorRepresentation() {
         ct.stroke()
       })
 
-      // Etiquetas cardinales
-      ct.font = '600 12px "Space Grotesk", sans-serif'
-      ct.fillStyle = 'rgba(255, 255, 255, 0.45)'
+      ct.font = '700 12px "Plus Jakarta Sans", sans-serif'
+      ct.fillStyle = '#24346c'
       ct.textAlign = 'center'
       ct.textBaseline = 'middle'
 
@@ -199,9 +203,8 @@ export default function VectorRepresentation() {
       ct.fillText('E', compassRadius + 16, 0)
       ct.fillText('O', -compassRadius - 16, 0)
 
-      // Sub-etiquetas de cuadrante
-      ct.font = '9px IBM Plex Mono, monospace'
-      ct.fillStyle = 'rgba(255, 255, 255, 0.2)'
+      ct.font = '9px "JetBrains Mono", monospace'
+      ct.fillStyle = '#8494ac'
       ct.fillText('NE (I)', compassRadius * 0.7, -compassRadius * 0.7)
       ct.fillText('NO (II)', -compassRadius * 0.7, -compassRadius * 0.7)
       ct.fillText('SO (III)', -compassRadius * 0.7, compassRadius * 0.7)
@@ -211,23 +214,28 @@ export default function VectorRepresentation() {
     }
 
     // ── Ejes Cartesianos Principales ───────────────────────────
-    ct.strokeStyle = 'rgba(255, 255, 255, 0.35)'
+    ct.strokeStyle = '#64748b'
     ct.lineWidth = 1.5
     ct.beginPath()
-    ct.moveTo(0, cy); ct.lineTo(W, cy) // Eje X
-    ct.moveTo(cx, 0); ct.lineTo(cx, H) // Eje Y
+    ct.moveTo(0, cy)
+    ct.lineTo(W, cy) // Eje X
+    ct.moveTo(cx, 0)
+    ct.lineTo(cx, H) // Eje Y
     ct.stroke()
 
     // Graduaciones numéricas en los ejes
-    ct.font = '9px IBM Plex Mono, monospace'
-    ct.fillStyle = 'rgba(255, 255, 255, 0.35)'
+    ct.font = '9px "JetBrains Mono", monospace'
+    ct.fillStyle = '#64748b'
     ct.textAlign = 'center'
 
     const maxUnitsX = Math.floor(cx / scale)
     for (let u = -maxUnitsX; u <= maxUnitsX; u++) {
       if (u === 0) continue
       const px = cx + u * scale
-      ct.beginPath(); ct.moveTo(px, cy - 3); ct.lineTo(px, cy + 3); ct.stroke()
+      ct.beginPath()
+      ct.moveTo(px, cy - 3)
+      ct.lineTo(px, cy + 3)
+      ct.stroke()
       if (Math.abs(u) % 2 === 0) {
         ct.fillText(`${u}`, px, cy + 13)
       }
@@ -238,13 +246,15 @@ export default function VectorRepresentation() {
     for (let u = -maxUnitsY; u <= maxUnitsY; u++) {
       if (u === 0) continue
       const py = cy - u * scale
-      ct.beginPath(); ct.moveTo(cx - 3, py); ct.lineTo(cx + 3, py); ct.stroke()
+      ct.beginPath()
+      ct.moveTo(cx - 3, py)
+      ct.lineTo(cx + 3, py)
+      ct.stroke()
       if (Math.abs(u) % 2 === 0) {
         ct.fillText(`${u}`, cx - 6, py + 3)
       }
     }
 
-    // Posición de la punta del vector en canvas
     const vx = cx + coords.x * scale
     const vy = cy - coords.y * scale
 
@@ -254,13 +264,14 @@ export default function VectorRepresentation() {
       ct.lineWidth = 1.2
 
       // Proyección vertical a Eje X
-      ct.strokeStyle = 'rgba(255, 255, 255, 0.35)'
+      ct.strokeStyle = '#2563eb'
       ct.beginPath()
       ct.moveTo(vx, vy)
       ct.lineTo(vx, cy)
       ct.stroke()
 
       // Proyección horizontal a Eje Y
+      ct.strokeStyle = '#06b6d4'
       ct.beginPath()
       ct.moveTo(vx, vy)
       ct.lineTo(cx, vy)
@@ -268,16 +279,16 @@ export default function VectorRepresentation() {
       ct.setLineDash([])
 
       // Resaltado de componentes en los ejes
-      // Componente Ax sobre eje X
-      ct.strokeStyle = 'rgba(255, 255, 255, 0.75)'
+      // Componente Ax
+      ct.strokeStyle = '#2563eb'
       ct.lineWidth = 2.5
       ct.beginPath()
       ct.moveTo(cx, cy)
       ct.lineTo(vx, cy)
       ct.stroke()
 
-      // Componente Ay sobre eje Y
-      ct.strokeStyle = 'rgba(255, 255, 255, 0.75)'
+      // Componente Ay
+      ct.strokeStyle = '#06b6d4'
       ct.lineWidth = 2.5
       ct.beginPath()
       ct.moveTo(cx, cy)
@@ -285,33 +296,31 @@ export default function VectorRepresentation() {
       ct.stroke()
 
       // Etiquetas de componentes
-      ct.font = 'bold 10px IBM Plex Mono, monospace'
-      ct.fillStyle = '#ffffff'
+      ct.font = '700 10px "JetBrains Mono", monospace'
+      ct.fillStyle = '#1e40af'
       ct.textAlign = 'center'
       ct.fillText(`Ax = ${coords.x.toFixed(2)}`, (cx + vx) / 2, cy + (coords.y >= 0 ? 18 : -10))
 
+      ct.fillStyle = '#0e7490'
       ct.textAlign = coords.x >= 0 ? 'right' : 'left'
       ct.fillText(`Ay = ${coords.y.toFixed(2)}`, cx + (coords.x >= 0 ? -8 : 8), (cy + vy) / 2)
     }
 
     // ── Arcos de Ángulo (Polar y Geográfico) ───────────────────
     if (showArcs && polar.r > 0.4) {
-      const arcRadius = Math.min(50, polar.r * scale * 0.5)
-
-      // Arco polar θ desde semieje +X (antihorario)
+      const arcRadius = Math.min(48, polar.r * scale * 0.45)
       const radTheta = (polar.thetaDeg * Math.PI) / 180
-      ct.strokeStyle = 'rgba(255, 255, 255, 0.6)'
-      ct.lineWidth = 1.5
+      ct.strokeStyle = '#c8a932'
+      ct.lineWidth = 2
       ct.beginPath()
       ct.arc(cx, cy, arcRadius, 0, -radTheta, true)
       ct.stroke()
 
-      // Etiqueta del ángulo polar
       const midAngle = -radTheta / 2
       const textX = cx + Math.cos(midAngle) * (arcRadius + 14)
       const textY = cy + Math.sin(midAngle) * (arcRadius + 14)
-      ct.font = '10px IBM Plex Mono, monospace'
-      ct.fillStyle = '#ffffff'
+      ct.font = '700 10px "JetBrains Mono", monospace'
+      ct.fillStyle = '#92400e'
       ct.textAlign = 'center'
       ct.textBaseline = 'middle'
       ct.fillText(`θ = ${polar.thetaDeg.toFixed(1)}°`, textX, textY)
@@ -319,36 +328,29 @@ export default function VectorRepresentation() {
 
     // ── Vector Principal ──────────────────────────────────────
     if (polar.r > 0.05) {
-      // Sombra blanca para resaltar el vector
-      ct.shadowColor = 'rgba(255, 255, 255, 0.4)'
-      ct.shadowBlur = 8
-      drawArrow(ct, cx, cy, vx, vy, '#ffffff', 3)
-      ct.shadowBlur = 0
+      drawArrow(ct, cx, cy, vx, vy, '#24346c', 3)
 
-      // Etiqueta de magnitud sobre el vector
       const midVx = (cx + vx) / 2
       const midVy = (cy + vy) / 2
-      const offsetDist = 12
-      // Vector perpendicular para el offset de texto
+      const offsetDist = 14
       const len = Math.hypot(coords.x, coords.y)
       const nx = -coords.y / len
       const ny = coords.x / len
 
-      ct.font = '600 11px IBM Plex Mono, monospace'
-      ct.fillStyle = '#ffffff'
+      ct.font = '700 11px "JetBrains Mono", monospace'
+      ct.fillStyle = '#172554'
       ct.textAlign = 'center'
-      ct.fillText(`|A| = ${polar.r.toFixed(2)} u`, midVx + nx * offsetDist, midVy - ny * offsetDist)
+      ct.fillText(`|A⃗| = ${polar.r.toFixed(2)} u`, midVx + nx * offsetDist, midVy - ny * offsetDist)
     }
 
-    // Punto interactivo de agarre en la punta
-    ct.fillStyle = isDragging.current ? '#ffffff' : 'rgba(255, 255, 255, 0.85)'
+    // Asa de arrastre en la punta
+    ct.fillStyle = isDragging.current ? '#c8a932' : '#ffffff'
     ct.beginPath()
-    ct.arc(vx, vy, isDragging.current ? 7 : 5, 0, Math.PI * 2)
+    ct.arc(vx, vy, isDragging.current ? 7 : 5.5, 0, Math.PI * 2)
     ct.fill()
-    ct.strokeStyle = '#080808'
-    ct.lineWidth = 2
+    ct.strokeStyle = '#24346c'
+    ct.lineWidth = 2.5
     ct.stroke()
-
   }, [ctx, size, coords, polar, scale, showCompass, showProjections, showArcs])
 
   useEffect(() => {
@@ -368,7 +370,6 @@ export default function VectorRepresentation() {
     const vx = cx + coords.x * scale
     const vy = cy - coords.y * scale
 
-    // Si toca cerca de la punta o en cualquier punto del canvas al hacer click
     if (Math.hypot(px - vx, py - vy) < 28 || e.buttons === 1) {
       isDragging.current = true
       canvas.setPointerCapture(e.pointerId)
@@ -415,19 +416,16 @@ export default function VectorRepresentation() {
     let isCorrect = false
 
     if (currentChallenge.sourceMode === 'rectangular') {
-      // El alumno debe ingresar forma Polar: v1 = r, v2 = theta
       const expectedR = currentChallenge.polar.r
       const expectedTheta = currentChallenge.polar.thetaDeg
       const diffR = Math.abs(v1 - expectedR)
       const diffTheta = Math.abs(normalizeAngleDeg(v2) - expectedTheta)
       isCorrect = diffR <= 0.25 && (diffTheta <= 1.5 || Math.abs(diffTheta - 360) <= 1.5)
     } else if (currentChallenge.sourceMode === 'polar') {
-      // El alumno debe ingresar forma Rectangular: v1 = x, v2 = y
       const expectedX = currentChallenge.rect.x
       const expectedY = currentChallenge.rect.y
       isCorrect = Math.abs(v1 - expectedX) <= 0.25 && Math.abs(v2 - expectedY) <= 0.25
     } else {
-      // Origen geográfico -> alumno ingresa polar o rect: validamos magnitud y ángulo
       const expectedR = currentChallenge.polar.r
       const expectedTheta = currentChallenge.polar.thetaDeg
       const diffR = Math.abs(v1 - expectedR)
@@ -439,7 +437,7 @@ export default function VectorRepresentation() {
       setPracticeScore((prev) => ({ correct: prev.correct + 1, total: prev.total + 1 }))
       setChallengeFeedback({
         status: 'success',
-        message: '¡Excelente! Tu respuesta es correcta con alta precisión matemática.',
+        message: '¡Excelente! Tu respuesta es matemáticamente correcta.',
       })
     } else {
       setPracticeScore((prev) => ({ correct: prev.correct, total: prev.total + 1 }))
@@ -450,7 +448,6 @@ export default function VectorRepresentation() {
     }
   }
 
-  // Desgloses didácticos
   const rectToPolExplanation = explainRectangularToPolar(coords.x, coords.y)
   const polToRectExplanation = explainPolarToRectangular(polar.r, polar.thetaDeg)
 
@@ -467,18 +464,18 @@ export default function VectorRepresentation() {
           onPointerCancel={handlePointerUp}
         />
 
-        {/* HUD Overlay en esquina superior izquierda */}
+        {/* HUD Telemetry Overlay */}
         <div className={styles.canvasOverlay}>
-          <span className={styles.overlayTitle}>Coordenadas Actuales</span>
+          <span className={styles.overlayTitle}>Telemetría Vectorial</span>
           <span className={styles.overlayValue}>
-            A = ({coords.x.toFixed(2)}, {coords.y.toFixed(2)}) u
+            A⃗ = ({coords.x.toFixed(2)}, {coords.y.toFixed(2)}) u
           </span>
           <span className={styles.overlaySub}>
-            |A| = {polar.r.toFixed(2)} u &nbsp;|&nbsp; θ = {polar.thetaDeg.toFixed(1)}° &nbsp;|&nbsp; {geo.canonicalText}
+            |A⃗| = {polar.r.toFixed(2)} u &nbsp;|&nbsp; θ = {polar.thetaDeg.toFixed(1)}° &nbsp;|&nbsp; {geo.canonicalText}
           </span>
         </div>
 
-        {/* Controles de Canvas en esquina inferior derecha */}
+        {/* Canvas Toolbar Buttons */}
         <div className={styles.canvasControls}>
           <button
             className={styles.canvasBtn}
@@ -495,71 +492,75 @@ export default function VectorRepresentation() {
             - Zoom
           </button>
           <button
-            className={styles.canvasBtn}
+            className={`${styles.canvasBtn} ${showProjections ? styles.canvasBtnActive : ''}`}
             onClick={() => setShowProjections((v) => !v)}
             title="Alternar proyecciones ortogonales"
           >
-            {showProjections ? 'Ocultar Ax/Ay' : 'Ver Ax/Ay'}
+            Proyecciones
           </button>
           <button
-            className={styles.canvasBtn}
+            className={`${styles.canvasBtn} ${showArcs ? styles.canvasBtnActive : ''}`}
             onClick={() => setShowArcs((v) => !v)}
             title="Alternar arcos de ángulo"
           >
-            {showArcs ? 'Ocultar Arcos' : 'Ver Arcos'}
+            Ángulo θ
           </button>
           <button
-            className={styles.canvasBtn}
+            className={`${styles.canvasBtn} ${showCompass ? styles.canvasBtnActive : ''}`}
             onClick={() => setShowCompass((v) => !v)}
             title="Alternar rosa de los vientos"
           >
-            {showCompass ? 'Ocultar Brújula' : 'Ver Brújula'}
+            Brújula
           </button>
         </div>
       </div>
 
-      {/* ── Selector de Modo de Entrada ──────────────────────── */}
+      {/* ── Mode Selection Navigation Tabs ───────────────────── */}
       <div className={styles.tabsContainer}>
         <button
           className={`${styles.tabBtn} ${activeTab === 'rectangular' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('rectangular')}
         >
-          <span>⊞</span> Rectangular (x, y)
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>grid_view</span>
+          Rectangular (x, y)
         </button>
         <button
           className={`${styles.tabBtn} ${activeTab === 'polar' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('polar')}
         >
-          <span>⊙</span> Polar (r, θ)
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>adjust</span>
+          Polar (r, θ)
         </button>
         <button
           className={`${styles.tabBtn} ${activeTab === 'geographic' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('geographic')}
         >
-          <span>🧭</span> Geográfico (Rumbo)
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>explore</span>
+          Geográfico (Rumbo)
         </button>
         <button
           className={`${styles.tabBtn} ${activeTab === 'practice' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('practice')}
         >
-          <span>📝</span> Práctica y Retos
-          <span className={styles.practiceBadge}>TEST</span>
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>quiz</span>
+          Modo Práctica
+          <span className={styles.practiceBadge}>EVAL</span>
         </button>
       </div>
 
-      {/* ── Paneles Principales: Entrada y Conversión en Vivo ── */}
+      {/* ── Main Parameter & Conversion Panels ───────────────── */}
       {activeTab !== 'practice' ? (
         <div className={styles.panelGrid}>
-          {/* Panel Izquierdo: Entrada Activa */}
+          {/* Left Panel: Active Input Controls */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <span className={styles.cardTitle}>
-                {activeTab === 'rectangular' && 'Edición en Coordenadas Rectangulares'}
-                {activeTab === 'polar' && 'Edición en Coordenadas Polares'}
-                {activeTab === 'geographic' && 'Edición en Coordenadas Geográficas'}
+                {activeTab === 'rectangular' && 'Control de Coordenadas Rectangulares'}
+                {activeTab === 'polar' && 'Control de Coordenadas Polares'}
+                {activeTab === 'geographic' && 'Control de Coordenadas Geográficas'}
               </span>
-              <span style={{ fontSize: '11px', color: 'var(--gray-500)', fontFamily: 'var(--font-mono)' }}>
-                Arrastra la punta o usa los controles
+              <span className={styles.cardHint}>
+                Arrastra el vector o ajusta los parámetros
               </span>
             </div>
 
@@ -568,8 +569,8 @@ export default function VectorRepresentation() {
               <div className={styles.inputGroup}>
                 <div className={styles.inputRow}>
                   <div className={styles.labelRow}>
-                    <span>Componente Ax (horizontal)</span>
-                    <span>{coords.x.toFixed(2)} u</span>
+                    <span className={styles.paramName}>Componente Ax (horizontal / i)</span>
+                    <span className={styles.paramVal}>{coords.x.toFixed(2)} u</span>
                   </div>
                   <div className={styles.sliderRow}>
                     <input
@@ -593,8 +594,8 @@ export default function VectorRepresentation() {
 
                 <div className={styles.inputRow}>
                   <div className={styles.labelRow}>
-                    <span>Componente Ay (vertical)</span>
-                    <span>{coords.y.toFixed(2)} u</span>
+                    <span className={styles.paramName}>Componente Ay (vertical / j)</span>
+                    <span className={styles.paramVal}>{coords.y.toFixed(2)} u</span>
                   </div>
                   <div className={styles.sliderRow}>
                     <input
@@ -623,8 +624,8 @@ export default function VectorRepresentation() {
               <div className={styles.inputGroup}>
                 <div className={styles.inputRow}>
                   <div className={styles.labelRow}>
-                    <span>Módulo / Magnitud (r)</span>
-                    <span>{polar.r.toFixed(2)} u</span>
+                    <span className={styles.paramName}>Módulo / Magnitud (r)</span>
+                    <span className={styles.paramVal}>{polar.r.toFixed(2)} u</span>
                   </div>
                   <div className={styles.sliderRow}>
                     <input
@@ -649,8 +650,8 @@ export default function VectorRepresentation() {
 
                 <div className={styles.inputRow}>
                   <div className={styles.labelRow}>
-                    <span>Ángulo polar (θ respecto a +X)</span>
-                    <span>{polar.thetaDeg.toFixed(1)}°</span>
+                    <span className={styles.paramName}>Ángulo polar (θ respecto a +X)</span>
+                    <span className={styles.paramVal}>{polar.thetaDeg.toFixed(1)}°</span>
                   </div>
                   <div className={styles.sliderRow}>
                     <input
@@ -681,8 +682,8 @@ export default function VectorRepresentation() {
               <div className={styles.inputGroup}>
                 <div className={styles.inputRow}>
                   <div className={styles.labelRow}>
-                    <span>Magnitud del Vector</span>
-                    <span>{polar.r.toFixed(2)} u</span>
+                    <span className={styles.paramName}>Magnitud del Vector (r)</span>
+                    <span className={styles.paramVal}>{polar.r.toFixed(2)} u</span>
                   </div>
                   <div className={styles.sliderRow}>
                     <input
@@ -711,8 +712,8 @@ export default function VectorRepresentation() {
 
                 <div className={styles.inputRow}>
                   <div className={styles.labelRow}>
-                    <span>Rumbo Geográfico (Puntos Cardinales)</span>
-                    <span>
+                    <span className={styles.paramName}>Rumbo Geográfico</span>
+                    <span className={styles.paramVal}>
                       {geoPrimary} {geoAngle.toFixed(1)}° {geoSecondary}
                     </span>
                   </div>
@@ -748,46 +749,44 @@ export default function VectorRepresentation() {
                         handleGeoChange(polar.r, geoPrimary, geoAngle, e.target.value as CardinalSecondary)
                       }
                     >
-                      <option value="E">Hacia el Este (E)</option>
-                      <option value="O">Hacia el Oeste (O)</option>
+                      <option value="E">Este (E)</option>
+                      <option value="O">Oeste (O)</option>
                     </select>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Presets Rápidos Didácticos */}
+            {/* Presets Rápidos */}
             <div className={styles.presetsRow}>
-              <span style={{ fontSize: '10px', color: 'var(--gray-500)', width: '100%', fontFamily: 'var(--font-mono)' }}>
-                Vectores de Referencia:
-              </span>
+              <span className={styles.presetsTitle}>Vectores de Referencia:</span>
               <button className={styles.presetBtn} onClick={() => handleRectChange(3, 4)}>
-                (3, 4) — Clásico 5 u
+                (3, 4) — 5 u
               </button>
               <button className={styles.presetBtn} onClick={() => handleRectChange(-4, 3)}>
-                (-4, 3) — Cuadrante II
+                (-4, 3) — Cuad. II
               </button>
               <button className={styles.presetBtn} onClick={() => handleRectChange(-5, -5)}>
-                (-5, -5) — Cuadrante III
+                (-5, -5) — Cuad. III
               </button>
               <button className={styles.presetBtn} onClick={() => handleRectChange(6, -8)}>
-                (6, -8) — Cuadrante IV
+                (6, -8) — Cuad. IV
               </button>
               <button className={styles.presetBtn} onClick={() => handleRectChange(10, 0)}>
-                10 u al Este
+                10 u Este
               </button>
               <button className={styles.presetBtn} onClick={() => handleRectChange(0, 10)}>
-                10 u al Norte
+                10 u Norte
               </button>
             </div>
           </div>
 
-          {/* Panel Derecho: Visualización Simultánea de las 3 Formas */}
+          {/* Right Panel: Simultaneous Coordinate Forms */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <span className={styles.cardTitle}>Conversión Simultánea de Coordenadas</span>
-              <span style={{ fontSize: '11px', color: 'var(--gray-400)', fontFamily: 'var(--font-mono)' }}>
-                Cuadrante: {geo.quadrant}
+              <span className={styles.cuadranteBadge}>
+                {geo.quadrant}
               </span>
             </div>
 
@@ -797,26 +796,26 @@ export default function VectorRepresentation() {
                 className={`${styles.readoutCard} ${activeTab === 'rectangular' ? styles.readoutActive : ''}`}
               >
                 <div className={styles.readoutHeader}>
-                  <span>Forma Rectangular</span>
-                  {activeTab === 'rectangular' && <span className={styles.readoutBadge}>ORIGEN</span>}
+                  <span className={styles.readoutType}>Forma Rectangular</span>
+                  {activeTab === 'rectangular' && <span className={styles.readoutBadge}>EDITANDO</span>}
                 </div>
                 <div className={styles.readoutMain}>
-                  A = ({coords.x.toFixed(2)}, {coords.y.toFixed(2)})
+                  A⃗ = ({coords.x.toFixed(2)}, {coords.y.toFixed(2)})
                 </div>
                 <div className={styles.readoutDetails}>
-                  <span>Ax = {coords.x.toFixed(2)} u (i)</span>
-                  <span>Ay = {coords.y.toFixed(2)} u (j)</span>
+                  <span>Ax = {coords.x.toFixed(2)} u (î)</span>
+                  <span>Ay = {coords.y.toFixed(2)} u (ĵ)</span>
                 </div>
               </div>
 
               {/* Tarjeta Polar */}
               <div className={`${styles.readoutCard} ${activeTab === 'polar' ? styles.readoutActive : ''}`}>
                 <div className={styles.readoutHeader}>
-                  <span>Forma Polar</span>
-                  {activeTab === 'polar' && <span className={styles.readoutBadge}>ORIGEN</span>}
+                  <span className={styles.readoutType}>Forma Polar</span>
+                  {activeTab === 'polar' && <span className={styles.readoutBadge}>EDITANDO</span>}
                 </div>
                 <div className={styles.readoutMain}>
-                  A = ({polar.r.toFixed(2)} u ; {polar.thetaDeg.toFixed(1)}°)
+                  A⃗ = ({polar.r.toFixed(2)} u ; {polar.thetaDeg.toFixed(1)}°)
                 </div>
                 <div className={styles.readoutDetails}>
                   <span>Módulo (r) = {polar.r.toFixed(2)} u</span>
@@ -829,8 +828,8 @@ export default function VectorRepresentation() {
                 className={`${styles.readoutCard} ${activeTab === 'geographic' ? styles.readoutActive : ''}`}
               >
                 <div className={styles.readoutHeader}>
-                  <span>Forma Geográfica</span>
-                  {activeTab === 'geographic' && <span className={styles.readoutBadge}>ORIGEN</span>}
+                  <span className={styles.readoutType}>Forma Geográfica</span>
+                  {activeTab === 'geographic' && <span className={styles.readoutBadge}>EDITANDO</span>}
                 </div>
                 <div className={styles.readoutMain}>
                   {geo.canonicalText}
@@ -842,27 +841,29 @@ export default function VectorRepresentation() {
               </div>
             </div>
 
-            {/* Toggle de Desglose Matemático Paso a Paso */}
+            {/* Toggle de Desglose Matemático */}
             <button className={styles.toggleMathBtn} onClick={() => setShowMath((v) => !v)}>
-              <span>{showMath ? '▲ Ocultar' : '▼ Ver'}</span>
-              <span>desglose matemático paso a paso con fórmulas</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                {showMath ? 'expand_less' : 'expand_more'}
+              </span>
+              <span>Desglose analítico paso a paso</span>
             </button>
 
             {showMath && (
               <div className={styles.mathPanel}>
                 <div className={styles.mathStep}>
-                  <span style={{ color: 'var(--gray-400)', fontSize: '11px' }}>1. Cálculo del Módulo (Pitágoras):</span>
-                  <span className={styles.mathFormula}>{rectToPolExplanation.magnitudeStep}</span>
+                  <span className={styles.mathStepTitle}>1. Teorema de Pitágoras (Módulo):</span>
+                  <code className={styles.mathFormula}>{rectToPolExplanation.magnitudeStep}</code>
                 </div>
                 <div className={styles.mathStep}>
-                  <span style={{ color: 'var(--gray-400)', fontSize: '11px' }}>2. Cálculo del Ángulo Polar (Trigonometría):</span>
-                  <span style={{ color: 'var(--gray-300)', fontSize: '11px' }}>{rectToPolExplanation.quadrantStep}</span>
-                  <span className={styles.mathFormula}>{rectToPolExplanation.angleStep}</span>
+                  <span className={styles.mathStepTitle}>2. Trigonometría (Ángulo Polar):</span>
+                  <span className={styles.mathStepDesc}>{rectToPolExplanation.quadrantStep}</span>
+                  <code className={styles.mathFormula}>{rectToPolExplanation.angleStep}</code>
                 </div>
                 <div className={styles.mathStep}>
-                  <span style={{ color: 'var(--gray-400)', fontSize: '11px' }}>3. Componentes Cartesianas Inversas:</span>
-                  <span className={styles.mathFormula}>{polToRectExplanation.xStep}</span>
-                  <span className={styles.mathFormula}>{polToRectExplanation.yStep}</span>
+                  <span className={styles.mathStepTitle}>3. Componentes Cartesianas Inversas:</span>
+                  <code className={styles.mathFormula}>{polToRectExplanation.xStep}</code>
+                  <code className={styles.mathFormula}>{polToRectExplanation.yStep}</code>
                 </div>
               </div>
             )}
@@ -872,48 +873,57 @@ export default function VectorRepresentation() {
         /* ── MODO PRÁCTICA Y RETOS INTERACTIVOS ─────────────── */
         <div className={styles.practiceCard}>
           <div className={styles.scoreBanner}>
-            <span>PRÁCTICA EVALUATIVA DE CONVERSIÓN DE VECTORES</span>
-            <span>
-              Aciertos: <strong>{practiceScore.correct}</strong> de <strong>{practiceScore.total}</strong> (
-              {practiceScore.total > 0
-                ? Math.round((practiceScore.correct / practiceScore.total) * 100)
-                : 0}
-              %)
-            </span>
+            <div className={styles.scoreTitleRow}>
+              <span className="material-symbols-outlined" style={{ color: 'var(--corporate)' }}>
+                military_tech
+              </span>
+              <span className={styles.scoreTitle}>EVALUACIÓN INTERACTIVA DE CONVERSIÓN VECTORIAL</span>
+            </div>
+            <div className={styles.scoreStats}>
+              <span>
+                Puntaje: <strong>{practiceScore.correct}</strong> / <strong>{practiceScore.total}</strong>
+              </span>
+              <span className={styles.scorePercent}>
+                ({practiceScore.total > 0
+                  ? Math.round((practiceScore.correct / practiceScore.total) * 100)
+                  : 0}
+                %)
+              </span>
+            </div>
           </div>
 
           {currentChallenge && (
             <>
               <div className={styles.challengePrompt}>
                 <span className={styles.promptTitle}>
-                  Reto Activo: Se te proporciona el siguiente vector en forma{' '}
+                  Vector de Prueba (Forma{' '}
                   {currentChallenge.sourceMode === 'rectangular' && 'RECTANGULAR'}
                   {currentChallenge.sourceMode === 'polar' && 'POLAR'}
-                  {currentChallenge.sourceMode === 'geographic' && 'GEOGRÁFICA'}
+                  {currentChallenge.sourceMode === 'geographic' && 'GEOGRÁFICA'}):
                 </span>
-                <span className={styles.promptGiven}>
+                <div className={styles.promptGiven}>
                   {currentChallenge.sourceMode === 'rectangular' &&
-                    `A = (${currentChallenge.rect.x.toFixed(2)}, ${currentChallenge.rect.y.toFixed(2)}) u`}
+                    `A⃗ = (${currentChallenge.rect.x.toFixed(2)}, ${currentChallenge.rect.y.toFixed(2)}) u`}
                   {currentChallenge.sourceMode === 'polar' &&
-                    `A = (${currentChallenge.polar.r.toFixed(2)} u ; ${currentChallenge.polar.thetaDeg.toFixed(1)}°)`}
+                    `A⃗ = (${currentChallenge.polar.r.toFixed(2)} u ; ${currentChallenge.polar.thetaDeg.toFixed(1)}°)`}
                   {currentChallenge.sourceMode === 'geographic' &&
-                    `A = ${currentChallenge.geo.canonicalText}`}
-                </span>
-                <span style={{ fontSize: '11px', color: 'var(--gray-400)', fontFamily: 'var(--font-mono)' }}>
+                    `A⃗ = ${currentChallenge.geo.canonicalText}`}
+                </div>
+                <p className={styles.promptInstruction}>
                   {currentChallenge.sourceMode === 'rectangular' &&
-                    'Convierte e ingresa sus coordenadas POLARES (Magnitud r y Ángulo θ en grados):'}
+                    'Calcula y escribe las coordenadas POLARES (Magnitud r y Ángulo θ en grados):'}
                   {currentChallenge.sourceMode === 'polar' &&
-                    'Convierte e ingresa sus componentes RECTANGULARES (Ax horizontal y Ay vertical):'}
+                    'Calcula y escribe las componentes RECTANGULARES (Ax horizontal y Ay vertical):'}
                   {currentChallenge.sourceMode === 'geographic' &&
-                    'Convierte e ingresa sus coordenadas POLARES (Magnitud r y Ángulo θ en grados):'}
-                </span>
+                    'Calcula y escribe las coordenadas POLARES (Magnitud r y Ángulo θ en grados):'}
+                </p>
               </div>
 
               <div className={styles.practiceInputs}>
                 <div className={styles.inputRow}>
                   <label className={styles.labelRow}>
-                    <span>
-                      {currentChallenge.sourceMode === 'polar' ? 'Componente Ax' : 'Módulo r (u)'}
+                    <span className={styles.paramName}>
+                      {currentChallenge.sourceMode === 'polar' ? 'Componente Ax (u)' : 'Módulo r (u)'}
                     </span>
                   </label>
                   <input
@@ -921,7 +931,7 @@ export default function VectorRepresentation() {
                     step="0.01"
                     placeholder="Ej. 5.00"
                     className={styles.numInput}
-                    style={{ width: '100%', textAlign: 'left', padding: '8px' }}
+                    style={{ width: '100%', textAlign: 'left', padding: '8px 12px' }}
                     value={userAnswer.val1}
                     onChange={(e) => setUserAnswer((prev) => ({ ...prev, val1: e.target.value }))}
                   />
@@ -929,8 +939,8 @@ export default function VectorRepresentation() {
 
                 <div className={styles.inputRow}>
                   <label className={styles.labelRow}>
-                    <span>
-                      {currentChallenge.sourceMode === 'polar' ? 'Componente Ay' : 'Ángulo polar θ (°)'}
+                    <span className={styles.paramName}>
+                      {currentChallenge.sourceMode === 'polar' ? 'Componente Ay (u)' : 'Ángulo θ (°)'}
                     </span>
                   </label>
                   <input
@@ -938,25 +948,28 @@ export default function VectorRepresentation() {
                     step="0.01"
                     placeholder="Ej. 53.13"
                     className={styles.numInput}
-                    style={{ width: '100%', textAlign: 'left', padding: '8px' }}
+                    style={{ width: '100%', textAlign: 'left', padding: '8px 12px' }}
                     value={userAnswer.val2}
                     onChange={(e) => setUserAnswer((prev) => ({ ...prev, val2: e.target.value }))}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <button className={styles.actionBtn} onClick={verifyChallengeAnswer}>
-                  Comprobar Respuesta
+              <div className={styles.practiceActions}>
+                <button className="btn btn--primary" onClick={verifyChallengeAnswer}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
+                  Verificar Respuesta
                 </button>
-                <button className={styles.secondaryBtn} onClick={generateNewChallenge}>
-                  Siguiente Reto →
+                <button className="btn btn--secondary" onClick={generateNewChallenge}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>shuffle</span>
+                  Siguiente Reto
                 </button>
                 <button
-                  className={styles.secondaryBtn}
+                  className="btn btn--ghost"
                   onClick={() => setShowChallengeSolution((v) => !v)}
                 >
-                  {showChallengeSolution ? 'Ocultar Solución' : 'Ver Solución Paso a Paso'}
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>visibility</span>
+                  {showChallengeSolution ? 'Ocultar Solución' : 'Ver Solución'}
                 </button>
               </div>
 
@@ -977,24 +990,24 @@ export default function VectorRepresentation() {
 
               {showChallengeSolution && (
                 <div className={styles.mathPanel}>
-                  <span style={{ fontWeight: 600, color: 'var(--white)' }}>Solución Completa del Reto:</span>
+                  <span className={styles.solutionHeader}>Solución Completa del Reto:</span>
                   <div className={styles.mathStep}>
-                    <span>Forma Rectangular:</span>
-                    <span className={styles.mathFormula}>
+                    <span className={styles.mathStepTitle}>Forma Rectangular:</span>
+                    <code className={styles.mathFormula}>
                       Ax = {currentChallenge.rect.x.toFixed(2)} u &nbsp;|&nbsp; Ay ={' '}
                       {currentChallenge.rect.y.toFixed(2)} u
-                    </span>
+                    </code>
                   </div>
                   <div className={styles.mathStep}>
-                    <span>Forma Polar:</span>
-                    <span className={styles.mathFormula}>
+                    <span className={styles.mathStepTitle}>Forma Polar:</span>
+                    <code className={styles.mathFormula}>
                       r = {currentChallenge.polar.r.toFixed(2)} u &nbsp;|&nbsp; θ ={' '}
                       {currentChallenge.polar.thetaDeg.toFixed(2)}°
-                    </span>
+                    </code>
                   </div>
                   <div className={styles.mathStep}>
-                    <span>Forma Geográfica:</span>
-                    <span className={styles.mathFormula}>{currentChallenge.geo.canonicalText}</span>
+                    <span className={styles.mathStepTitle}>Forma Geográfica:</span>
+                    <code className={styles.mathFormula}>{currentChallenge.geo.canonicalText}</code>
                   </div>
                 </div>
               )}
@@ -1006,9 +1019,6 @@ export default function VectorRepresentation() {
   )
 }
 
-/**
- * Función auxiliar para dibujar una flecha vectorial limpia con punta estilizada
- */
 function drawArrow(
   ct: CanvasRenderingContext2D,
   fromX: number,
@@ -1018,7 +1028,7 @@ function drawArrow(
   color: string,
   lineWidth: number
 ) {
-  const headLen = 14
+  const headLen = 12
   const angle = Math.atan2(toY - fromY, toX - fromX)
 
   ct.strokeStyle = color
@@ -1026,13 +1036,11 @@ function drawArrow(
   ct.lineWidth = lineWidth
   ct.lineCap = 'round'
 
-  // Línea del tallo
   ct.beginPath()
   ct.moveTo(fromX, fromY)
   ct.lineTo(toX, toY)
   ct.stroke()
 
-  // Cabeza de la flecha
   ct.beginPath()
   ct.moveTo(toX, toY)
   ct.lineTo(
