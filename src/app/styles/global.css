@@ -163,8 +163,6 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Compensa la TopBar fija */
-  padding-top: var(--header-h);
   padding-bottom: calc(var(--safe-bottom) + 68px); /* Espacio para bottom nav en móvil */
 }
 
