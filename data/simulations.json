@@ -73,13 +73,13 @@
   },
   {
     "id": "sim-013",
-    "slug": "alcances-encuentros",
-    "titulo": "Alcances y Encuentros en MRU",
-    "descripcionCorta": "Simulación 1D de móviles en persecución o sentidos opuestos con resolución analítica y gráfica.",
+    "slug": "alcances-mru",
+    "titulo": "Alcances y Encuentros MRU",
+    "descripcionCorta": "Simulación 1D de móviles en persecución o sentidos opuestos con resolución analítica y escala dinámica.",
     "categoriaId": "mecanica",
     "dificultad": "basico",
     "estado": "active",
-    "orden": 6,
+    "orden": 5,
     "icono": "compare_arrows",
     "etiquetas": ["cinemática", "MRU", "alcance", "encuentro", "gráficas", "tiempo"]
   },

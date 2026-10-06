@@ -19,7 +19,8 @@ const FORMULA_PREVIEWS: Record<string, string> = {
   'suma-vectores': 'R⃗ = A⃗ + B⃗ = √(Rx² + Ry²)',
   'distancia-desplazamiento': 'd = Σ|Δs|  vs  Δr⃗ = r⃗_f - r⃗_i',
   'velocidad-rapidez': 'v_med = Δr⃗/Δt  vs  r = d/Δt',
-  'alcances-encuentros': 'x₁(t) = x₂(t) ⇒ t_encuentro',
+  'alcances-mru': 'x(t) = x₀ + v·t  ⇒  t_encuentro',
+  'alcances-encuentros': 'x(t) = x₀ + v·t  ⇒  t_encuentro',
 }
 
 export default function SimulationCard({ simulation, index = 0 }: Props) {
