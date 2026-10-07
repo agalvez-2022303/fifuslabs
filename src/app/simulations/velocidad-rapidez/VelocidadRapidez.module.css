@@ -28,7 +28,14 @@
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  flex-wrap: wrap;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.presetGroup::-webkit-scrollbar {
+  display: none;
 }
 
 .presetLabel {
@@ -41,10 +48,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .presetBtn {
   padding: 6px 12px;
+  min-height: 38px;
   border-radius: var(--radius-md);
   font-size: var(--text-xs);
   font-family: var(--font-mono);
@@ -54,6 +63,9 @@
   border: 1px solid var(--border);
   background: var(--surface-alt);
   color: var(--text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  touch-action: manipulation;
 }
 
 .presetBtn:hover {
@@ -194,12 +206,18 @@
 
 .telemetryGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--sp-2);
   padding: var(--sp-3);
   background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+}
+
+@media (min-width: 600px) {
+  .telemetryGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .telemetryCol {

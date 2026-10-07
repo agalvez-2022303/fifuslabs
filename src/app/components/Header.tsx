@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BottomNav from './BottomNav'
 import styles from './Header.module.css'
 
 export default function Header(): JSX.Element {
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [temasOpen, setTemasOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
+  const navigate = useNavigate()
   const currentPath = location.pathname
 
-  const navLinks = [
-    { label: 'Dashboard', path: '/', icon: 'dashboard' },
+  const temaLinks = [
     { label: 'Alcances y Encuentros MRU', path: '/tema/alcances-mru', icon: 'compare_arrows' },
     { label: 'Vectores', path: '/tema/vectores', icon: 'near_me' },
     { label: 'Suma de Vectores', path: '/tema/suma-vectores', icon: 'add_circle' },
@@ -19,33 +21,65 @@ export default function Header(): JSX.Element {
     { label: 'Tres Fuerzas Equilibrio', path: '/tema/tres-fuerzas-equilibrio', icon: 'balance' },
   ]
 
-  // Cerrar drawer al cambiar de ruta
+  // Cerrar menús al cambiar de ruta
   useEffect(() => {
     setDrawerOpen(false)
+    setTemasOpen(false)
   }, [currentPath])
 
-  // Cerrar con Escape
+  // Cerrar dropdown al hacer clic afuera o presionar Escape
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setDrawerOpen(false)
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setTemasOpen(false)
+      }
     }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setDrawerOpen(false)
+        setTemasOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
+
+  // Bloquear scroll del fondo con drawer móvil abierto
+  useEffect(() => {
     if (drawerOpen) {
-      document.addEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = 'hidden' // Evitar scroll del fondo
+      document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
     }
     return () => {
-      document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = ''
     }
   }, [drawerOpen])
+
+  const handleSearchClick = () => {
+    if (currentPath === '/') {
+      const searchInput = document.getElementById('search-simulations') as HTMLInputElement | null
+      if (searchInput) {
+        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        searchInput.focus()
+      }
+    } else {
+      navigate('/?buscar=1#search-simulations')
+    }
+  }
+
+  const isInicioActive = currentPath === '/'
+  const isAnyTemaActive = currentPath.startsWith('/tema/')
 
   return (
     <>
       <header className={styles.header}>
         <div className={styles.inner}>
-          {/* Brand & Version */}
+          {/* Brand & Logo */}
           <div className={styles.brandGroup}>
             <Link to="/" className={styles.logo} aria-label="FísicaLab Inicio">
               <div className={styles.logoIconBox}>
@@ -61,37 +95,80 @@ export default function Header(): JSX.Element {
             </Link>
           </div>
 
-          {/* Desktop Global Navigation Bar */}
+          {/* Desktop Global Navigation */}
           <nav className={styles.navBar} aria-label="Navegación principal">
-            {navLinks.slice(0, 7).map(link => {
-              const isActive = link.path === '/'
-                ? currentPath === '/'
-                : currentPath.startsWith(link.path) || (link.path === '/tema/alcances-mru' && currentPath.includes('alcances'))
-              return (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}
-                >
-                  {link.path === '/' && (
-                    <span className={`material-symbols-outlined ${styles.navIcon}`}>dashboard</span>
-                  )}
-                  <span>{link.label}</span>
-                </Link>
-              )
-            })}
-          </nav>
+            <Link
+              to="/"
+              className={`${styles.navLink} ${isInicioActive ? styles.navLinkActive : ''}`}
+            >
+              <span className={`material-symbols-outlined ${styles.navIcon}`}>home</span>
+              <span>Inicio</span>
+            </Link>
 
-          {/* Right Telemetry Widget & Mobile Hamburger */}
-          <div className={styles.telemetryGroup}>
-            <div className={styles.telemetryBadge}>
-              <span className={styles.pulseDot} />
-              <span className={styles.fpsText}>60.0 FPS</span>
-              <span className={styles.telemetryDivider}>|</span>
-              <span className={styles.precisionText}>IEEE 754</span>
+            {/* Dropdown Menu Temas */}
+            <div className={styles.dropdownWrap} ref={dropdownRef}>
+              <button
+                type="button"
+                className={`${styles.navLink} ${styles.dropdownTrigger} ${isAnyTemaActive ? styles.navLinkActive : ''}`}
+                onClick={() => setTemasOpen(!temasOpen)}
+                aria-expanded={temasOpen}
+                aria-haspopup="true"
+              >
+                <span className={`material-symbols-outlined ${styles.navIcon}`}>topic</span>
+                <span>Temas</span>
+                <span className={`material-symbols-outlined ${styles.arrowIcon} ${temasOpen ? styles.arrowOpen : ''}`}>
+                  expand_more
+                </span>
+              </button>
+
+              {temasOpen && (
+                <div className={styles.dropdownMenu} role="menu">
+                  <div className={styles.dropdownHeader}>Temas disponibles</div>
+                  {temaLinks.map(link => {
+                    const isActive = currentPath.startsWith(link.path) || (link.path === '/tema/alcances-mru' && currentPath.includes('alcances'))
+                    return (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        className={`${styles.dropdownItem} ${isActive ? styles.dropdownItemActive : ''}`}
+                        onClick={() => setTemasOpen(false)}
+                        role="menuitem"
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                          {link.icon}
+                        </span>
+                        <span>{link.label}</span>
+                        {isActive && <span className={styles.activeDot} />}
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* Hamburger Button on Mobile */}
+            {/* Buscar Action */}
+            <button
+              type="button"
+              className={styles.searchBtn}
+              onClick={handleSearchClick}
+              aria-label="Buscar simulaciones"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>search</span>
+              <span>Buscar</span>
+            </button>
+          </nav>
+
+          {/* Mobile Actions */}
+          <div className={styles.rightGroup}>
+            <button
+              type="button"
+              className={styles.searchBtnMobile}
+              onClick={handleSearchClick}
+              aria-label="Buscar simulaciones"
+            >
+              <span className="material-symbols-outlined">search</span>
+            </button>
+
             <button
               type="button"
               className={styles.hamburgerBtn}
@@ -132,10 +209,21 @@ export default function Header(): JSX.Element {
         </div>
 
         <nav className={styles.drawerNavList}>
-          {navLinks.map((link) => {
-            const isActive = link.path === '/'
-              ? currentPath === '/'
-              : currentPath.startsWith(link.path) || (link.path === '/tema/alcances-mru' && currentPath.includes('alcances'))
+          <Link
+            to="/"
+            className={`${styles.drawerNavLink} ${isInicioActive ? styles.drawerNavLinkActive : ''}`}
+            onClick={() => setDrawerOpen(false)}
+          >
+            <span className="material-symbols-outlined" style={{ color: isInicioActive ? 'var(--corporate)' : 'var(--slate-sub)' }}>
+              home
+            </span>
+            <span>Inicio (Dashboard)</span>
+          </Link>
+
+          <div className={styles.drawerSectionDivider}>TEMAS DISPONIBLES</div>
+
+          {temaLinks.map((link) => {
+            const isActive = currentPath.startsWith(link.path) || (link.path === '/tema/alcances-mru' && currentPath.includes('alcances'))
 
             return (
               <Link
@@ -154,18 +242,14 @@ export default function Header(): JSX.Element {
         </nav>
 
         <div className={styles.drawerFooter}>
-          <div className={styles.drawerTelemetry}>
-            <span>Motor Físico:</span>
-            <strong style={{ color: 'var(--corporate)' }}>Float64 (60 FPS)</strong>
-          </div>
-          <div className={styles.drawerTelemetry}>
-            <span>Versión:</span>
-            <span>v2.4 Engine Stitch</span>
+          <div className={styles.drawerFooterText}>
+            <span>FísicaLab v2.4</span>
+            <span>Laboratorio Virtual de Física</span>
           </div>
         </div>
       </aside>
 
-      {/* Bottom Navigation Bar for 1-handed mobile use */}
+      {/* Bottom Navigation Bar */}
       <BottomNav onOpenMenu={() => setDrawerOpen(true)} />
     </>
   )

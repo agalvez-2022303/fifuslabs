@@ -101,16 +101,52 @@
   border-color: var(--corporate) !important;
 }
 
+@media (max-width: 600px) {
+  .canvasOverlay {
+    top: 6px;
+    left: 6px;
+    padding: 4px 8px;
+    max-width: calc(100% - 12px);
+  }
+  .overlayTitle {
+    font-size: 9px;
+  }
+  .overlayValue {
+    font-size: 12px;
+  }
+  .overlaySub {
+    font-size: 10px;
+  }
+  .canvasControls {
+    bottom: 6px;
+    right: 6px;
+    gap: 4px;
+    max-width: 85%;
+    justify-content: flex-end;
+  }
+  .canvasBtn {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+}
+
 /* ─── Mode Tabs ──────────────────────────────────────────────── */
 .tabsContainer {
   display: flex;
-  flex-wrap: wrap;
+  overflow-x: auto;
+  flex-wrap: nowrap;
   gap: 6px;
   background-color: var(--card-bg);
   padding: 6px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-neutral);
   box-shadow: var(--shadow-sm);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabsContainer::-webkit-scrollbar {
+  display: none;
 }
 
 .tabBtn {
@@ -127,6 +163,9 @@
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 40px;
 }
 
 .tabBtn:hover {

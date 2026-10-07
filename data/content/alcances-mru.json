@@ -1,37 +1,47 @@
 {
   "slug": "alcances-mru",
-  "teoria": "En el **Movimiento Rectilíneo Uniforme (MRU)**, la velocidad vectorial de los cuerpos se mantiene constante y la aceleración es nula (a = 0).\n\nCuando dos móviles comparten una misma trayectoria rectilínea unidimensional, se presentan dos fenómenos principales:\n\n**1. Alcance:** Ocurre cuando dos móviles se desplazan en el mismo sentido y el móvil retrasado tiene mayor velocidad (vA > vB).\n\n**2. Encuentro:** Ocurre cuando los dos móviles viajan en sentidos opuestos (uno hacia el otro), reduciendo la distancia que los separa a una rapidez relativa igual a la suma de sus rapideces escalares.",
+  "titulo": "Alcances y Encuentros MRU",
+  "teoria": "¿Qué es?\nEs el estudio cinemático que calcula cuándo y dónde se cruzan o se alcanzan dos móviles que se desplazan en línea recta con velocidad constante.\n\nIdeas clave:\n1. La velocidad de cada móvil es constante y su aceleración es cero.\n2. En un alcance, ambos viajan en el mismo sentido ($v_A > v_B$).\n3. En un encuentro, viajan en sentidos contrarios (uno hacia el otro).\n4. El instante de cruce sucede cuando ambos coinciden en la misma posición ($x_A = x_B$).\n\nEjemplo cotidiano:\nImagina que un auto A viaja a 25 m/s persiguiendo a un autobús B que va a 15 m/s situado 100 m adelante. La diferencia de velocidad es 10 m/s, por lo que el auto tarda 10 segundos (100 / 10) en alcanzarlo a los 250 metros del punto de partida.\n\nErrores comunes:\n- Olvidar asignar signo negativo a la velocidad de un móvil que viaja a la izquierda.\n- Medir las posiciones iniciales desde puntos cero diferentes.\n\nResumen:\nPara resolver alcances y encuentros, escribe la ecuación de posición de cada móvil respecto a un solo origen y resuelve x_A(t) = x_B(t).",
   "formulas": [
     {
-      "nombre": "Ecuación Horaria de Posición",
       "expresion": "x(t) = x_0 + v \\cdot t",
-      "descripcion": "Calcula la posición del móvil en cualquier instante de tiempo.",
+      "descripcion": "Ecuación horaria de posición en MRU",
       "variables": [
-        { "simbolo": "x(t)", "descripcion": "Posición final", "unidad": "m" },
+        { "simbolo": "x(t)", "descripcion": "Posición en el instante t", "unidad": "m" },
         { "simbolo": "x_0", "descripcion": "Posición inicial", "unidad": "m" },
         { "simbolo": "v", "descripcion": "Velocidad constante", "unidad": "m/s" },
-        { "simbolo": "t", "descripcion": "Tiempo", "unidad": "s" }
+        { "simbolo": "t", "descripcion": "Tiempo transcurrido", "unidad": "s" }
       ]
     },
     {
-      "nombre": "Tiempo de Alcance / Encuentro",
-      "expresion": "t = \\frac{x_{B0} - x_{A0}}{v_A - v_B}",
-      "descripcion": "Instante en que ambos móviles coinciden en la misma posición espacial.",
+      "expresion": "t_{\\text{alcance}} = \\frac{x_{B0} - x_{A0}}{v_A - v_B}",
+      "descripcion": "Tiempo de alcance para móviles en el mismo sentido",
       "variables": [
-        { "simbolo": "t", "descripcion": "Tiempo de cruce", "unidad": "s" },
-        { "simbolo": "x_{A0}, x_{B0}", "descripcion": "Posiciones iniciales", "unidad": "m" },
-        { "simbolo": "v_A, v_B", "descripcion": "Velocidades con signo", "unidad": "m/s" }
+        { "simbolo": "t", "descripcion": "Tiempo de alcance", "unidad": "s" },
+        { "simbolo": "x_{B0} - x_{A0}", "descripcion": "Distancia de separación inicial", "unidad": "m" },
+        { "simbolo": "v_A", "descripcion": "Velocidad del perseguidor", "unidad": "m/s" },
+        { "simbolo": "v_B", "descripcion": "Velocidad del perseguido", "unidad": "m/s" }
+      ]
+    },
+    {
+      "expresion": "t_{\\text{encuentro}} = \\frac{d_0}{|v_A| + |v_B|}",
+      "descripcion": "Tiempo de encuentro para móviles en sentidos opuestos",
+      "variables": [
+        { "simbolo": "t", "descripcion": "Tiempo de encuentro", "unidad": "s" },
+        { "simbolo": "d_0", "descripcion": "Separación inicial", "unidad": "m" },
+        { "simbolo": "v_A, v_B", "descripcion": "Rapideces de cada móvil", "unidad": "m/s" }
       ]
     }
   ],
-  "unidades": [
-    { "magnitud": "Posición", "unidad": "metro", "simbolo": "m" },
-    { "magnitud": "Tiempo", "unidad": "segundo", "simbolo": "s" },
-    { "magnitud": "Velocidad", "unidad": "metro por segundo", "simbolo": "m/s" }
-  ],
   "glosario": [
-    { "termino": "Móvil", "definicion": "Cuerpo puntual idealizado en movimiento." },
-    { "termino": "Alcance", "definicion": "Cruce entre móviles que se desplazan en el mismo sentido." },
-    { "termino": "Encuentro", "definicion": "Cruce entre móviles que se desplazan en sentidos opuestos." }
+    { "termino": "Alcance", "definicion": "Situación donde un móvil posterior más rápido atrapa a uno delantero en su mismo sentido." },
+    { "termino": "Desplazamiento", "definicion": "Cambio neto de posición desde el punto inicial hasta el final." },
+    { "termino": "Encuentro", "definicion": "Cruzamiento de dos móviles que se mueven en sentidos contrarios." },
+    { "termino": "Movimiento Rectilíneo Uniforme (MRU)", "definicion": "Movimiento en línea recta con velocidad constante y aceleración cero." },
+    { "termino": "Móvil", "definicion": "Objeto en movimiento representado como una partícula puntual." },
+    { "termino": "Origen de Coordenadas", "definicion": "Punto de referencia fijo (x = 0 m) desde donde se miden las distancias." },
+    { "termino": "Posición (x)", "definicion": "Ubicación exacta de un objeto en una recta en un instante de tiempo." },
+    { "termino": "Rapidez", "definicion": "Valor numérico de la velocidad sin tomar en cuenta la dirección." },
+    { "termino": "Velocidad (v)", "definicion": "Magnitud que indica la rapidez y el sentido del movimiento." }
   ]
 }

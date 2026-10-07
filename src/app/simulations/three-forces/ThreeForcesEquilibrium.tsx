@@ -194,24 +194,24 @@ export default function ThreeForcesEquilibrium() {
     ct.font = '700 10px "JetBrains Mono", monospace'
     ct.fillStyle = '#475569'
     ct.textAlign = 'left'
-    ct.fillText(`α₁ = ${Math.abs(ang1).toFixed(1)}°`, 14, H - 36)
-    ct.fillText(`α₂ = ${Math.abs(ang2).toFixed(1)}°`, 14, H - 20)
+    ct.fillText(`α₁ = ${Math.abs(ang1).toFixed(1)}°`, 12, H - 32)
+    ct.fillText(`α₂ = ${Math.abs(ang2).toFixed(1)}°`, 12, H - 16)
 
     if (!result.valid) {
-      ct.font = '700 12px "JetBrains Mono", monospace'
+      ct.font = '700 11px "JetBrains Mono", monospace'
       ct.fillStyle = '#ef4444'
       ct.textAlign = 'center'
-      ct.fillText('⚠ Fuera de rango de equilibrio estático', W / 2, H - 16)
+      ct.fillText('⚠ Fuera de rango de equilibrio estático', W / 2, H - 12)
     }
 
     ct.textAlign = 'right'
     ct.fillStyle = '#2563eb'
-    ct.fillText(`F₁ = ${F1mag.toFixed(1)} N`, W - 14, H - 36)
+    ct.fillText(`F₁ = ${F1mag.toFixed(1)} N`, W - 12, H - 36)
     ct.fillStyle = '#c8a932'
-    ct.fillText(`F₂ = ${F2mag.toFixed(1)} N`, W - 14, H - 20)
+    ct.fillText(`F₂ = ${F2mag.toFixed(1)} N`, W - 12, H - 22)
     if (result.valid) {
       ct.fillStyle = '#7c3aed'
-      ct.fillText(`F₃ = ${result.F3mag.toFixed(2)} N`, W - 14, H - 6)
+      ct.fillText(`F₃ = ${result.F3mag.toFixed(2)} N`, W - 12, H - 8)
     }
   }, [ctx, size, F1mag, F2mag, pulley1Angle, pulley2Angle, showParallelogram, result])
 

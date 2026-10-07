@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from './Header'
+import Footer from './Footer'
 import styles from './SimulationShell.module.css'
 import type { Simulation, SimulationContent } from '@physicslab/shared-types'
 import katex from 'katex'
@@ -279,6 +280,7 @@ export default function SimulationShell({ slug, children }: Props) {
           </div>
         </aside>
       </main>
+      <Footer />
     </div>
   )
 }

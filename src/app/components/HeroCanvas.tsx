@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import styles from './HeroCanvas.module.css'
 
 /**
- * HeroCanvas — escena animada en canvas 2D con visualización de vectores, péndulo y proyectil
+ * HeroCanvas — Escena animada en canvas 2D con vectores de fuerza, péndulo, proyectil y líneas de campo
  */
 export default function HeroCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -15,6 +15,7 @@ export default function HeroCanvas() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
     let W = 0, H = 0
 
@@ -52,12 +53,22 @@ export default function HeroCanvas() {
     let lastFrame = 0
 
     function draw(timestamp: number) {
+      if (!ctx) return
+
+      if (prefersReducedMotion) {
+        ctx.clearRect(0, 0, W, H)
+        drawFieldLines(ctx, W, H, 0, 0, 0)
+        drawPendulum(ctx, W, H, 0, 0, 0)
+        drawProjectile(ctx, W, H, 0, 0, 0)
+        drawForceVectors(ctx, W, H, 0, 0, 0)
+        return
+      }
+
       rafRef.current = requestAnimationFrame(draw)
 
       if (timestamp - lastFrame < FPS_TARGET * 0.8) return
       lastFrame = timestamp
 
-      if (!ctx) return
       ctx.clearRect(0, 0, W, H)
       t += 0.016
 
@@ -89,7 +100,7 @@ function drawFieldLines(
   t: number, mx: number, my: number
 ) {
   const spacing = 70
-  ctx.strokeStyle = 'rgba(36, 52, 108, 0.06)'
+  ctx.strokeStyle = 'rgba(36, 52, 108, 0.05)'
   ctx.lineWidth = 1
   for (let x = 0; x < W + spacing; x += spacing) {
     for (let y = 0; y < H + spacing; y += spacing) {
@@ -110,19 +121,19 @@ function drawPendulum(
   W: number, H: number,
   t: number, mx: number, my: number
 ) {
-  const pivotX = W * 0.20 + mx * 6
-  const pivotY = H * 0.18 + my * 3
-  const L = Math.min(H * 0.32, 130)
-  const angle = Math.sin(t * 1.8) * 0.5
+  const pivotX = W < 600 ? W * 0.15 : W * 0.20 + mx * 6
+  const pivotY = H * 0.15 + my * 3
+  const L = Math.min(H * 0.30, 120)
+  const angle = Math.sin(t * 1.8) * 0.45
 
   const bobX = pivotX + Math.sin(angle) * L
   const bobY = pivotY + Math.cos(angle) * L
 
-  ctx.strokeStyle = 'rgba(36, 52, 108, 0.3)'
+  ctx.strokeStyle = 'rgba(36, 52, 108, 0.25)'
   ctx.lineWidth = 2
   ctx.beginPath()
-  ctx.moveTo(pivotX - 24, pivotY)
-  ctx.lineTo(pivotX + 24, pivotY)
+  ctx.moveTo(pivotX - 20, pivotY)
+  ctx.lineTo(pivotX + 20, pivotY)
   ctx.stroke()
 
   ctx.fillStyle = '#24346C'
@@ -130,7 +141,7 @@ function drawPendulum(
   ctx.arc(pivotX, pivotY, 3.5, 0, Math.PI * 2)
   ctx.fill()
 
-  ctx.strokeStyle = 'rgba(36, 52, 108, 0.45)'
+  ctx.strokeStyle = 'rgba(36, 52, 108, 0.4)'
   ctx.lineWidth = 1.5
   ctx.beginPath()
   ctx.moveTo(pivotX, pivotY)
@@ -138,7 +149,7 @@ function drawPendulum(
   ctx.stroke()
 
   // Bob
-  const bobR = 14
+  const bobR = 13
   const grd = ctx.createRadialGradient(bobX - 3, bobY - 3, 1, bobX, bobY, bobR)
   grd.addColorStop(0, '#38bdf8')
   grd.addColorStop(0.7, '#0284c7')
@@ -151,7 +162,7 @@ function drawPendulum(
   ctx.font = '10px JetBrains Mono, monospace'
   ctx.fillStyle = '#64748B'
   ctx.textAlign = 'center'
-  ctx.fillText('Péndulo θ(t)', pivotX, pivotY - 10)
+  ctx.fillText('Péndulo θ(t)', pivotX, pivotY - 8)
 }
 
 function drawProjectile(
@@ -159,10 +170,10 @@ function drawProjectile(
   W: number, H: number,
   t: number, mx: number, my: number
 ) {
-  const originX = W * 0.35 + mx * 4
-  const originY = H * 0.72 + my * 2
+  const originX = W < 600 ? W * 0.10 : W * 0.32 + mx * 4
+  const originY = H * 0.75 + my * 2
   const maxH = H * 0.22
-  const range = W * 0.28
+  const range = W < 600 ? W * 0.70 : W * 0.30
 
   ctx.strokeStyle = 'rgba(37, 99, 235, 0.25)'
   ctx.lineWidth = 1.5
@@ -182,7 +193,7 @@ function drawProjectile(
   const px = originX + loopT * range
   const py = originY - 4 * maxH * loopT * (1 - loopT)
 
-  const pr = 9
+  const pr = 8
   const grd2 = ctx.createRadialGradient(px - 2, py - 2, 1, px, py, pr)
   grd2.addColorStop(0, '#fbbf24')
   grd2.addColorStop(0.8, '#d97706')
@@ -207,9 +218,9 @@ function drawForceVectors(
   W: number, H: number,
   t: number, mx: number, my: number
 ) {
-  const cx = W * 0.76 + mx * 5
+  const cx = W < 600 ? W * 0.78 : W * 0.76 + mx * 5
   const cy = H * 0.42 + my * 3
-  const len = Math.min(W * 0.09, 64)
+  const len = Math.min(W * 0.09, W < 600 ? 44 : 64)
 
   const colors = ['#2563EB', '#06B6D4', '#7C3AED']
   const angles = [
@@ -233,13 +244,13 @@ function drawForceVectors(
 
   ctx.fillStyle = '#172554'
   ctx.beginPath()
-  ctx.arc(cx, cy, 6, 0, Math.PI * 2)
+  ctx.arc(cx, cy, 5, 0, Math.PI * 2)
   ctx.fill()
 
   ctx.font = '10px JetBrains Mono, monospace'
   ctx.fillStyle = '#64748B'
   ctx.textAlign = 'center'
-  ctx.fillText('ΣF⃗ = 0 (Estática)', cx, cy + len + 24)
+  ctx.fillText('ΣF⃗ = 0 (Estática)', cx, cy + len + 20)
 }
 
 function drawArrow(
