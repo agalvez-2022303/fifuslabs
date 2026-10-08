@@ -79,6 +79,18 @@ function renderFormattedContent(text: string): string {
   return processed
 }
 
+/** Renderiza el desarrollo de una fórmula con notación matemática KaTeX */
+function renderDesarrollo(desarrollo: string): string {
+  if (!desarrollo) return ''
+  const trimmed = desarrollo.trim()
+
+  if (trimmed.includes('$')) {
+    return renderFormattedContent(trimmed)
+  }
+
+  return renderLatexInline(trimmed)
+}
+
 type TabType = 'simulacion' | 'formulas' | 'glosario' | 'teoria'
 
 export default function TemaDashboard(): JSX.Element {
@@ -308,7 +320,7 @@ export default function TemaDashboard(): JSX.Element {
                     </div>
                     <div style={{ marginTop: '4px' }}>
                       <strong>Desarrollo: </strong>
-                      <span dangerouslySetInnerHTML={{ __html: renderFormattedContent(f.ejemploResuelto.desarrollo) }} />
+                      <span dangerouslySetInnerHTML={{ __html: renderDesarrollo(f.ejemploResuelto.desarrollo) }} />
                     </div>
                     <div style={{ fontWeight: 700, color: 'var(--corporate-dark)', marginTop: '4px' }}>
                       <strong>Resultado: </strong>
