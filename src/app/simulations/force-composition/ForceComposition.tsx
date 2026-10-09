@@ -20,14 +20,6 @@ const STITCH_VECTOR_COLORS = [
   '#172554', // V6 Navy
 ]
 
-interface ChallengeState {
-  vectors: Vector2D[]
-  expectedRx: number
-  expectedRy: number
-  expectedR: number
-  expectedTheta: number
-}
-
 export default function ForceComposition() {
   const { canvasRef, ctx, size } = useCanvasRenderer()
 
@@ -39,9 +31,6 @@ export default function ForceComposition() {
 
   // Método gráfico activo
   const [method, setMethod] = useState<GraphicalMethod>('paralelogramo')
-
-  // Modo de vista: 'simulacion' o 'practica'
-  const [activeTab, setActiveTab] = useState<'simulacion' | 'practica'>('simulacion')
 
   // Zoom de escala (px por unidad)
   const [scale, setScale] = useState(24)
@@ -62,52 +51,6 @@ export default function ForceComposition() {
       setMethod('paralelogramo')
     }
   }, [vectors.length, method])
-
-  // ─── Estado del Modo Práctica ────────────────────────────────
-  const [challenge, setChallenge] = useState<ChallengeState | null>(null)
-  const [practiceAnswers, setPracticeAnswers] = useState({ rx: '', ry: '', r: '', theta: '' })
-  const [score, setScore] = useState({ correct: 0, total: 0 })
-  const [feedback, setFeedback] = useState<{ status: 'idle' | 'success' | 'error'; message: string }>({
-    status: 'idle',
-    message: '',
-  })
-  const [showSolution, setShowSolution] = useState(false)
-
-  const generateChallenge = useCallback(() => {
-    const count = Math.random() > 0.5 ? 2 : 3
-    const newVecs: Vector2D[] = []
-    for (let i = 0; i < count; i++) {
-      const mag = Math.floor(Math.random() * 7) + 3
-      const ang = Math.floor(Math.random() * 12) * 30
-      newVecs.push(
-        createVector(
-          `cv${i + 1}`,
-          `V${i + 1}`,
-          { magnitude: mag, angleDeg: ang },
-          STITCH_VECTOR_COLORS[i],
-          'polar'
-        )
-      )
-    }
-
-    const res = computeAnalytical(newVecs)
-    setChallenge({
-      vectors: newVecs,
-      expectedRx: res.sumX,
-      expectedRy: res.sumY,
-      expectedR: res.resultant.magnitude,
-      expectedTheta: res.resultant.angleDeg,
-    })
-    setPracticeAnswers({ rx: '', ry: '', r: '', theta: '' })
-    setFeedback({ status: 'idle', message: '' })
-    setShowSolution(false)
-  }, [])
-
-  useEffect(() => {
-    if (activeTab === 'practica' && !challenge) {
-      generateChallenge()
-    }
-  }, [activeTab, challenge, generateChallenge])
 
   // ─── Manipulación de Vectores ────────────────────────────────
   const addVector = () => {
@@ -459,45 +402,6 @@ export default function ForceComposition() {
     draggingId.current = null
   }
 
-  // ─── Validación en Modo Práctica ────────────────────────────
-  const checkPracticeAnswer = () => {
-    if (!challenge) return
-
-    const rx = parseFloat(practiceAnswers.rx)
-    const ry = parseFloat(practiceAnswers.ry)
-    const r = parseFloat(practiceAnswers.r)
-    const theta = parseFloat(practiceAnswers.theta)
-
-    if (isNaN(rx) || isNaN(ry) || isNaN(r) || isNaN(theta)) {
-      setFeedback({
-        status: 'error',
-        message: 'Por favor ingresa valores numéricos en los cuatro campos (Rx, Ry, R y θ).',
-      })
-      return
-    }
-
-    const tol = 0.35
-    const matchRx = Math.abs(rx - challenge.expectedRx) <= tol
-    const matchRy = Math.abs(ry - challenge.expectedRy) <= tol
-    const matchR = Math.abs(r - challenge.expectedR) <= tol
-    const diffTheta = Math.abs((theta % 360) - challenge.expectedTheta)
-    const matchTheta = diffTheta <= 2 || Math.abs(diffTheta - 360) <= 2
-
-    if (matchRx && matchRy && matchR && matchTheta) {
-      setScore((prev) => ({ correct: prev.correct + 1, total: prev.total + 1 }))
-      setFeedback({
-        status: 'success',
-        message: '¡Excelente cálculo! Has descompuesto y sumado los vectores con total precisión.',
-      })
-    } else {
-      setScore((prev) => ({ correct: prev.correct, total: prev.total + 1 }))
-      setFeedback({
-        status: 'error',
-        message: 'Discrepancia encontrada. Verifica las componentes individuales y los signos.',
-      })
-    }
-  }
-
   return (
     <div className={styles.sim}>
       {/* ── Canvas 2D Interactivo ────────────────────────────── */}
@@ -552,11 +456,8 @@ export default function ForceComposition() {
       <div className={styles.methodBar}>
         <div className={styles.methodButtons}>
           <button
-            className={`${styles.methodBtn} ${activeTab === 'simulacion' && method === 'paralelogramo' ? styles.methodActive : ''}`}
-            onClick={() => {
-              setActiveTab('simulacion')
-              setMethod('paralelogramo')
-            }}
+            className={`${styles.methodBtn} ${method === 'paralelogramo' ? styles.methodActive : ''}`}
+            onClick={() => setMethod('paralelogramo')}
             disabled={vectors.length >= 3}
             title={vectors.length >= 3 ? 'Exclusivo para 2 vectores' : 'Método del paralelogramo'}
           >
@@ -565,11 +466,8 @@ export default function ForceComposition() {
           </button>
 
           <button
-            className={`${styles.methodBtn} ${activeTab === 'simulacion' && method === 'triangulo' ? styles.methodActive : ''}`}
-            onClick={() => {
-              setActiveTab('simulacion')
-              setMethod('triangulo')
-            }}
+            className={`${styles.methodBtn} ${method === 'triangulo' ? styles.methodActive : ''}`}
+            onClick={() => setMethod('triangulo')}
             disabled={vectors.length >= 3}
             title={vectors.length >= 3 ? 'Exclusivo para 2 vectores' : 'Método del triángulo'}
           >
@@ -578,35 +476,24 @@ export default function ForceComposition() {
           </button>
 
           <button
-            className={`${styles.methodBtn} ${activeTab === 'simulacion' && method === 'poligono' ? styles.methodActive : ''}`}
-            onClick={() => {
-              setActiveTab('simulacion')
-              setMethod('poligono')
-            }}
+            className={`${styles.methodBtn} ${method === 'poligono' ? styles.methodActive : ''}`}
+            onClick={() => setMethod('poligono')}
             title="Método del polígono (cabeza-cola)"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>polyline</span>
             Polígono ({vectors.length >= 3 ? `${vectors.length} vectores` : 'Punta-Cola'})
           </button>
 
-          <button
-            className={`${styles.methodBtn} ${activeTab === 'practica' ? styles.methodActive : ''}`}
-            onClick={() => setActiveTab('practica')}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>assignment_turned_in</span>
-            Práctica Evaluativa
-          </button>
         </div>
 
-        {vectors.length >= 3 && activeTab === 'simulacion' && (
+        {vectors.length >= 3 && (
           <span className={styles.methodNotice}>
             ℹ Con 3 o más vectores se aplica automáticamente el método del polígono.
           </span>
         )}
       </div>
 
-      {activeTab === 'simulacion' ? (
-        <>
+      <>
           {/* ── MÉTODO ANALÍTICO: Tabla de Descomposición ───────── */}
           <div className={styles.tableCard}>
             <div className={styles.cardHeader}>
@@ -823,155 +710,6 @@ export default function ForceComposition() {
             </div>
           </div>
         </>
-      ) : (
-        /* ── MODO PRÁCTICA EVALUATIVA ────────────────────────── */
-        <div className={styles.practiceCard}>
-          <div className={styles.scoreBanner}>
-            <div className={styles.scoreTitleGroup}>
-              <span className="material-symbols-outlined" style={{ color: 'var(--corporate)' }}>
-                military_tech
-              </span>
-              <span className={styles.scoreTitle}>PRÁCTICA: SUMA ANALÍTICA DE VECTORES</span>
-            </div>
-            <div className={styles.scoreStats}>
-              <span>
-                Aciertos: <strong>{score.correct}</strong> de <strong>{score.total}</strong>
-              </span>
-              <span className={styles.scorePercent}>
-                ({score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0}%)
-              </span>
-            </div>
-          </div>
-
-          {challenge && (
-            <>
-              <div className={styles.challengePrompt}>
-                <span className={styles.promptTitle}>
-                  Reto: Calcula analíticamente la resultante de los siguientes {challenge.vectors.length} vectores:
-                </span>
-                <div className={styles.challengeVectorList}>
-                  {challenge.vectors.map((v) => (
-                    <div key={v.id} className={styles.challengeVectorItem}>
-                      <span className={styles.challengeVectorName}>{v.label}:</span>
-                      <span>Módulo = {v.magnitude.toFixed(1)} u, Ángulo θ = {v.angleDeg.toFixed(1)}°</span>
-                    </div>
-                  ))}
-                </div>
-                <p className={styles.promptInstruction}>
-                  Descompón cada vector en componentes cartesianas, calcula Rx, Ry, el módulo total |R| y el ángulo resultante θ:
-                </p>
-              </div>
-
-              <div className={styles.practiceGrid}>
-                <div className={styles.practiceField}>
-                  <label className={styles.practiceLabel}>Sumatoria Rx = ∑ Vx (u)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Ej. 3.20"
-                    className={styles.tableInput}
-                    style={{ width: '100%' }}
-                    value={practiceAnswers.rx}
-                    onChange={(e) => setPracticeAnswers((prev) => ({ ...prev, rx: e.target.value }))}
-                  />
-                </div>
-
-                <div className={styles.practiceField}>
-                  <label className={styles.practiceLabel}>Sumatoria Ry = ∑ Vy (u)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Ej. 4.50"
-                    className={styles.tableInput}
-                    style={{ width: '100%' }}
-                    value={practiceAnswers.ry}
-                    onChange={(e) => setPracticeAnswers((prev) => ({ ...prev, ry: e.target.value }))}
-                  />
-                </div>
-
-                <div className={styles.practiceField}>
-                  <label className={styles.practiceLabel}>Módulo Resultante |R| (u)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Ej. 5.52"
-                    className={styles.tableInput}
-                    style={{ width: '100%' }}
-                    value={practiceAnswers.r}
-                    onChange={(e) => setPracticeAnswers((prev) => ({ ...prev, r: e.target.value }))}
-                  />
-                </div>
-
-                <div className={styles.practiceField}>
-                  <label className={styles.practiceLabel}>Ángulo Resultante θ (°)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="Ej. 54.6"
-                    className={styles.tableInput}
-                    style={{ width: '100%' }}
-                    value={practiceAnswers.theta}
-                    onChange={(e) => setPracticeAnswers((prev) => ({ ...prev, theta: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.practiceActions}>
-                <button className="btn btn--primary" onClick={checkPracticeAnswer}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
-                  Comprobar Respuesta
-                </button>
-                <button className="btn btn--secondary" onClick={generateChallenge}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>shuffle</span>
-                  Siguiente Reto
-                </button>
-                <button
-                  className="btn btn--ghost"
-                  onClick={() => setShowSolution((v) => !v)}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>visibility</span>
-                  {showSolution ? 'Ocultar Solución' : 'Ver Solución'}
-                </button>
-              </div>
-
-              {feedback.status !== 'idle' && (
-                <div
-                  className={`${styles.feedbackBox} ${
-                    feedback.status === 'success' ? styles.feedbackSuccess : styles.feedbackError
-                  }`}
-                >
-                  <strong>{feedback.status === 'success' ? '✓ ¡Correcto!' : '✗ Respuesta inexacta'}</strong>
-                  <span>{feedback.message}</span>
-                </div>
-              )}
-
-              {showSolution && (
-                <div className={styles.solutionBox}>
-                  <strong className={styles.solutionTitle}>Solución Paso a Paso:</strong>
-                  {challenge.vectors.map((v) => (
-                    <div key={v.id} className={styles.solutionStep}>
-                      {v.label}: Vx = {v.magnitude.toFixed(2)}·cos({v.angleDeg.toFixed(1)}°) ={' '}
-                      {v.x.toFixed(2)} u, Vy = {v.magnitude.toFixed(2)}·sen({v.angleDeg.toFixed(1)}°) ={' '}
-                      {v.y.toFixed(2)} u
-                    </div>
-                  ))}
-                  <div className={styles.solutionDivider}>
-                    Rx = {challenge.expectedRx.toFixed(2)} u &nbsp;|&nbsp; Ry ={' '}
-                    {challenge.expectedRy.toFixed(2)} u
-                  </div>
-                  <div>
-                    R = √(({challenge.expectedRx.toFixed(2)})² + ({challenge.expectedRy.toFixed(2)})²) ={' '}
-                    <strong>{challenge.expectedR.toFixed(2)} u</strong>
-                  </div>
-                  <div>
-                    θ = <strong>{challenge.expectedTheta.toFixed(2)}°</strong>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
     </div>
   )
 }

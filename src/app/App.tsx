@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import TemaDashboard from './pages/TemaDashboard'
 import SimulationShell from './components/SimulationShell'
@@ -51,6 +51,12 @@ function SimulationLoader() {
 }
 
 export default function App() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />

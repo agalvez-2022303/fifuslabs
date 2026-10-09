@@ -9,8 +9,6 @@ import {
   explainRectangularToPolar,
   explainPolarToRectangular,
   type RectangularCoords,
-  type PolarCoords,
-  type GeographicCoords,
   type CardinalPrimary,
   type CardinalSecondary,
 } from './physics'
@@ -18,18 +16,11 @@ import styles from './VectorRepresentation.module.css'
 
 type InputMode = 'rectangular' | 'polar' | 'geographic'
 
-interface PracticeChallenge {
-  sourceMode: InputMode
-  rect: RectangularCoords
-  polar: PolarCoords
-  geo: GeographicCoords
-}
-
 export default function VectorRepresentation() {
   const { canvasRef, ctx, size } = useCanvasRenderer()
 
   // Modo de edición activo
-  const [activeTab, setActiveTab] = useState<InputMode | 'practice'>('rectangular')
+  const [activeTab, setActiveTab] = useState<InputMode>('rectangular')
 
   // Estado del vector en coordenadas rectangulares (fuente canónica interna)
   const [coords, setCoords] = useState<RectangularCoords>({ x: 4, y: 3 })
@@ -59,58 +50,6 @@ export default function VectorRepresentation() {
   // Inputs locales para modo geográfico editable
   const [geoPrimary, setGeoPrimary] = useState<CardinalPrimary>('N')
   const [geoSecondary, setGeoSecondary] = useState<CardinalSecondary>('E')
-
-  // ─── Estado del Modo Práctica ────────────────────────────────
-  const [practiceScore, setPracticeScore] = useState({ correct: 0, total: 0 })
-  const [currentChallenge, setCurrentChallenge] = useState<PracticeChallenge | null>(null)
-  const [userAnswer, setUserAnswer] = useState({
-    val1: '',
-    val2: '',
-    primary: 'N' as CardinalPrimary,
-    secondary: 'E' as CardinalSecondary,
-  })
-  const [challengeFeedback, setChallengeFeedback] = useState<{
-    status: 'idle' | 'success' | 'error'
-    message: string
-  }>({ status: 'idle', message: '' })
-  const [showChallengeSolution, setShowChallengeSolution] = useState(false)
-
-  // ─── Generador de Retos ─────────────────────────────────────
-  const generateNewChallenge = useCallback(() => {
-    let x = Math.floor(Math.random() * 16) - 8
-    let y = Math.floor(Math.random() * 16) - 8
-    if (x === 0 && y === 0) {
-      x = 3
-      y = 4
-    }
-
-    const modes: InputMode[] = ['rectangular', 'polar', 'geographic']
-    const chosenMode = modes[Math.floor(Math.random() * modes.length)]
-
-    const pol = rectangularToPolar(x, y)
-    const g = polarToGeographic(pol.r, pol.thetaDeg)
-
-    setCurrentChallenge({
-      sourceMode: chosenMode,
-      rect: { x, y },
-      polar: pol,
-      geo: g,
-    })
-    setUserAnswer({
-      val1: '',
-      val2: '',
-      primary: 'N',
-      secondary: 'E',
-    })
-    setChallengeFeedback({ status: 'idle', message: '' })
-    setShowChallengeSolution(false)
-  }, [])
-
-  useEffect(() => {
-    if (activeTab === 'practice' && !currentChallenge) {
-      generateNewChallenge()
-    }
-  }, [activeTab, currentChallenge, generateNewChallenge])
 
   const parseSafeFloat = (val: string): number | null => {
     const trimmed = val.trim()
@@ -422,56 +361,6 @@ export default function VectorRepresentation() {
     handleRectChange(newX, newY)
   }
 
-  // ── Validación de Reto en Modo Práctica ──────────────────────
-  const verifyChallengeAnswer = () => {
-    if (!currentChallenge) return
-
-    const v1 = parseFloat(userAnswer.val1)
-    const v2 = parseFloat(userAnswer.val2)
-
-    if (isNaN(v1) || isNaN(v2)) {
-      setChallengeFeedback({
-        status: 'error',
-        message: 'Por favor ingresa valores numéricos válidos en los campos de respuesta.',
-      })
-      return
-    }
-
-    let isCorrect = false
-
-    if (currentChallenge.sourceMode === 'rectangular') {
-      const expectedR = currentChallenge.polar.r
-      const expectedTheta = currentChallenge.polar.thetaDeg
-      const diffR = Math.abs(v1 - expectedR)
-      const diffTheta = Math.abs(normalizeAngleDeg(v2) - expectedTheta)
-      isCorrect = diffR <= 0.25 && (diffTheta <= 1.5 || Math.abs(diffTheta - 360) <= 1.5)
-    } else if (currentChallenge.sourceMode === 'polar') {
-      const expectedX = currentChallenge.rect.x
-      const expectedY = currentChallenge.rect.y
-      isCorrect = Math.abs(v1 - expectedX) <= 0.25 && Math.abs(v2 - expectedY) <= 0.25
-    } else {
-      const expectedR = currentChallenge.polar.r
-      const expectedTheta = currentChallenge.polar.thetaDeg
-      const diffR = Math.abs(v1 - expectedR)
-      const diffTheta = Math.abs(normalizeAngleDeg(v2) - expectedTheta)
-      isCorrect = diffR <= 0.25 && (diffTheta <= 1.5 || Math.abs(diffTheta - 360) <= 1.5)
-    }
-
-    if (isCorrect) {
-      setPracticeScore((prev) => ({ correct: prev.correct + 1, total: prev.total + 1 }))
-      setChallengeFeedback({
-        status: 'success',
-        message: '¡Excelente! Tu respuesta es matemáticamente correcta.',
-      })
-    } else {
-      setPracticeScore((prev) => ({ correct: prev.correct, total: prev.total + 1 }))
-      setChallengeFeedback({
-        status: 'error',
-        message: 'Respuesta incorrecta. Revisa los signos y la orientación en el cuadrante.',
-      })
-    }
-  }
-
   const rectToPolExplanation = explainRectangularToPolar(coords.x, coords.y)
   const polToRectExplanation = explainPolarToRectangular(polar.r, polar.thetaDeg)
 
@@ -562,19 +451,10 @@ export default function VectorRepresentation() {
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>explore</span>
           Geográfico (Rumbo)
         </button>
-        <button
-          className={`${styles.tabBtn} ${activeTab === 'practice' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('practice')}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>quiz</span>
-          Modo Práctica
-          <span className={styles.practiceBadge}>EVAL</span>
-        </button>
       </div>
 
       {/* ── Main Parameter & Conversion Panels ───────────────── */}
-      {activeTab !== 'practice' ? (
-        <div className={styles.panelGrid}>
+      <div className={styles.panelGrid}>
           {/* Left Panel: Active Input Controls */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
@@ -907,152 +787,6 @@ export default function VectorRepresentation() {
             )}
           </div>
         </div>
-      ) : (
-        /* ── MODO PRÁCTICA Y RETOS INTERACTIVOS ─────────────── */
-        <div className={styles.practiceCard}>
-          <div className={styles.scoreBanner}>
-            <div className={styles.scoreTitleRow}>
-              <span className="material-symbols-outlined" style={{ color: 'var(--corporate)' }}>
-                military_tech
-              </span>
-              <span className={styles.scoreTitle}>EVALUACIÓN INTERACTIVA DE CONVERSIÓN VECTORIAL</span>
-            </div>
-            <div className={styles.scoreStats}>
-              <span>
-                Puntaje: <strong>{practiceScore.correct}</strong> / <strong>{practiceScore.total}</strong>
-              </span>
-              <span className={styles.scorePercent}>
-                ({practiceScore.total > 0
-                  ? Math.round((practiceScore.correct / practiceScore.total) * 100)
-                  : 0}
-                %)
-              </span>
-            </div>
-          </div>
-
-          {currentChallenge && (
-            <>
-              <div className={styles.challengePrompt}>
-                <span className={styles.promptTitle}>
-                  Vector de Prueba (Forma{' '}
-                  {currentChallenge.sourceMode === 'rectangular' && 'RECTANGULAR'}
-                  {currentChallenge.sourceMode === 'polar' && 'POLAR'}
-                  {currentChallenge.sourceMode === 'geographic' && 'GEOGRÁFICA'}):
-                </span>
-                <div className={styles.promptGiven}>
-                  {currentChallenge.sourceMode === 'rectangular' &&
-                    `A⃗ = (${currentChallenge.rect.x.toFixed(2)}, ${currentChallenge.rect.y.toFixed(2)}) u`}
-                  {currentChallenge.sourceMode === 'polar' &&
-                    `A⃗ = (${currentChallenge.polar.r.toFixed(2)} u ; ${currentChallenge.polar.thetaDeg.toFixed(1)}°)`}
-                  {currentChallenge.sourceMode === 'geographic' &&
-                    `A⃗ = ${currentChallenge.geo.canonicalText}`}
-                </div>
-                <p className={styles.promptInstruction}>
-                  {currentChallenge.sourceMode === 'rectangular' &&
-                    'Calcula y escribe las coordenadas POLARES (Magnitud r y Ángulo θ en grados):'}
-                  {currentChallenge.sourceMode === 'polar' &&
-                    'Calcula y escribe las componentes RECTANGULARES (Ax horizontal y Ay vertical):'}
-                  {currentChallenge.sourceMode === 'geographic' &&
-                    'Calcula y escribe las coordenadas POLARES (Magnitud r y Ángulo θ en grados):'}
-                </p>
-              </div>
-
-              <div className={styles.practiceInputs}>
-                <div className={styles.inputRow}>
-                  <label className={styles.labelRow}>
-                    <span className={styles.paramName}>
-                      {currentChallenge.sourceMode === 'polar' ? 'Componente Ax (u)' : 'Módulo r (u)'}
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Ej. 5.00"
-                    className={styles.numInput}
-                    style={{ width: '100%', textAlign: 'left', padding: '8px 12px' }}
-                    value={userAnswer.val1}
-                    onChange={(e) => setUserAnswer((prev) => ({ ...prev, val1: e.target.value }))}
-                  />
-                </div>
-
-                <div className={styles.inputRow}>
-                  <label className={styles.labelRow}>
-                    <span className={styles.paramName}>
-                      {currentChallenge.sourceMode === 'polar' ? 'Componente Ay (u)' : 'Ángulo θ (°)'}
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Ej. 53.13"
-                    className={styles.numInput}
-                    style={{ width: '100%', textAlign: 'left', padding: '8px 12px' }}
-                    value={userAnswer.val2}
-                    onChange={(e) => setUserAnswer((prev) => ({ ...prev, val2: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.practiceActions}>
-                <button className="btn btn--primary" onClick={verifyChallengeAnswer}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
-                  Verificar Respuesta
-                </button>
-                <button className="btn btn--secondary" onClick={generateNewChallenge}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>shuffle</span>
-                  Siguiente Reto
-                </button>
-                <button
-                  className="btn btn--ghost"
-                  onClick={() => setShowChallengeSolution((v) => !v)}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>visibility</span>
-                  {showChallengeSolution ? 'Ocultar Solución' : 'Ver Solución'}
-                </button>
-              </div>
-
-              {challengeFeedback.status !== 'idle' && (
-                <div
-                  className={`${styles.feedbackBox} ${
-                    challengeFeedback.status === 'success'
-                      ? styles.feedbackSuccess
-                      : styles.feedbackError
-                  }`}
-                >
-                  <strong>
-                    {challengeFeedback.status === 'success' ? '✓ ¡Correcto!' : '✗ Intenta nuevamente'}
-                  </strong>
-                  <span>{challengeFeedback.message}</span>
-                </div>
-              )}
-
-              {showChallengeSolution && (
-                <div className={styles.mathPanel}>
-                  <span className={styles.solutionHeader}>Solución Completa del Reto:</span>
-                  <div className={styles.mathStep}>
-                    <span className={styles.mathStepTitle}>Forma Rectangular:</span>
-                    <code className={styles.mathFormula}>
-                      Ax = {currentChallenge.rect.x.toFixed(2)} u &nbsp;|&nbsp; Ay ={' '}
-                      {currentChallenge.rect.y.toFixed(2)} u
-                    </code>
-                  </div>
-                  <div className={styles.mathStep}>
-                    <span className={styles.mathStepTitle}>Forma Polar:</span>
-                    <code className={styles.mathFormula}>
-                      r = {currentChallenge.polar.r.toFixed(2)} u &nbsp;|&nbsp; θ ={' '}
-                      {currentChallenge.polar.thetaDeg.toFixed(2)}°
-                    </code>
-                  </div>
-                  <div className={styles.mathStep}>
-                    <span className={styles.mathStepTitle}>Forma Geográfica:</span>
-                    <code className={styles.mathFormula}>{currentChallenge.geo.canonicalText}</code>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
     </div>
   )
 }
