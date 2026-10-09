@@ -21,6 +21,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 // Lazy simulations mapping
 const SIMULATION_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
+  'mru': lazy(() => import('../simulations/mru/MRU')),
+  'movimiento-rectilineo-uniforme': lazy(() => import('../simulations/mru/MRU')),
   'alcances-mru': lazy(() => import('../simulations/alcances-mru/alcancesMRU')),
   'alcances-encuentros': lazy(() => import('../simulations/alcances-mru/alcancesMRU')),
   'movimiento-aceleracion-constante': lazy(() => import('../simulations/constant-acceleration/ConstantAcceleration')),

@@ -278,42 +278,82 @@ export default function ForceComposition() {
 
       drawArrow(ct, p1x, p1y, p2x, p2y, '#94a3b8', 2, `${v2.label}'`, [4, 4])
     } else if (method === 'poligono') {
+      // ── Método del Polígono: Cadena Punta-Cola en colores propios ─────
+      // Se encadenan TODOS los vectores consecutivamente (incluyendo V1 desde el origen).
+      // La resultante R cierra el polígono desde el origen hasta el extremo final.
       let currX = cx
       let currY = cy
 
-      vectors.forEach((v, idx) => {
-        const dx = v.x * scale
-        const dy = -v.y * scale
-        const nextX = currX + dx
-        const nextY = currY + dy
-
-        if (idx > 0) {
-          drawArrow(ct, currX, currY, nextX, nextY, '#94a3b8', 2, `${v.label}'`, [4, 4])
-        }
-
+      vectors.forEach((v) => {
+        const nextX = currX + v.x * scale
+        const nextY = currY - v.y * scale
+        // Dibujamos con el color propio del vector (sólido, con etiqueta prima)
+        drawArrow(ct, currX, currY, nextX, nextY, v.color ?? '#2563eb', 2.5, `${v.label}'`)
+        // Círculo articulación en la punta de cada vector de la cadena
+        ct.fillStyle = '#ffffff'
+        ct.strokeStyle = v.color ?? '#2563eb'
+        ct.lineWidth = 1.8
+        ct.beginPath()
+        ct.arc(nextX, nextY, 4, 0, Math.PI * 2)
+        ct.fill()
+        ct.stroke()
         currX = nextX
         currY = nextY
       })
+
+      // Línea de cierre del polígono (desde el extremo final hacia el origen) en gris punteado
+      // para mostrar visualmente que la resultante cierra la figura
+      if (vectors.length >= 2) {
+        ct.strokeStyle = '#c4b5fd'
+        ct.lineWidth = 1.2
+        ct.setLineDash([4, 4])
+        ct.beginPath()
+        ct.moveTo(currX, currY)
+        ct.lineTo(cx, cy)
+        ct.stroke()
+        ct.setLineDash([])
+      }
     }
 
     // ─── Vectores Concurrentes desde el Origen ────────────────
-    vectors.forEach((v) => {
-      const ex = cx + v.x * scale
-      const ey = cy - v.y * scale
-      const isDraggingThis = draggingId.current === v.id
-      const color = isDraggingThis ? '#24346c' : (v.color || '#2563eb')
+    // En el método polígono NO se superponen (ya se dibujan en la cadena).
+    if (method !== 'poligono') {
+      vectors.forEach((v) => {
+        const ex = cx + v.x * scale
+        const ey = cy - v.y * scale
+        const isDraggingThis = draggingId.current === v.id
+        const color = isDraggingThis ? '#24346c' : (v.color || '#2563eb')
 
-      drawArrow(ct, cx, cy, ex, ey, color, 2.5, v.label)
+        drawArrow(ct, cx, cy, ex, ey, color, 2.5, v.label)
 
-      // Círculo interactivo en la punta
-      ct.fillStyle = isDraggingThis ? '#c8a932' : '#ffffff'
-      ct.beginPath()
-      ct.arc(ex, ey, isDraggingThis ? 7 : 5, 0, Math.PI * 2)
-      ct.fill()
-      ct.strokeStyle = color
-      ct.lineWidth = 2
-      ct.stroke()
-    })
+        // Círculo interactivo en la punta
+        ct.fillStyle = isDraggingThis ? '#c8a932' : '#ffffff'
+        ct.beginPath()
+        ct.arc(ex, ey, isDraggingThis ? 7 : 5, 0, Math.PI * 2)
+        ct.fill()
+        ct.strokeStyle = color
+        ct.lineWidth = 2
+        ct.stroke()
+      })
+    } else {
+      // En modo polígono sí permitimos arrastrar las puntas del polígono (hit-test sobre los extremos acumulados)
+      // Marcamos el origen como punto de arrastre disponible para V1
+      let accX = cx
+      let accY = cy
+      vectors.forEach((v) => {
+        const ex = accX + v.x * scale
+        const ey = accY - v.y * scale
+        const isDraggingThis = draggingId.current === v.id
+        if (isDraggingThis) {
+          ct.fillStyle = '#c8a932'
+          ct.beginPath()
+          ct.arc(ex, ey, 7, 0, Math.PI * 2)
+          ct.fill()
+        }
+        accX = ex
+        accY = ey
+      })
+    }
 
     // ─── Vector Resultante R ──────────────────────────────────
     if (vectors.length > 0 && resultant.magnitude > 0.05) {
@@ -353,13 +393,31 @@ export default function ForceComposition() {
     const cx = size.width / 2
     const cy = size.height / 2
 
-    for (const v of vectors) {
-      const ex = cx + v.x * scale
-      const ey = cy - v.y * scale
-      if (Math.hypot(px - ex, py - ey) < 26) {
-        draggingId.current = v.id
-        canvas.setPointerCapture(e.pointerId)
-        break
+    if (method === 'poligono') {
+      // En modo polígono el handle de cada vector está en su punta acumulada
+      let accX = cx
+      let accY = cy
+      for (const v of vectors) {
+        const tipX = accX + v.x * scale
+        const tipY = accY - v.y * scale
+        if (Math.hypot(px - tipX, py - tipY) < 26) {
+          draggingId.current = v.id
+          canvas.setPointerCapture(e.pointerId)
+          break
+        }
+        accX = tipX
+        accY = tipY
+      }
+    } else {
+      // Modo paralelogramo / triángulo: handles en los extremos desde el origen
+      for (const v of vectors) {
+        const ex = cx + v.x * scale
+        const ey = cy - v.y * scale
+        if (Math.hypot(px - ex, py - ey) < 26) {
+          draggingId.current = v.id
+          canvas.setPointerCapture(e.pointerId)
+          break
+        }
       }
     }
   }
@@ -373,10 +431,28 @@ export default function ForceComposition() {
     const cx = size.width / 2
     const cy = size.height / 2
 
-    const vx = (px - cx) / scale
-    const vy = -(py - cy) / scale
-
-    updateVectorRect(draggingId.current, vx, vy)
+    if (method === 'poligono') {
+      // La punta de arrastre está en coordenadas absolutas del canvas.
+      // El delta respecto a la BASE acumulada de ese vector determina el nuevo (x, y).
+      const dragIdx = vectors.findIndex((v) => v.id === draggingId.current)
+      if (dragIdx < 0) return
+      // Calcular la base acumulada (punta del vector anterior en la cadena)
+      let baseX = cx
+      let baseY = cy
+      for (let i = 0; i < dragIdx; i++) {
+        baseX += vectors[i].x * scale
+        baseY -= vectors[i].y * scale
+      }
+      // El nuevo vector va desde esa base hasta el puntero
+      const newVx = (px - baseX) / scale
+      const newVy = -(py - baseY) / scale
+      updateVectorRect(draggingId.current, newVx, newVy)
+    } else {
+      // Modo concurrente: el vector va desde el origen al puntero
+      const vx = (px - cx) / scale
+      const vy = -(py - cy) / scale
+      updateVectorRect(draggingId.current, vx, vy)
+    }
   }
 
   const handlePointerUp = () => {
@@ -454,6 +530,21 @@ export default function ForceComposition() {
           <button className={styles.canvasBtn} onClick={() => setScale((s) => Math.max(14, s - 4))}>
             - Zoom
           </button>
+        </div>
+
+        {/* Pista de arrastre (contextual por método) */}
+        <div style={{
+          position: 'absolute', bottom: '10px', left: '10px',
+          display: 'flex', alignItems: 'center', gap: '5px',
+          background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)',
+          padding: '4px 10px', borderRadius: '6px', border: '1px solid #e2e8f0',
+          fontSize: '11px', color: '#475569', fontFamily: 'var(--font-display)',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>drag_indicator</span>
+          {method === 'poligono'
+            ? 'Arrastra la punta de cada flecha de la cadena'
+            : 'Arrastra las puntas de los vectores desde el origen'}
         </div>
       </div>
 
@@ -580,6 +671,7 @@ export default function ForceComposition() {
                           ) : (
                             <input
                               type="number"
+                              inputMode="decimal"
                               step="0.1"
                               min="0"
                               max="15"
@@ -597,6 +689,7 @@ export default function ForceComposition() {
                           ) : (
                             <input
                               type="number"
+                              inputMode="decimal"
                               step="1"
                               min="0"
                               max="360"
@@ -612,6 +705,7 @@ export default function ForceComposition() {
                           {isRect ? (
                             <input
                               type="number"
+                              inputMode="decimal"
                               step="0.1"
                               value={row.x}
                               className={styles.tableInput}
@@ -627,6 +721,7 @@ export default function ForceComposition() {
                           {isRect ? (
                             <input
                               type="number"
+                              inputMode="decimal"
                               step="0.1"
                               value={row.y}
                               className={styles.tableInput}
@@ -679,6 +774,9 @@ export default function ForceComposition() {
               </div>
               <div className={styles.resultSubtext}>
                 Dirección angular: <strong>θ = {resultant.angleDeg.toFixed(2)}°</strong> ({analytical.quadrant})
+              </div>
+              <div className={styles.resultSubtext}>
+                Rumbo geográfico: <strong>{analytical.geographicText}</strong>
               </div>
               <div className={styles.resultSubtext}>
                 Forma cartesiana: <strong>R⃗ = ({resultant.x.toFixed(2)}î + {resultant.y.toFixed(2)}ĵ) u</strong>

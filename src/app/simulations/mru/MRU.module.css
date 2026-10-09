@@ -1,0 +1,408 @@
+.sim {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* ─── Canvas Container ───────────────────────────────────────── */
+.canvasWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  min-height: 280px;
+  max-height: 420px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-neutral);
+  box-shadow: var(--shadow-sm);
+  cursor: crosshair;
+}
+
+@media (max-width: 600px) {
+  .canvasWrap {
+    aspect-ratio: 16 / 9;
+    min-height: 240px;
+  }
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.barrierHint {
+  position: absolute;
+  bottom: var(--sp-3);
+  left: var(--sp-3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--slate-dark);
+  box-shadow: var(--shadow-xs);
+}
+
+/* ─── Transport Controls Bar ─────────────────────────────────── */
+.transportBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-3) var(--sp-4);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (min-width: 768px) {
+  .transportBar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.transportButtons {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.presetsRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.presetsRow::-webkit-scrollbar {
+  display: none;
+}
+
+.presetsLabel {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--slate-muted);
+  flex-shrink: 0;
+}
+
+.presetChip {
+  background: var(--sub-card-bg);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-full);
+  padding: 6px 12px;
+  min-height: 38px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--corporate);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  transition: all var(--transition-fast);
+}
+
+.presetChip:hover {
+  background: #e2e8f0;
+  border-color: var(--corporate);
+}
+
+/* ─── Parameters & Photogates Grid ───────────────────────────── */
+.panelGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-5);
+}
+
+@media (min-width: 860px) {
+  .panelGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.cardTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--corporate);
+}
+
+.deltaBadge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--corporate-dark);
+  background-color: var(--gold-light);
+  border: 1px solid var(--gold);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.fieldsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--sp-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Inputs para evitar auto-zoom iOS */
+.inputField {
+  font-size: 16px !important;
+}
+
+/* Clocks */
+.clocksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--sp-3);
+}
+
+.clockCard {
+  background: var(--sub-card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all var(--transition-fast);
+}
+
+.clockGreenActive {
+  background-color: #ecfdf5;
+  border-color: #10b981;
+}
+
+.clockRedActive {
+  background-color: #fef2f2;
+  border-color: #ef4444;
+}
+
+.clockHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dotGreen {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10b981;
+}
+
+.dotRed {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #ef4444;
+}
+
+.clockLabel {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--slate-dark);
+}
+
+.clockValue {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--corporate);
+}
+
+/* ─── Synchronized Charts Section ────────────────────────────── */
+.chartsSection {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+}
+
+@media (min-width: 768px) {
+  .chartsSection {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.chartCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.chartBadgeX {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: #065f46;
+  background-color: #ecfdf5;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #a7f3d0;
+}
+
+.chartBadgeV {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: #155e75;
+  background-color: #ecfeff;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #a5f3fc;
+}
+
+.chartTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--corporate);
+}
+
+.chartCanvas {
+  display: block;
+  width: 100%;
+  height: 160px;
+  background-color: #f8fafc;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+/* ─── Table of Values Section ────────────────────────────────── */
+.tableCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+}
+
+.valueTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: center;
+}
+
+.valueTable th {
+  background-color: #f1f5f9;
+  color: var(--corporate-dark);
+  font-weight: 700;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-neutral);
+}
+
+.valueTable td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+
+.valueTable tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+/* ─── Solver Section ─────────────────────────────────────────── */
+.solverCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.stepsBox {
+  background-color: #f8fafc;
+  border: 1px dashed var(--corporate);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stepLine {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--corporate-dark);
+}

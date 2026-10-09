@@ -26,6 +26,9 @@ const VelocidadRapidez = lazy(
 const AlcancesMRU = lazy(
   () => import('./simulations/alcances-mru/alcancesMRU')
 )
+const MRUSimulation = lazy(
+  () => import('./simulations/mru/MRU')
+)
 
 function SimulationLoader() {
   return (
@@ -147,6 +150,27 @@ export default function App() {
           <SimulationShell slug="alcances-mru">
             <Suspense fallback={<SimulationLoader />}>
               <AlcancesMRU />
+            </Suspense>
+          </SimulationShell>
+        }
+      />
+
+      <Route
+        path="/sim/mru"
+        element={
+          <SimulationShell slug="mru">
+            <Suspense fallback={<SimulationLoader />}>
+              <MRUSimulation />
+            </Suspense>
+          </SimulationShell>
+        }
+      />
+      <Route
+        path="/sim/movimiento-rectilineo-uniforme"
+        element={
+          <SimulationShell slug="mru">
+            <Suspense fallback={<SimulationLoader />}>
+              <MRUSimulation />
             </Suspense>
           </SimulationShell>
         }

@@ -87,10 +87,6 @@ export default function Header(): JSX.Element {
               </div>
               <div className={styles.logoTextContainer}>
                 <span className={styles.logoTitle}>FísicaLab</span>
-                <div className={styles.logoBadge}>
-                  <span className={styles.engineTag}>v2.4</span>
-                  <span className={styles.statusDot} />
-                </div>
               </div>
             </Link>
           </div>
@@ -243,7 +239,7 @@ export default function Header(): JSX.Element {
 
         <div className={styles.drawerFooter}>
           <div className={styles.drawerFooterText}>
-            <span>FísicaLab v2.4</span>
+            <span>FísicaLab</span>
             <span>Laboratorio Virtual de Física</span>
           </div>
         </div>

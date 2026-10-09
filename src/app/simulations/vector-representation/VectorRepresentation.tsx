@@ -48,9 +48,16 @@ export default function VectorRepresentation() {
   const polar = rectangularToPolar(coords.x, coords.y)
   const geo = polarToGeographic(polar.r, polar.thetaDeg)
 
+  // Inputs locales en formato string para edición fluida
+  const [strRectX, setStrRectX] = useState('4')
+  const [strRectY, setStrRectY] = useState('3')
+  const [strPolarR, setStrPolarR] = useState('5')
+  const [strPolarTheta, setStrPolarTheta] = useState('36.87')
+  const [strGeoR, setStrGeoR] = useState('5')
+  const [strGeoAngle, setStrGeoAngle] = useState('53.13')
+
   // Inputs locales para modo geográfico editable
   const [geoPrimary, setGeoPrimary] = useState<CardinalPrimary>('N')
-  const [geoAngle, setGeoAngle] = useState(36.87)
   const [geoSecondary, setGeoSecondary] = useState<CardinalSecondary>('E')
 
   // ─── Estado del Modo Práctica ────────────────────────────────
@@ -105,17 +112,36 @@ export default function VectorRepresentation() {
     }
   }, [activeTab, currentChallenge, generateNewChallenge])
 
+  const parseSafeFloat = (val: string): number | null => {
+    const trimmed = val.trim()
+    if (trimmed === '' || trimmed === '-' || trimmed === '+' || trimmed === '.' || trimmed === '-.' || trimmed === '+.') {
+      return null
+    }
+    const num = Number(trimmed)
+    return isNaN(num) || !Number.isFinite(num) ? null : num
+  }
+
+  // Sync helpers when coords change via canvas or presets
+  const syncDerivedStrings = (newX: number, newY: number) => {
+    const p = rectangularToPolar(newX, newY)
+    const g = polarToGeographic(p.r, p.thetaDeg)
+
+    setStrRectX(newX.toString())
+    setStrRectY(newY.toString())
+    setStrPolarR(p.r.toString())
+    setStrPolarTheta(p.thetaDeg.toString())
+    setStrGeoR(p.r.toString())
+    setStrGeoAngle(g.angleDeg.toString())
+    if (g.primary) setGeoPrimary(g.primary)
+    if (g.secondary) setGeoSecondary(g.secondary)
+  }
+
   // ─── Handlers de Actualización ──────────────────────────────
   const handleRectChange = (newX: number, newY: number) => {
     const clampedX = parseFloat(Math.max(-15, Math.min(15, newX)).toFixed(2))
     const clampedY = parseFloat(Math.max(-15, Math.min(15, newY)).toFixed(2))
     setCoords({ x: clampedX, y: clampedY })
-
-    const p = rectangularToPolar(clampedX, clampedY)
-    const g = polarToGeographic(p.r, p.thetaDeg)
-    if (g.primary) setGeoPrimary(g.primary)
-    if (g.secondary) setGeoSecondary(g.secondary)
-    setGeoAngle(g.angleDeg)
+    syncDerivedStrings(clampedX, clampedY)
   }
 
   const handlePolarChange = (newR: number, newTheta: number) => {
@@ -123,19 +149,17 @@ export default function VectorRepresentation() {
     const normTheta = normalizeAngleDeg(newTheta)
     const rect = polarToRectangular(clampedR, normTheta)
     setCoords(rect)
-
-    const g = polarToGeographic(clampedR, normTheta)
-    if (g.primary) setGeoPrimary(g.primary)
-    if (g.secondary) setGeoSecondary(g.secondary)
-    setGeoAngle(g.angleDeg)
+    syncDerivedStrings(rect.x, rect.y)
   }
 
   const handleGeoChange = (r: number, prim: CardinalPrimary, angle: number, sec: CardinalSecondary) => {
     setGeoPrimary(prim)
-    setGeoAngle(angle)
     setGeoSecondary(sec)
-    const rect = geographicToRectangular(r, prim, angle, sec)
+    const clampedR = Math.max(0, Math.min(15, r))
+    const clampedAngle = Math.max(0, Math.min(90, angle))
+    const rect = geographicToRectangular(clampedR, prim, clampedAngle, sec)
     setCoords(rect)
+    syncDerivedStrings(rect.x, rect.y)
   }
 
   // ─── Dibujo en Canvas ────────────────────────────────────────
@@ -583,11 +607,15 @@ export default function VectorRepresentation() {
                       onChange={(e) => handleRectChange(parseFloat(e.target.value), coords.y)}
                     />
                     <input
-                      type="number"
-                      step="0.1"
-                      value={coords.x}
+                      type="text"
+                      inputMode="decimal"
+                      value={strRectX}
                       className={styles.numInput}
-                      onChange={(e) => handleRectChange(parseFloat(e.target.value) || 0, coords.y)}
+                      onChange={(e) => {
+                        setStrRectX(e.target.value)
+                        const val = parseSafeFloat(e.target.value)
+                        if (val !== null) handleRectChange(val, coords.y)
+                      }}
                     />
                   </div>
                 </div>
@@ -608,11 +636,15 @@ export default function VectorRepresentation() {
                       onChange={(e) => handleRectChange(coords.x, parseFloat(e.target.value))}
                     />
                     <input
-                      type="number"
-                      step="0.1"
-                      value={coords.y}
+                      type="text"
+                      inputMode="decimal"
+                      value={strRectY}
                       className={styles.numInput}
-                      onChange={(e) => handleRectChange(coords.x, parseFloat(e.target.value) || 0)}
+                      onChange={(e) => {
+                        setStrRectY(e.target.value)
+                        const val = parseSafeFloat(e.target.value)
+                        if (val !== null) handleRectChange(coords.x, val)
+                      }}
                     />
                   </div>
                 </div>
@@ -638,12 +670,15 @@ export default function VectorRepresentation() {
                       onChange={(e) => handlePolarChange(parseFloat(e.target.value), polar.thetaDeg)}
                     />
                     <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      value={polar.r}
+                      type="text"
+                      inputMode="decimal"
+                      value={strPolarR}
                       className={styles.numInput}
-                      onChange={(e) => handlePolarChange(parseFloat(e.target.value) || 0, polar.thetaDeg)}
+                      onChange={(e) => {
+                        setStrPolarR(e.target.value)
+                        const val = parseSafeFloat(e.target.value)
+                        if (val !== null) handlePolarChange(val, polar.thetaDeg)
+                      }}
                     />
                   </div>
                 </div>
@@ -664,13 +699,15 @@ export default function VectorRepresentation() {
                       onChange={(e) => handlePolarChange(polar.r, parseFloat(e.target.value))}
                     />
                     <input
-                      type="number"
-                      step="1"
-                      min="0"
-                      max="360"
-                      value={polar.thetaDeg}
+                      type="text"
+                      inputMode="decimal"
+                      value={strPolarTheta}
                       className={styles.numInput}
-                      onChange={(e) => handlePolarChange(polar.r, parseFloat(e.target.value) || 0)}
+                      onChange={(e) => {
+                        setStrPolarTheta(e.target.value)
+                        const val = parseSafeFloat(e.target.value)
+                        if (val !== null) handlePolarChange(polar.r, val)
+                      }}
                     />
                   </div>
                 </div>
@@ -694,18 +731,19 @@ export default function VectorRepresentation() {
                       value={polar.r}
                       className={styles.slider}
                       onChange={(e) =>
-                        handleGeoChange(parseFloat(e.target.value), geoPrimary, geoAngle, geoSecondary)
+                        handleGeoChange(parseFloat(e.target.value), geoPrimary, geo.angleDeg, geoSecondary)
                       }
                     />
                     <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      value={polar.r}
+                      type="text"
+                      inputMode="decimal"
+                      value={strGeoR}
                       className={styles.numInput}
-                      onChange={(e) =>
-                        handleGeoChange(parseFloat(e.target.value) || 0, geoPrimary, geoAngle, geoSecondary)
-                      }
+                      onChange={(e) => {
+                        setStrGeoR(e.target.value)
+                        const val = parseSafeFloat(e.target.value)
+                        if (val !== null) handleGeoChange(val, geoPrimary, geo.angleDeg, geoSecondary)
+                      }}
                     />
                   </div>
                 </div>
@@ -714,7 +752,7 @@ export default function VectorRepresentation() {
                   <div className={styles.labelRow}>
                     <span className={styles.paramName}>Rumbo Geográfico</span>
                     <span className={styles.paramVal}>
-                      {geoPrimary} {geoAngle.toFixed(1)}° {geoSecondary}
+                      {geoPrimary} {geo.angleDeg.toFixed(1)}° {geoSecondary}
                     </span>
                   </div>
                   <div className={styles.geoSelectRow}>
@@ -722,7 +760,7 @@ export default function VectorRepresentation() {
                       className={styles.selectInput}
                       value={geoPrimary}
                       onChange={(e) =>
-                        handleGeoChange(polar.r, e.target.value as CardinalPrimary, geoAngle, geoSecondary)
+                        handleGeoChange(polar.r, e.target.value as CardinalPrimary, geo.angleDeg, geoSecondary)
                       }
                     >
                       <option value="N">Norte (N)</option>
@@ -730,23 +768,23 @@ export default function VectorRepresentation() {
                     </select>
 
                     <input
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      max="90"
-                      value={geoAngle}
+                      type="text"
+                      inputMode="decimal"
+                      value={strGeoAngle}
                       className={styles.numInput}
                       style={{ width: '100%' }}
-                      onChange={(e) =>
-                        handleGeoChange(polar.r, geoPrimary, parseFloat(e.target.value) || 0, geoSecondary)
-                      }
+                      onChange={(e) => {
+                        setStrGeoAngle(e.target.value)
+                        const val = parseSafeFloat(e.target.value)
+                        if (val !== null) handleGeoChange(polar.r, geoPrimary, val, geoSecondary)
+                      }}
                     />
 
                     <select
                       className={styles.selectInput}
                       value={geoSecondary}
                       onChange={(e) =>
-                        handleGeoChange(polar.r, geoPrimary, geoAngle, e.target.value as CardinalSecondary)
+                        handleGeoChange(polar.r, geoPrimary, geo.angleDeg, e.target.value as CardinalSecondary)
                       }
                     >
                       <option value="E">Este (E)</option>

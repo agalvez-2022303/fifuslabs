@@ -185,6 +185,41 @@ export default function AlcancesMRU(): JSX.Element {
   const pctB = posToPercent(currentPosB)
   const estanMuyCercanos = Math.abs(pctA - pctB) < 7
 
+  // Arrastre por puntero de vehículos sobre la pista antes de dar Play
+  const draggingVehicleRef = useRef<'A' | 'B' | null>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+
+  const handleVehiclePointerDown = (vehicle: 'A' | 'B', e: React.PointerEvent) => {
+    if (isPlaying || tiempoTranscurrido > 0) return
+    draggingVehicleRef.current = vehicle
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+  }
+
+  const handleTrackPointerMove = (e: React.PointerEvent) => {
+    if (!draggingVehicleRef.current || !trackRef.current) return
+    const rect = trackRef.current.getBoundingClientRect()
+    const padding = 24
+    const usableWidth = rect.width - 2 * padding
+    if (usableWidth <= 0) return
+    const clientX = e.clientX - rect.left - padding
+    const pct = Math.max(0, Math.min(1, clientX / usableWidth))
+    const newX = Math.round(rangoPista.min + pct * rangoPista.span)
+
+    if (draggingVehicleRef.current === 'A') {
+      setNumXA0(newX)
+      setStrXA0(newX.toString())
+      setErrXA0(null)
+    } else if (draggingVehicleRef.current === 'B') {
+      setNumXB0(newX)
+      setStrXB0(newX.toString())
+      setErrXB0(null)
+    }
+  }
+
+  const handleTrackPointerUp = () => {
+    draggingVehicleRef.current = null
+  }
+
   // Reiniciar simulación
   const resetSimulacion = useCallback(() => {
     setIsPlaying(false)
@@ -439,7 +474,13 @@ export default function AlcancesMRU(): JSX.Element {
 
         {/* Pista Visual Dinámica */}
         <section className={styles.panel} aria-label="Pista visual de movimiento">
-          <div className={styles.trackArea}>
+          <div
+            ref={trackRef}
+            className={styles.trackArea}
+            onPointerMove={handleTrackPointerMove}
+            onPointerUp={handleTrackPointerUp}
+            onPointerCancel={handleTrackPointerUp}
+          >
             {/* Carril */}
             <div className={styles.trackRail}>
               <div className={styles.trackCenterLine} />
@@ -477,7 +518,10 @@ export default function AlcancesMRU(): JSX.Element {
               style={{
                 left: `calc(24px + (100% - 48px) * ${pctA / 100})`,
                 top: estanMuyCercanos ? '30px' : '48px',
+                cursor: !isPlaying && tiempoTranscurrido === 0 ? 'grab' : 'default',
               }}
+              onPointerDown={(e) => handleVehiclePointerDown('A', e)}
+              title={!isPlaying && tiempoTranscurrido === 0 ? 'Arrastra para cambiar x₀A' : ''}
             >
               <div className={styles.movilAvatarA}>
                 A
@@ -498,7 +542,10 @@ export default function AlcancesMRU(): JSX.Element {
               style={{
                 left: `calc(24px + (100% - 48px) * ${pctB / 100})`,
                 top: estanMuyCercanos ? '68px' : '48px',
+                cursor: !isPlaying && tiempoTranscurrido === 0 ? 'grab' : 'default',
               }}
+              onPointerDown={(e) => handleVehiclePointerDown('B', e)}
+              title={!isPlaying && tiempoTranscurrido === 0 ? 'Arrastra para cambiar x₀B' : ''}
             >
               <div className={styles.movilAvatarB}>
                 B

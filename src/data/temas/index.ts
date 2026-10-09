@@ -1,8 +1,9 @@
 import type { TemaConfig } from './types'
 import { alcancesMRUData } from './alcances-mru'
+import { mruData } from './mru'
 
 export * from './types'
-export { alcancesMRUData }
+export { alcancesMRUData, mruData }
 
 export const vectoresData: TemaConfig = {
   id: 'sim-000',
@@ -482,6 +483,8 @@ export const velocidadRapidezData: TemaConfig = {
 }
 
 export const TEMAS_REGISTRY: Record<string, TemaConfig> = {
+  'mru': mruData,
+  'movimiento-rectilineo-uniforme': mruData,
   'alcances-mru': alcancesMRUData,
   'alcances-encuentros': alcancesMRUData,
   'vectores': vectoresData,
