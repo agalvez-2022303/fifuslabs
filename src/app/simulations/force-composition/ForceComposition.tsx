@@ -7,6 +7,7 @@ import {
   rectToPolar,
   type Vector2D,
 } from './physics'
+import { renderLatex } from '../../utils/latex'
 import styles from './ForceComposition.module.css'
 
 type GraphicalMethod = 'paralelogramo' | 'triangulo' | 'poligono'
@@ -684,11 +685,21 @@ export default function ForceComposition() {
                 <div className={styles.formulaBox}>
                   <div className={styles.formulaStep}>
                     <span className={styles.formulaStepTitle}>1. Módulo Resultante (Teorema de Pitágoras):</span>
-                    <code className={styles.formulaCode}>{analytical.magnitudeDerivation}</code>
+                    <div
+                      className={styles.formulaCode}
+                      dangerouslySetInnerHTML={{
+                        __html: renderLatex(analytical.magnitudeDerivation, true),
+                      }}
+                    />
                   </div>
                   <div className={styles.formulaStep}>
                     <span className={styles.formulaStepTitle}>2. Ángulo y Cuadrante:</span>
-                    <code className={styles.formulaCode}>{analytical.angleDerivation}</code>
+                    <div
+                      className={styles.formulaCode}
+                      dangerouslySetInnerHTML={{
+                        __html: renderLatex(analytical.angleDerivation, true),
+                      }}
+                    />
                   </div>
                 </div>
               )}

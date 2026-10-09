@@ -1,511 +1,280 @@
-import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
-import {
-  type Point2D,
-  computeVelocityVsSpeed,
-  computeParticlePosition,
-} from './physics'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { renderLatex } from '../../utils/latex'
+import { computeParticlePosition, computeVelocityVsSpeed, type Point2D } from './physics'
 import styles from './VelocidadRapidez.module.css'
 
-interface PointNode {
+interface RouteExample {
   id: string
-  label: string
-  x: number
-  y: number
-}
-
-interface PresetPath {
-  id: string
-  name: string
+  title: string
   description: string
-  points: { x: number; y: number; label: string }[]
+  points: Point2D[]
   times: number[]
 }
 
-const PRESET_PATHS: PresetPath[] = [
+const ROUTE_EXAMPLES: RouteExample[] = [
   {
     id: 'roundtrip',
-    name: 'Ida y Vuelta 1D (vm = 0)',
-    description: 'La partícula viaja 10m al Este y regresa 10m al Oeste.',
+    title: 'Ida y vuelta',
+    description: 'Camina 10 m y regresa al punto de partida en 4 s.',
     points: [
-      { x: 0, y: 0, label: 'A' },
-      { x: 10, y: 0, label: 'B' },
-      { x: 0, y: 0, label: 'A' },
+      { x: 0, y: 0, label: 'Inicio' },
+      { x: 10, y: 0, label: 'Giro' },
+      { x: 0, y: 0, label: 'Final' },
     ],
     times: [2, 2],
   },
   {
-    id: 'l-shape',
-    name: 'Trayectoria L (3-4-5)',
-    description: '3m al Este y 4m al Norte. Compara distancia (7m) vs desplazamiento (5m).',
-    points: [
-      { x: 0, y: 0, label: 'A' },
-      { x: 3, y: 0, label: 'B' },
-      { x: 3, y: 4, label: 'C' },
-    ],
-    times: [1.5, 2],
-  },
-  {
-    id: 'closed-square',
-    name: 'Circuito Cuadrado Cerrado',
-    description: '4 tramos que forman un cuadrado regresando al origen.',
-    points: [
-      { x: 0, y: 0, label: 'A' },
-      { x: 6, y: 0, label: 'B' },
-      { x: 6, y: 6, label: 'C' },
-      { x: 0, y: 6, label: 'D' },
-      { x: 0, y: 0, label: 'A' },
-    ],
-    times: [2, 2, 2, 2],
-  },
-  {
     id: 'straight',
-    name: 'Movimiento Rectilíneo (rm = |vm|)',
-    description: 'Un solo sentido: rapidez y magnitud de velocidad son exactamente iguales.',
+    title: 'Línea recta',
+    description: 'Avanza 12 m en la misma dirección en 3 s.',
     points: [
-      { x: 0, y: 0, label: 'A' },
-      { x: 12, y: 0, label: 'B' },
+      { x: 0, y: 0, label: 'Inicio' },
+      { x: 12, y: 0, label: 'Final' },
     ],
     times: [3],
+  },
+  {
+    id: 'corner',
+    title: 'Recorrido en L',
+    description: 'Avanza 3 m y luego 4 m hacia el Norte en 3.5 s.',
+    points: [
+      { x: 0, y: 0, label: 'Inicio' },
+      { x: 3, y: 0, label: 'Giro' },
+      { x: 3, y: 4, label: 'Final' },
+    ],
+    times: [1.5, 2],
   },
 ]
 
 export default function VelocidadRapidez() {
-  // Puntos de la trayectoria
-  const [points, setPoints] = useState<PointNode[]>(() => {
-    const p = PRESET_PATHS[0]
-    return p.points.map((pt, i) => ({
-      id: `pt-${i}-${Date.now()}`,
-      label: pt.label,
-      x: pt.x,
-      y: pt.y,
-    }))
-  })
+  const [activeRouteId, setActiveRouteId] = useState(ROUTE_EXAMPLES[0].id)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [simTime, setSimTime] = useState(0)
+  const animationFrame = useRef<number>(0)
+  const previousFrameTime = useRef(0)
 
-  // Tiempos por tramo (en segundos)
-  const [segmentTimes, setSegmentTimes] = useState<number[]>([2, 2])
-  const [activePreset, setActivePreset] = useState<string>('roundtrip')
-
-  // Controles de simulación
-  const [isPlaying, setIsPlaying] = useState<boolean>(false)
-  const [simTime, setSimTime] = useState<number>(0)
-  const [simSpeed, setSimSpeed] = useState<number>(1.0)
-
-  const rafRef = useRef<number>(0)
-  const lastTsRef = useRef<number>(0)
-
-  // Capas visuales
-  const [showVectorVm, setShowVectorVm] = useState<boolean>(true)
-  const [showDisplacement, setShowDisplacement] = useState<boolean>(true)
-
-  // Conversión a Point2D puro
-  const points2D: Point2D[] = useMemo(() => {
-    return points.map((p) => ({ x: p.x, y: p.y, label: p.label }))
-  }, [points])
-
-  // Cálculo físico global
-  const result = useMemo(() => {
-    return computeVelocityVsSpeed(points2D, segmentTimes)
-  }, [points2D, segmentTimes])
-
-  // Estado de la partícula instantánea
-  const particleState = useMemo(() => {
-    return computeParticlePosition(simTime, points2D, segmentTimes)
-  }, [simTime, points2D, segmentTimes])
-
-  // Animación requestAnimationFrame
-  const loop = useCallback(
-    (timestamp: number) => {
-      if (lastTsRef.current === 0) {
-        lastTsRef.current = timestamp
-      }
-      const dt = Math.min((timestamp - lastTsRef.current) / 1000, 0.1) * simSpeed
-      lastTsRef.current = timestamp
-
-      setSimTime((prev) => {
-        const next = prev + dt
-        if (result.totalTime > 0 && next >= result.totalTime) {
-          setIsPlaying(false)
-          return result.totalTime
-        }
-        return next
-      })
-
-      rafRef.current = requestAnimationFrame(loop)
-    },
-    [simSpeed, result.totalTime]
+  const activeRoute = ROUTE_EXAMPLES.find((route) => route.id === activeRouteId) ?? ROUTE_EXAMPLES[0]
+  const result = useMemo(
+    () => computeVelocityVsSpeed(activeRoute.points, activeRoute.times),
+    [activeRoute]
+  )
+  const particle = useMemo(
+    () => computeParticlePosition(simTime, activeRoute.points, activeRoute.times),
+    [simTime, activeRoute]
   )
 
-  useEffect(() => {
-    if (isPlaying) {
-      lastTsRef.current = 0
-      rafRef.current = requestAnimationFrame(loop)
-    } else {
-      cancelAnimationFrame(rafRef.current)
-      lastTsRef.current = 0
-    }
-    return () => cancelAnimationFrame(rafRef.current)
-  }, [isPlaying, loop])
-
-  // Cargar preset
-  const handleLoadPreset = (preset: PresetPath) => {
+  const resetSimulation = useCallback(() => {
     setIsPlaying(false)
     setSimTime(0)
-    setActivePreset(preset.id)
-    setPoints(
-      preset.points.map((pt, i) => ({
-        id: `pt-${i}-${Date.now()}`,
-        label: pt.label,
-        x: pt.x,
-        y: pt.y,
-      }))
-    )
-    setSegmentTimes([...preset.times])
+    previousFrameTime.current = 0
+  }, [])
+
+  const selectRoute = (route: RouteExample) => {
+    resetSimulation()
+    setActiveRouteId(route.id)
   }
 
-  // Modificar tiempo de tramo
-  const handleSegmentTimeChange = (index: number, valStr: string) => {
-    setActivePreset('')
-    const num = parseFloat(valStr)
-    setSegmentTimes((prev) => {
-      const copy = [...prev]
-      copy[index] = isNaN(num) || num <= 0 ? 0.1 : num
-      return copy
-    })
-  }
-
-  const handleReset = () => {
-    setIsPlaying(false)
-    setSimTime(0)
-    lastTsRef.current = 0
-  }
-
-  const handleTogglePlay = () => {
-    if (particleState.isComplete && simTime > 0) {
+  const toggleSimulation = () => {
+    if (particle.isComplete && simTime > 0) {
       setSimTime(0)
       setIsPlaying(true)
       return
     }
-    setIsPlaying((p) => !p)
+    setIsPlaying((playing) => !playing)
   }
 
-  // Bounding box SVG dinámico
-  const minX = Math.min(-2, ...points.map((p) => p.x)) - 2
-  const maxX = Math.max(12, ...points.map((p) => p.x)) + 2
-  const minY = Math.min(-2, ...points.map((p) => p.y)) - 2
-  const maxY = Math.max(10, ...points.map((p) => p.y)) + 2
+  const animationLoop = useCallback(
+    (timestamp: number) => {
+      if (previousFrameTime.current === 0) previousFrameTime.current = timestamp
+      const elapsedSeconds = Math.min((timestamp - previousFrameTime.current) / 1000, 0.1)
+      previousFrameTime.current = timestamp
 
-  const svgW = 600
-  const svgH = 360
-  const pad = 40
+      setSimTime((currentTime) => {
+        const nextTime = currentTime + elapsedSeconds
+        if (nextTime >= result.totalTime) {
+          setIsPlaying(false)
+          return result.totalTime
+        }
+        return nextTime
+      })
+      animationFrame.current = requestAnimationFrame(animationLoop)
+    },
+    [result.totalTime]
+  )
 
-  const toSvgX = (x: number) => pad + ((x - minX) / (maxX - minX)) * (svgW - 2 * pad)
-  const toSvgY = (y: number) => svgH - pad - ((y - minY) / (maxY - minY)) * (svgH - 2 * pad)
+  useEffect(() => {
+    if (isPlaying) {
+      previousFrameTime.current = 0
+      animationFrame.current = requestAnimationFrame(animationLoop)
+    } else {
+      cancelAnimationFrame(animationFrame.current)
+      previousFrameTime.current = 0
+    }
+    return () => cancelAnimationFrame(animationFrame.current)
+  }, [isPlaying, animationLoop])
+
+  const svgWidth = 640
+  const svgHeight = 300
+  const padding = 64
+  const minX = Math.min(...activeRoute.points.map((point) => point.x), 0) - 2
+  const maxX = Math.max(...activeRoute.points.map((point) => point.x), 10) + 2
+  const minY = Math.min(...activeRoute.points.map((point) => point.y), 0) - 2
+  const maxY = Math.max(...activeRoute.points.map((point) => point.y), 0) + 2
+  const toSvgX = (x: number) =>
+    padding + ((x - minX) / (maxX - minX)) * (svgWidth - padding * 2)
+  const toSvgY = (y: number) =>
+    svgHeight - padding - ((y - minY) / (maxY - minY)) * (svgHeight - padding * 2)
+  const routePoints = activeRoute.points
+    .map((point) => `${toSvgX(point.x)},${toSvgY(point.y)}`)
+    .join(' ')
+  const start = activeRoute.points[0]
+  const end = activeRoute.points[activeRoute.points.length - 1]
 
   return (
-    <div className={styles.container}>
-      {/* Sub-Header Presets */}
-      <div className={styles.subHeader}>
-        <div className={styles.presetGroup}>
-          <span className={styles.presetLabel}>
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>alt_route</span>
-            Ejemplos didácticos:
+    <div className={styles.simulation}>
+      <section className={styles.intro}>
+        <h2>¿Rapidez o velocidad?</h2>
+        <p>Elige un recorrido y compara cuánto camino se recorrió con cuánto cambió la posición.</p>
+      </section>
+
+      <section className={styles.routePicker} aria-label="Elige un recorrido">
+        {ROUTE_EXAMPLES.map((route) => (
+          <button
+            key={route.id}
+            type="button"
+            className={`${styles.routeButton} ${route.id === activeRouteId ? styles.routeButtonActive : ''}`}
+            onClick={() => selectRoute(route)}
+            aria-pressed={route.id === activeRouteId}
+          >
+            <strong>{route.title}</strong>
+            <span>{route.description}</span>
+          </button>
+        ))}
+      </section>
+
+      <section className={styles.visualCard}>
+        <div className={styles.sectionHeading}>
+          <div>
+            <h3>Observa el recorrido</h3>
+            <p>La línea muestra el camino; la flecha dorada une el inicio con el final.</p>
+          </div>
+          <span className={styles.timeLabel}>
+            Tiempo: {particle.time.toFixed(1)} / {result.totalTime.toFixed(1)} s
           </span>
-          {PRESET_PATHS.map((p) => (
-            <button
-              key={p.id}
-              className={`${styles.presetBtn} ${activePreset === p.id ? styles.presetBtnActive : ''}`}
-              onClick={() => handleLoadPreset(p)}
-              type="button"
-            >
-              {p.name}
-            </button>
-          ))}
         </div>
-        <span className={styles.badge}>MÓDULO 4: VELOCIDAD VS RAPIDEZ MEDIA</span>
-      </div>
 
-      {/* Grid Principal Workbench */}
-      <div className={styles.gridWorkbench}>
-        {/* Columna 1: Tramos, Tiempos y Controles */}
-        <div className={styles.column}>
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <span className={styles.cardTitle}>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>timer</span>
-                Tramos y Tiempos de Recorrido
-              </span>
-              <span className={styles.badge}>{segmentTimes.length} TRAMOS</span>
-            </div>
+        <div className={styles.routeCanvas}>
+          <svg
+            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+            role="img"
+            aria-label={`Trayectoria: ${activeRoute.title}`}
+          >
+            <defs>
+              <marker id="displacement-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#d97706" />
+              </marker>
+            </defs>
+            <line
+              x1={padding}
+              y1={toSvgY(0)}
+              x2={svgWidth - padding}
+              y2={toSvgY(0)}
+              className={styles.axis}
+            />
+            <polyline points={routePoints} className={styles.pathLine} />
+            {result.displacementMagnitude > 0 && (
+              <line
+                x1={toSvgX(start.x)}
+                y1={toSvgY(start.y)}
+                x2={toSvgX(end.x)}
+                y2={toSvgY(end.y)}
+                className={styles.displacementLine}
+                markerEnd="url(#displacement-arrow)"
+              />
+            )}
+            {activeRoute.points.map((point, index) => (
+              <g key={`${point.label}-${index}`}>
+                <circle cx={toSvgX(point.x)} cy={toSvgY(point.y)} r="6" className={styles.routePoint} />
+                <text
+                  x={toSvgX(point.x)}
+                  y={
+                    index === activeRoute.points.length - 1 &&
+                    point.x === start.x &&
+                    point.y === start.y
+                      ? toSvgY(point.y) + 28
+                      : toSvgY(point.y) - 16
+                  }
+                  className={styles.pointLabel}
+                >
+                  {point.label}
+                </text>
+              </g>
+            ))}
+            <circle cx={toSvgX(particle.currentPos.x)} cy={toSvgY(particle.currentPos.y)} r="10" className={styles.movingHalo} />
+            <circle cx={toSvgX(particle.currentPos.x)} cy={toSvgY(particle.currentPos.y)} r="5" className={styles.movingPoint} />
+          </svg>
+        </div>
 
-            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Ajusta el tiempo de duración <span dangerouslySetInnerHTML={{ __html: '$$\\Delta t$$' }} /> de cada tramo:
-            </p>
-
-            <div className={styles.segmentList}>
-              {segmentTimes.map((tVal, idx) => {
-                const pStart = points[idx]
-                const pEnd = points[idx + 1]
-                if (!pStart || !pEnd) return null
-                const dist = Math.hypot(pEnd.x - pStart.x, pEnd.y - pStart.y)
-
-                return (
-                  <div key={idx} className={styles.segmentCard}>
-                    <div className={styles.segmentHeader}>
-                      <span className={styles.segmentBadge}>
-                        Tramo {idx + 1}: {pStart.label} → {pEnd.label}
-                      </span>
-                      <span className={styles.segmentDist}>{dist.toFixed(2)} m</span>
-                    </div>
-
-                    <div className={styles.segmentInputsRow}>
-                      <label className={styles.segmentLabel}>Duración Δt (s):</label>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        step="0.5"
-                        min="0.1"
-                        value={tVal}
-                        className={styles.timeInput}
-                        onChange={(e) => handleSegmentTimeChange(idx, e.target.value)}
-                      />
-                      <span className={styles.speedHint}>
-                        v_tramo = {(dist / Math.max(0.1, tVal)).toFixed(2)} m/s
-                      </span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Capas visuales */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-light)' }}>
-              <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                Capas Visuales
-              </span>
-              <label className={styles.layerCheckbox}>
-                <input
-                  type="checkbox"
-                  checked={showVectorVm}
-                  onChange={(e) => setShowVectorVm(e.target.checked)}
-                />
-                <span>Vector Velocidad Media <strong>v⃗_m</strong> (Azul)</span>
-              </label>
-              <label className={styles.layerCheckbox}>
-                <input
-                  type="checkbox"
-                  checked={showDisplacement}
-                  onChange={(e) => setShowDisplacement(e.target.checked)}
-                />
-                <span>Vector Desplazamiento <strong>Δr⃗</strong> (Dorado)</span>
-              </label>
-            </div>
-
-            {/* Velocidad de Reproducción */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '6px', borderTop: '1px solid var(--border-light)', fontSize: 'var(--text-xs)' }}>
-              <span style={{ color: 'var(--text-muted)' }}>Velocidad:</span>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                {[0.5, 1.0, 2.0].map((sp) => (
-                  <button
-                    key={sp}
-                    type="button"
-                    onClick={() => setSimSpeed(sp)}
-                    className={`btn btn--secondary ${simSpeed === sp ? styles.presetBtnActive : ''}`}
-                    style={{ padding: '2px 8px', fontSize: '11px' }}
-                  >
-                    {sp}x
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Controles de Simulación */}
-            <div className={styles.transportGrid}>
-              <button
-                className={`btn ${isPlaying ? 'btn--secondary' : 'btn--primary'}`}
-                onClick={handleTogglePlay}
-                type="button"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+        <div className={styles.playback}>
+          <div
+            className={styles.progressTrack}
+            role="progressbar"
+            aria-label="Avance del recorrido"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(particle.progressPercent)}
+          >
+            <div className={styles.progressFill} style={{ width: `${particle.progressPercent}%` }} />
+          </div>
+          <div className={styles.playbackActions}>
+            <span>Distancia recorrida: <strong>{particle.distanceCovered.toFixed(1)} m</strong></span>
+            <div>
+              <button type="button" className="btn btn--primary" onClick={toggleSimulation}>
+                <span className="material-symbols-outlined" aria-hidden="true">
                   {isPlaying ? 'pause' : 'play_arrow'}
                 </span>
-                {isPlaying ? 'Pausar' : particleState.isComplete && simTime > 0 ? 'Repetir' : 'Iniciar'}
+                {isPlaying ? 'Pausar' : particle.isComplete ? 'Repetir' : 'Iniciar recorrido'}
               </button>
-              <button
-                className="btn btn--secondary"
-                onClick={handleReset}
-                type="button"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>restart_alt</span>
+              <button type="button" className="btn btn--secondary" onClick={resetSimulation}>
                 Reiniciar
               </button>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Columna 2: Escenario Visual SVG y Telemetría */}
-        <div className={styles.stageCard}>
-          <div className={styles.cardHeader}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--corporate)' }} />
-              <span style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
-                Visualizador de Trayectoria y Vectores
-              </span>
-              <span className={styles.badge}>Tiempo t = {particleState.time.toFixed(2)} / {result.totalTime.toFixed(2)} s</span>
-            </div>
+      <section className={styles.results} aria-label="Resultados del recorrido">
+        <article className={`${styles.resultCard} ${styles.speedCard}`}>
+          <span className={styles.resultTag}>Rapidez media · solo importa cuánto camino recorrió</span>
+          <div className={styles.resultValue}>
+            {result.avgSpeed.toFixed(2)} <small>m/s</small>
           </div>
+          <div className={styles.formula} dangerouslySetInnerHTML={{
+            __html: renderLatex(
+              `\\text{Rapidez media} = \\frac{\\text{distancia total}}{\\text{tiempo total}} = \\frac{${result.totalDistance.toFixed(1)}\\text{ m}}{${result.totalTime.toFixed(1)}\\text{ s}} = ${result.avgSpeed.toFixed(2)}\\text{ m/s}`
+            ),
+          }} />
+          <p>La rapidez no lleva dirección.</p>
+        </article>
 
-          {/* Telemetría comparativa */}
-          <div className={styles.telemetryGrid}>
-            <div className={styles.telemetryCol}>
-              <span className={styles.telemetryLabel}>Distancia Total (d)</span>
-              <span className={styles.telemetryValue}>{result.totalDistance.toFixed(2)} <small style={{ fontSize: '10px' }}>m</small></span>
-            </div>
-            <div className={styles.telemetryCol}>
-              <span className={styles.telemetryLabel}>Rapidez Media (rm)</span>
-              <span className={styles.telemetryValue} style={{ color: 'var(--corporate)' }}>
-                {result.avgSpeed.toFixed(2)} <small style={{ fontSize: '10px' }}>m/s</small>
-              </span>
-            </div>
-            <div className={styles.telemetryCol}>
-              <span className={styles.telemetryLabel}>Desplazamiento (|Δr|)</span>
-              <span className={styles.telemetryValue} style={{ color: '#d97706' }}>
-                {result.displacementMagnitude.toFixed(2)} <small style={{ fontSize: '10px' }}>m</small>
-              </span>
-            </div>
-            <div className={styles.telemetryCol}>
-              <span className={styles.telemetryLabel}>Velocidad Media (|vm|)</span>
-              <span className={styles.telemetryValue} style={{ color: '#2563eb' }}>
-                {result.avgVelocityMag.toFixed(2)} <small style={{ fontSize: '10px' }}>m/s</small>
-              </span>
-            </div>
+        <article className={`${styles.resultCard} ${styles.velocityCard}`}>
+          <span className={styles.resultTag}>Velocidad media · importa dónde terminó</span>
+          <div className={styles.resultValue}>
+            {result.avgVelocityMag.toFixed(2)} <small>m/s</small>
           </div>
+          <div className={styles.formula} dangerouslySetInnerHTML={{
+            __html: renderLatex(
+              `\\text{Velocidad media} = \\frac{\\text{desplazamiento}}{\\text{tiempo total}} = \\frac{${result.displacementMagnitude.toFixed(1)}\\text{ m}}{${result.totalTime.toFixed(1)}\\text{ s}} = ${result.avgVelocityMag.toFixed(2)}\\text{ m/s}`
+            ),
+          }} />
+          <p>{result.avgVelocityMag > 0 ? `Dirección: ${result.geographicRumbo}` : 'Dirección: no hay, porque terminó donde empezó.'}</p>
+        </article>
+      </section>
 
-          {/* SVG Canvas */}
-          <div className={styles.svgStageWrapper}>
-            <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%' }}>
-              <defs>
-                <marker id="arrow-disp" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-                  <path d="M 0 1 L 7 4 L 0 7 z" fill="#d97706" />
-                </marker>
-                <marker id="arrow-vm" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-                  <path d="M 0 1 L 7 4 L 0 7 z" fill="#2563eb" />
-                </marker>
-              </defs>
-
-              {/* Grid axes */}
-              <line x1={pad} y1={toSvgY(0)} x2={svgW - pad} y2={toSvgY(0)} stroke="#e2e8f0" strokeWidth="1" />
-              <line x1={toSvgX(0)} y1={pad} x2={toSvgX(0)} y2={svgH - pad} stroke="#e2e8f0" strokeWidth="1" />
-
-              {/* Trayectoria Completa */}
-              {points.map((p, idx) => {
-                if (idx === points.length - 1) return null
-                const pNext = points[idx + 1]
-                return (
-                  <line
-                    key={idx}
-                    x1={toSvgX(p.x)}
-                    y1={toSvgY(p.y)}
-                    x2={toSvgX(pNext.x)}
-                    y2={toSvgY(pNext.y)}
-                    stroke="#94a3b8"
-                    strokeWidth="2"
-                    strokeDasharray="4 4"
-                  />
-                )
-              })}
-
-              {/* Vector Desplazamiento Δr */}
-              {showDisplacement && points.length >= 2 && result.displacementMagnitude > 0.1 && (
-                <line
-                  x1={toSvgX(points[0].x)}
-                  y1={toSvgY(points[0].y)}
-                  x2={toSvgX(points[points.length - 1].x)}
-                  y2={toSvgY(points[points.length - 1].y)}
-                  stroke="#d97706"
-                  strokeWidth="2.5"
-                  markerEnd="url(#arrow-disp)"
-                />
-              )}
-
-              {/* Vector Velocidad Media vm (desde el origen del primer punto) */}
-              {showVectorVm && points.length >= 2 && result.avgVelocityMag > 0.05 && (
-                <line
-                  x1={toSvgX(points[0].x)}
-                  y1={toSvgY(points[0].y)}
-                  x2={toSvgX(points[0].x + result.avgVelocityX * 2)}
-                  y2={toSvgY(points[0].y + result.avgVelocityY * 2)}
-                  stroke="#2563eb"
-                  strokeWidth="3"
-                  markerEnd="url(#arrow-vm)"
-                />
-              )}
-
-              {/* Nodos de la trayectoria */}
-              {points.map((p) => (
-                <g key={p.id} transform={`translate(${toSvgX(p.x)}, ${toSvgY(p.y)})`}>
-                  <circle r="6" fill="#ffffff" stroke="#24346c" strokeWidth="2" />
-                  <text y="-10" textAnchor="middle" fill="#172554" fontFamily="JetBrains Mono" fontSize="11" fontWeight="bold">
-                    {p.label} ({p.x}, {p.y})
-                  </text>
-                </g>
-              ))}
-
-              {/* Partícula animada */}
-              <g transform={`translate(${toSvgX(particleState.currentPos.x)}, ${toSvgY(particleState.currentPos.y)})`}>
-                <circle r="9" fill="#c8a932" opacity="0.3" />
-                <circle r="5" fill="#24346c" />
-                <circle r="2" fill="#ffffff" />
-              </g>
-            </svg>
-          </div>
-        </div>
-
-        {/* Columna 3: Análisis y Comparativa Explicativa */}
-        <div className={styles.column}>
-          {/* Card: Rapidez Media (Escalar) */}
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <span className={styles.cardTitle}>Rapidez Media (rm)</span>
-              <span className={styles.badge}>ESCALAR</span>
-            </div>
-            <div className={styles.bigValueRow}>
-              <span className={styles.bigValue}>{result.avgSpeed.toFixed(2)}</span>
-              <span className={styles.bigUnit}>m/s</span>
-            </div>
-            <div className={styles.formulaBox}>
-              <code className={styles.formulaCode}>{`r_m = \\frac{d}{\\Delta t} = \\frac{${result.totalDistance.toFixed(2)}\\text{ m}}{${result.totalTime.toFixed(2)}\\text{ s}} = ${result.avgSpeed.toFixed(2)}\\text{ m/s}`}</code>
-              <span>Cuenta toda la longitud de trayectoria recorrida. Siempre es $\ge 0$.</span>
-            </div>
-          </div>
-
-          {/* Card: Velocidad Media (Vectorial) */}
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <span className={styles.cardTitle} style={{ color: '#2563eb' }}>Velocidad Media (v⃗_m)</span>
-              <span className={styles.badge} style={{ color: '#2563eb', backgroundColor: '#eff6ff' }}>VECTORIAL</span>
-            </div>
-            <div className={styles.bigValueRow}>
-              <span className={styles.bigValue} style={{ color: '#2563eb' }}>{result.avgVelocityMag.toFixed(2)}</span>
-              <span className={styles.bigUnit}>m/s</span>
-            </div>
-            <div className={styles.formulaBox}>
-              <code className={styles.formulaCode}>{`\\vec{v}_m = \\frac{\\Delta\\vec{r}}{\\Delta t} = ${result.geographicRumbo}`}</code>
-              <span>Forma cartesiana: ({result.avgVelocityX.toFixed(2)}î + {result.avgVelocityY.toFixed(2)}ĵ) m/s</span>
-            </div>
-          </div>
-
-          {/* Card: Explicación Didáctica */}
-          <div className={styles.explanationCard}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#1e40af', fontWeight: 700, fontSize: 'var(--text-xs)' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>school</span>
-              <span>Conclusión Física</span>
-            </div>
-            <p style={{ fontSize: '11px', color: '#1e3a8a', lineHeight: 1.4, margin: 0 }}>
-              {result.explanation}
-            </p>
-          </div>
-        </div>
-      </div>
+      <aside className={styles.takeaway}>
+        <span className="material-symbols-outlined" aria-hidden="true">lightbulb</span>
+        <p>{result.explanation}</p>
+      </aside>
     </div>
   )
 }

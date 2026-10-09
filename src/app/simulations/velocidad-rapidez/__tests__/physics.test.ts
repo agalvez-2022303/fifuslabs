@@ -23,7 +23,7 @@ describe('Velocidad vs Rapidez Physics Engine', () => {
     expect(res.totalTime).toBe(4)
     expect(res.avgSpeed).toBe(5) // 20m / 4s = 5 m/s
     expect(res.avgVelocityMag).toBe(0) // Δr = 0, vm = 0
-    expect(res.explanation).toContain('NULA')
+    expect(res.explanation).toContain('desplazamiento es 0 m')
   })
 
   it('calcula rapidez y velocidad media en L (cuadrante I)', () => {

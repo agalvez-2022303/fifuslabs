@@ -408,6 +408,8 @@
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-light);
   width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .guideList {

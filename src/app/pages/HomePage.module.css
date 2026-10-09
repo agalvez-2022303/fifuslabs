@@ -234,13 +234,7 @@
 .howItWorksSection {
   background-color: #ffffff;
   border-bottom: 1px solid var(--border-neutral);
-  padding: var(--sp-8) 0;
-}
-
-@media (min-width: 768px) {
-  .howItWorksSection {
-    padding: var(--sp-12) 0;
-  }
+  padding: 0;
 }
 
 .howItWorksInner {
@@ -255,21 +249,48 @@
   }
 }
 
-.howHeader {
-  text-align: center;
-  margin-bottom: var(--sp-8);
+.howDetails {
+  border-bottom: 1px solid var(--border-neutral);
+}
+
+.howSummary {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  cursor: pointer;
+  list-style: none;
+}
+
+.howSummary::-webkit-details-marker {
+  display: none;
+}
+
+.howSummaryText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.howChevron {
+  color: var(--corporate);
+  transition: transform var(--transition-fast);
+}
+
+.howDetails[open] .howChevron {
+  transform: rotate(180deg);
 }
 
 .howTitle {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 4vw, 2rem);
-  font-weight: 800;
+  font-size: var(--text-sm);
+  font-weight: 700;
   color: var(--corporate-dark);
-  margin-bottom: 6px;
 }
 
 .howDesc {
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: var(--slate-muted);
 }
 
@@ -277,6 +298,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--sp-4);
+  padding: 0 0 var(--sp-5);
 }
 
 @media (min-width: 600px) {

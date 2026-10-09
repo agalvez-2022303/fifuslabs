@@ -125,48 +125,55 @@ export default function HomePage() {
       {/* ─── Bloque "¿Cómo funciona?" ───────────────────────────── */}
       <section className={styles.howItWorksSection} id="como-funciona">
         <div className={styles.howItWorksInner}>
-          <div className={styles.howHeader}>
-            <h2 className={styles.howTitle}>¿Cómo funciona FísicaLab?</h2>
-            <p className={styles.howDesc}>4 pasos sencillos para dominar cualquier concepto de física a tu ritmo</p>
-          </div>
+          <details className={styles.howDetails}>
+            <summary className={styles.howSummary}>
+              <span className={styles.howSummaryText}>
+                <span className={styles.howTitle}>¿Cómo funciona FísicaLab?</span>
+                <span className={styles.howDesc}>4 pasos sencillos para dominar cualquier concepto a tu ritmo</span>
+              </span>
+              <span className={`material-symbols-outlined ${styles.howChevron}`} aria-hidden="true">
+                expand_more
+              </span>
+            </summary>
 
-          <div className={styles.stepsGrid}>
-            <div className={styles.stepCard}>
-              <div className={styles.stepBadge}>1</div>
-              <div className={styles.stepIconBox}>
-                <span className="material-symbols-outlined">touch_app</span>
+            <div className={styles.stepsGrid}>
+              <div className={styles.stepCard}>
+                <div className={styles.stepBadge}>1</div>
+                <div className={styles.stepIconBox}>
+                  <span className="material-symbols-outlined">touch_app</span>
+                </div>
+                <h3 className={styles.stepTitle}>Elige un tema</h3>
+                <p className={styles.stepText}>Explora vectores, cinemática, velocidad, alcance de móviles y estática.</p>
               </div>
-              <h3 className={styles.stepTitle}>Elige un tema</h3>
-              <p className={styles.stepText}>Explora vectores, cinemática, velocidad, alcance de móviles y estática.</p>
-            </div>
 
-            <div className={styles.stepCard}>
-              <div className={styles.stepBadge}>2</div>
-              <div className={styles.stepIconBox}>
-                <span className="material-symbols-outlined">tune</span>
+              <div className={styles.stepCard}>
+                <div className={styles.stepBadge}>2</div>
+                <div className={styles.stepIconBox}>
+                  <span className="material-symbols-outlined">tune</span>
+                </div>
+                <h3 className={styles.stepTitle}>Juega con la simulación</h3>
+                <p className={styles.stepText}>Ajusta variables en tiempo real y observa la respuesta gráfica inmediata.</p>
               </div>
-              <h3 className={styles.stepTitle}>Juega con la simulación</h3>
-              <p className={styles.stepText}>Ajusta variables en tiempo real y observa la respuesta gráfica inmediata.</p>
-            </div>
 
-            <div className={styles.stepCard}>
-              <div className={styles.stepBadge}>3</div>
-              <div className={styles.stepIconBox}>
-                <span className="material-symbols-outlined">functions</span>
+              <div className={styles.stepCard}>
+                <div className={styles.stepBadge}>3</div>
+                <div className={styles.stepIconBox}>
+                  <span className="material-symbols-outlined">functions</span>
+                </div>
+                <h3 className={styles.stepTitle}>Repasa fórmulas y glosario</h3>
+                <p className={styles.stepText}>Comprueba ecuaciones despejadas y definiciones claras de cada magnitud.</p>
               </div>
-              <h3 className={styles.stepTitle}>Repasa fórmulas y glosario</h3>
-              <p className={styles.stepText}>Comprueba ecuaciones despejadas y definiciones claras de cada magnitud.</p>
-            </div>
 
-            <div className={styles.stepCard}>
-              <div className={styles.stepBadge}>4</div>
-              <div className={styles.stepIconBox}>
-                <span className="material-symbols-outlined">menu_book</span>
+              <div className={styles.stepCard}>
+                <div className={styles.stepBadge}>4</div>
+                <div className={styles.stepIconBox}>
+                  <span className="material-symbols-outlined">menu_book</span>
+                </div>
+                <h3 className={styles.stepTitle}>Lee la teoría</h3>
+                <p className={styles.stepText}>Consolida tu aprendizaje con explicaciones conceptuales y paso a paso.</p>
               </div>
-              <h3 className={styles.stepTitle}>Lee la teoría</h3>
-              <p className={styles.stepText}>Consolida tu aprendizaje con explicaciones conceptuales y paso a paso.</p>
             </div>
-          </div>
+          </details>
         </div>
       </section>
 

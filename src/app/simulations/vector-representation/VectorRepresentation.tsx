@@ -12,6 +12,7 @@ import {
   type CardinalPrimary,
   type CardinalSecondary,
 } from './physics'
+import { renderLatex } from '../../utils/latex'
 import styles from './VectorRepresentation.module.css'
 
 type InputMode = 'rectangular' | 'polar' | 'geographic'
@@ -771,17 +772,33 @@ export default function VectorRepresentation() {
               <div className={styles.mathPanel}>
                 <div className={styles.mathStep}>
                   <span className={styles.mathStepTitle}>1. Teorema de Pitágoras (Módulo):</span>
-                  <code className={styles.mathFormula}>{rectToPolExplanation.magnitudeStep}</code>
+                  <div
+                    className={styles.mathFormula}
+                    dangerouslySetInnerHTML={{
+                      __html: renderLatex(rectToPolExplanation.magnitudeStep, true),
+                    }}
+                  />
                 </div>
                 <div className={styles.mathStep}>
                   <span className={styles.mathStepTitle}>2. Trigonometría (Ángulo Polar):</span>
                   <span className={styles.mathStepDesc}>{rectToPolExplanation.quadrantStep}</span>
-                  <code className={styles.mathFormula}>{rectToPolExplanation.angleStep}</code>
+                  <div
+                    className={styles.mathFormula}
+                    dangerouslySetInnerHTML={{
+                      __html: renderLatex(rectToPolExplanation.angleStep, true),
+                    }}
+                  />
                 </div>
                 <div className={styles.mathStep}>
                   <span className={styles.mathStepTitle}>3. Componentes Cartesianas Inversas:</span>
-                  <code className={styles.mathFormula}>{polToRectExplanation.xStep}</code>
-                  <code className={styles.mathFormula}>{polToRectExplanation.yStep}</code>
+                  <div
+                    className={styles.mathFormula}
+                    dangerouslySetInnerHTML={{ __html: renderLatex(polToRectExplanation.xStep, true) }}
+                  />
+                  <div
+                    className={styles.mathFormula}
+                    dangerouslySetInnerHTML={{ __html: renderLatex(polToRectExplanation.yStep, true) }}
+                  />
                 </div>
               </div>
             )}

@@ -145,11 +145,11 @@ export function computeVelocityVsSpeed(
 
   let explanation = ''
   if (Math.abs(totalDistance - dispMag) < 1e-4) {
-    explanation = 'La rapidez media y la magnitud de la velocidad media son IGUALES porque el movimiento es en línea recta sin cambiar de sentido.'
+    explanation = 'Como avanzó en línea recta y no cambió de dirección, la distancia recorrida y el desplazamiento son iguales. Por eso, la rapidez media y el valor de la velocidad media también son iguales.'
   } else if (dispMag < 1e-4) {
-    explanation = `La velocidad media es NULA (|v_m| = 0 m/s) porque la partícula regresó al punto de origen (desplazamiento Δr = 0), a pesar de haber recorrido una rapidez media de ${avgSpeed.toFixed(2)} m/s.`
+    explanation = `Regresó al punto de partida: recorrió ${totalDistance.toFixed(2)} m, pero terminó donde empezó y su desplazamiento es 0 m. Por eso, su rapidez media es ${avgSpeed.toFixed(2)} m/s y su velocidad media es 0 m/s.`
   } else {
-    explanation = `La rapidez media (${avgSpeed.toFixed(2)} m/s) es MAYOR que la magnitud de la velocidad media (${avgVelocityMag.toFixed(2)} m/s) porque la trayectoria recorre más distancia que la longitud del vector línea recta entre inicio y fin.`
+    explanation = `Recorrió ${totalDistance.toFixed(2)} m, pero quedó a ${dispMag.toFixed(2)} m del punto de partida. La rapidez media usa todo el camino (${avgSpeed.toFixed(2)} m/s); la velocidad media usa el cambio entre inicio y final (${avgVelocityMag.toFixed(2)} m/s) e incluye la dirección.`
   }
 
   return {
