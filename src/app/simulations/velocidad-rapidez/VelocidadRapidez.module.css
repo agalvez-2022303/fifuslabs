@@ -1,0 +1,311 @@
+.simulation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.intro {
+  padding: var(--sp-4);
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-xl);
+}
+
+.intro h2,
+.sectionHeading h3 {
+  margin: 0;
+  color: var(--corporate-dark);
+  font-size: var(--text-lg);
+}
+
+.intro p,
+.sectionHeading p {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.routePicker {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-2);
+}
+
+@media (min-width: 700px) {
+  .routePicker {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.routeButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 76px;
+  padding: var(--sp-3);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-lg);
+  background: var(--card-bg);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.routeButton:hover {
+  border-color: var(--corporate);
+}
+
+.routeButtonActive {
+  border-color: var(--corporate);
+  background: #eef2ff;
+  box-shadow: inset 0 0 0 1px var(--corporate);
+}
+
+.routeButton strong {
+  color: var(--corporate-dark);
+  font-size: var(--text-sm);
+}
+
+.routeButton span {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+.visualCard,
+.resultCard {
+  padding: var(--sp-4);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-xl);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.visualCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.sectionHeading h3 {
+  font-size: var(--text-base);
+}
+
+.timeLabel {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border-radius: var(--radius-full);
+  background: var(--surface-alt);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.routeCanvas {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  background: #fff;
+}
+
+.routeCanvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 180px;
+}
+
+.axis {
+  stroke: #e2e8f0;
+  stroke-width: 1;
+  stroke-dasharray: 5 5;
+}
+
+.pathLine {
+  fill: none;
+  stroke: #24346c;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.displacementLine {
+  stroke: #d97706;
+  stroke-width: 3;
+  stroke-dasharray: 7 5;
+}
+
+.routePoint {
+  fill: #fff;
+  stroke: #24346c;
+  stroke-width: 3;
+}
+
+.pointLabel {
+  fill: #172554;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.movingHalo {
+  fill: #fbbf24;
+  opacity: 0.35;
+}
+
+.movingPoint {
+  fill: #c8a932;
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.playback {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.progressTrack {
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--surface-alt);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gold);
+  transition: width 100ms linear;
+}
+
+.playbackActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.playbackActions > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.playbackActions button {
+  min-height: 40px;
+}
+
+.playbackActions button .material-symbols-outlined {
+  vertical-align: middle;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-3);
+}
+
+@media (min-width: 700px) {
+  .results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.resultCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+
+.resultTag {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.resultValue {
+  color: var(--corporate);
+  font-family: var(--font-mono);
+  font-size: clamp(1.8rem, 6vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.velocityCard .resultValue {
+  color: #2563eb;
+}
+
+.resultValue small {
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.formula {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 8px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--sub-card-bg);
+  color: var(--text-primary);
+}
+
+.resultCard p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.takeaway {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-lg);
+  background: #fffbeb;
+  color: #78350f;
+}
+
+.takeaway .material-symbols-outlined {
+  color: #b45309;
+}
+
+.takeaway p {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+@media (max-width: 520px) {
+  .sectionHeading,
+  .playbackActions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .timeLabel {
+    align-self: flex-start;
+  }
+}
