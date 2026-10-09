@@ -1,38 +1,42 @@
 {
   "slug": "tres-fuerzas-equilibrio",
   "titulo": "Tres Fuerzas en Equilibrio",
-  "teoria": "Para que un objeto esté en equilibrio estático, la suma vectorial de todas las fuerzas que actúan sobre él debe ser cero (Primera Condición de Equilibrio). Cuando tres fuerzas concurrentes actúan sobre un nudo, se cumple:\n\n**F₁ + F₂ + F₃ = 0**\n\nEsto implica que las componentes horizontales y verticales suman cero por separado. Geométricamente, los tres vectores forman un triángulo cerrado. La condición de existencia exige que cada fuerza sea menor que la suma de las otras dos.",
+  "teoria": "¿Qué es?\nEs la rama de la estática que estudia cuando tres fuerzas jalando al mismo tiempo sobre un cuerpo se cancelan mutuamente, logrando que el objeto permanezca inmóvil (en reposo).\n\nIdeas clave:\n1. La fuerza neta sobre el cuerpo debe ser cero (ΣF⃗ = 0).\n2. En componentes: la suma de fuerzas horizontales debe ser cero (ΣF_x = 0) y las verticales también (ΣF_y = 0).\n3. Si dibujas los tres vectores de fuerza uno tras otro, forman un triángulo cerrado.\n4. Se usa para calcular las tensiones en cuerdas que sostienen pesos (como lámparas, piñatas o puentes).\n\nEjemplo cotidiano:\nImagina un semáforo colgado en medio de la calle sostenido por dos cables amarrados a dos postes:\n- El peso del semáforo tira hacia abajo.\n- El cable izquierdo tira hacia arriba y a la izquierda.\n- El cable derecho tira hacia arriba y a la derecha.\n- Las fuerzas horizontales se cancelan y las verticales sostienen el peso del semáforo.\n\nErrores comunes:\n- Olvidar descomponer las fuerzas inclinadas en X e Y.\n- Sumar los valores de las tensiones directamente sin tomar en cuenta los ángulos.\n- Confundir la masa en kilogramos (kg) con el peso en Newtons (N).\n\nResumen:\nUn cuerpo sostenido por tres fuerzas está en equilibrio cuando la suma de fuerzas en X y en Y es cero, evitando que el cuerpo caiga o se mueva.",
   "formulas": [
     {
-      "expresion": "ΣFₓ = 0",
-      "descripcion": "Equilibrio en el eje X",
+      "expresion": "\\sum F_x = 0, \\quad \\sum F_y = 0",
+      "descripcion": "Primera Condición de Equilibrio Estático",
       "variables": [
-        { "simbolo": "Fₓ", "descripcion": "Componente horizontal de cada fuerza", "unidad": "N" }
+        { "simbolo": "ΣF_x", "descripcion": "Suma de fuerzas en el eje horizontal X", "unidad": "N" },
+        { "simbolo": "ΣF_y", "descripcion": "Suma de fuerzas en el eje vertical Y", "unidad": "N" }
       ]
     },
     {
-      "expresion": "ΣFᵧ = 0",
-      "descripcion": "Equilibrio en el eje Y",
+      "expresion": "F_{1y} + F_{2y} = P",
+      "descripcion": "Equilibrio Vertical para Sostener un Peso",
       "variables": [
-        { "simbolo": "Fᵧ", "descripcion": "Componente vertical de cada fuerza", "unidad": "N" }
+        { "simbolo": "F_1y, F_2y", "descripcion": "Componentes verticales de las tensiones", "unidad": "N" },
+        { "simbolo": "P", "descripcion": "Peso suspendido (m · g)", "unidad": "N" }
       ]
     },
     {
-      "expresion": "F₁ < F₂ + F₃",
-      "descripcion": "Condición de existencia del equilibrio",
+      "expresion": "\\frac{F_1}{\\sin(\\alpha)} = \\frac{F_2}{\\sin(\\beta)} = \\frac{F_3}{\\sin(\\gamma)}",
+      "descripcion": "Teorema de Lami (Ley de senos para 3 fuerzas en equilibrio)",
       "variables": [
-        { "simbolo": "F₁, F₂, F₃", "descripcion": "Magnitudes de las tres fuerzas", "unidad": "N" }
+        { "simbolo": "F_1, F_2, F_3", "descripcion": "Magnitudes de las tres fuerzas", "unidad": "N" },
+        { "simbolo": "α, β, γ", "descripcion": "Ángulos opuestos a cada fuerza", "unidad": "°" }
       ]
     }
   ],
-  "unidades": [
-    { "magnitud": "Fuerza", "unidad": "Newton", "simbolo": "N" },
-    { "magnitud": "Ángulo", "unidad": "Grado sexagesimal", "simbolo": "°" }
-  ],
   "glosario": [
-    { "termino": "Equilibrio estático", "definicion": "Estado de un cuerpo cuya suma vectorial de fuerzas y de momentos es cero." },
-    { "termino": "Fuerza concurrente", "definicion": "Fuerza cuya línea de acción pasa por un punto común." },
-    { "termino": "Polea", "definicion": "Máquina simple que cambia la dirección de la fuerza sin variar su magnitud." },
-    { "termino": "Tensión", "definicion": "Fuerza transmitida a través de una cuerda o cable." }
+    { "termino": "Diagrama de Cuerpo Libre (DCL)", "definicion": "Dibujo donde se representan todas las fuerzas externas que actúan sobre un objeto." },
+    { "termino": "Equilibrio Estático", "definicion": "Estado de reposo donde la suma de todas las fuerzas aplicadas es igual a cero." },
+    { "termino": "Fuerza (F⃗)", "definicion": "Interacción capaz de mover, detener o deformar un cuerpo, medida en Newtons (N)." },
+    { "termino": "Fuerza Neta", "definicion": "Suma de todas las fuerzas que actúan sobre un cuerpo." },
+    { "termino": "Newton (N)", "definicion": "Unidad de fuerza del Sistema Internacional (1 N = 1 kg · m/s²)." },
+    { "termino": "Peso (P)", "definicion": "Fuerza de atracción gravitatoria que ejerce la Tierra sobre una masa (P = m · g)." },
+    { "termino": "Polígono Cerrado", "definicion": "Figura geométrica formada al conectar secuencialmente vectores de fuerza en equilibrio." },
+    { "termino": "Tensión (T)", "definicion": "Fuerza ejercida por una cuerda, cable o cadena tensada." },
+    { "termino": "Teorema de Lami", "definicion": "Ecuación trigonométrica que relaciona tres fuerzas en equilibrio con sus ángulos opuestos." }
   ]
 }
