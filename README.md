@@ -107,3 +107,20 @@ Ejecutar la suite de pruebas unitarias para los motores de física:
 ```bash
 npm run test
 ```
+
+---
+
+## Panel de administración local
+
+1. Completa `.env` con `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` y `PORT` (usa `.env.example` como guía).
+2. Configura `VITE_API_URL` en `src/.env.local`, por ejemplo `http://localhost:3001/api`.
+3. Si todavía no se aplicó, ejecuta el esquema PostgreSQL existente y crea un admin temporal:
+   ```sql
+   INSERT INTO usuario (nombre, correo, password_hash, rol)
+   VALUES ('Administrador', 'admin@fisicalab.local', 'admin123', 'admin');
+   ```
+   Esta contraseña está en texto plano solo para desarrollo; nunca la uses en producción.
+4. Instala dependencias con `npm install` y levanta ambas aplicaciones con `npm run dev:all`.
+
+También puedes iniciar los procesos por separado con `npm run server` y `npm run dev`.
+El panel está en `/admin/login` y el endpoint de diagnóstico en `/api/health`.

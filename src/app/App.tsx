@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import TemaDashboard from './pages/TemaDashboard'
 import SimulationShell from './components/SimulationShell'
+import AdminRoutes from './admin/AdminRoutes'
 
 // Code-split por simulación — cada chunk se carga solo cuando se necesita
 const ConstantAcceleration = lazy(
@@ -59,6 +60,7 @@ export default function App() {
 
   return (
     <Routes>
+      <Route path="/admin/*" element={<AdminRoutes />} />
       <Route path="/" element={<HomePage />} />
 
       {/* Dashboard por Tema y sus 4 pestañas (Simulación, Fórmulas, Glosario, Teoría) */}
