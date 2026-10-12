@@ -11,12 +11,20 @@ import { temaRoutes } from './routes/temas'
 import type { CategoryService } from './services/category-service'
 import type { LegacyService } from './services/legacy-service'
 import type { TemaService } from './services/tema-service'
+import type { AuthService } from './services/auth-service'
+import type { UserService } from './services/user-service'
+import { authRoutes } from './routes/auth'
+import { userRoutes } from './routes/users'
+import type { HealthService } from './services/health-service'
 
 export interface AppDependencies {
   auth: AuthProvider
   temas: TemaService
   categories: CategoryService
   legacy: LegacyService
+  accounts?: { auth: AuthService; users: UserService }
+  storage?: 'json-temporary' | 'postgres'
+  health?: HealthService
 }
 export function createApp(deps: AppDependencies) {
   const app = new Hono<AppEnv>()
@@ -33,7 +41,11 @@ export function createApp(deps: AppDependencies) {
   )
   app.route('/api/temas', temaRoutes(deps.temas))
   app.route('/api/categories', categoryRoutes(deps.categories))
-  app.route('/api/health', healthRoutes())
+  app.route('/api/health', healthRoutes(deps.storage, deps.health))
+  if (deps.accounts) {
+    app.route('/api/auth', authRoutes(deps.accounts.auth, deps.accounts.users))
+    app.route('/api/users', userRoutes(deps.accounts.users))
+  }
   app.route('/api', legacyRoutes(deps.legacy))
   app.notFound(c =>
     c.json({ error: { code: 'NOT_FOUND', message: 'Endpoint no encontrado' } }, 404)

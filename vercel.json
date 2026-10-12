@@ -3,7 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "src/dist",
   "functions": {
-    "api/[[...route]].ts": { "includeFiles": "data/**" }
+    "api/[[...route]].ts": { "includeFiles": "{data/**,backend/db/certs/**}" }
   },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/[[...route]]" },

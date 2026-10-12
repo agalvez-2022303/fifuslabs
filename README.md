@@ -149,7 +149,8 @@ backend/app.ts           app Hono compartida entre Vercel, Vite y pruebas
 backend/routes/          traducción HTTP; delega las reglas al servicio
 backend/middleware/      identidad, roles, Zod, versiones y body máximo
 backend/services/        CRUD, visibilidad, sanitización, LaTeX y revisiones
-backend/repositories/    interfaces, JsonFileRepository e InMemoryRepository
+backend/repositories/    interfaces, JSON, PostgreSQL y repositorios de prueba
+backend/db/              migraciones, importación y conexión TLS PostgreSQL
 packages/shared-types/  TemaConfig, tipos transitorios, esquemas Zod y whitelist
 scripts/migrate-temas.ts migración reproducible desde los temas estáticos
 data/temas/<slug>.json   tema canónico y metadatos internos de persistencia
@@ -161,23 +162,23 @@ versión + persistencia del tema + revisión + poda del historial**. Esta garant
 forma parte de la interfaz; un repositorio futuro debe implementarla mediante
 una transacción, no mediante varias llamadas independientes.
 
-Para conectar Supabase después, implementar `TemaRepository`, `CategoryRepository`,
-`RevisionRepository` y los contratos de compatibilidad de
-`backend/repositories/interfaces.ts`. Implementar `AuthProvider` con verificación
-real de JWT (firma, issuer, expiración y rol desde una fuente confiable).
+`PostgresRepository` implementa los contratos de contenido con transacciones SQL.
+`SupabaseAuthProvider` verifica los tokens contra Supabase Auth y consulta el rol
+actual en PostgreSQL. No acepta roles de headers, JWT decodificados sin verificar
+ni `user_metadata` como fuente de permisos.
 **La selección de implementaciones se cambia solo en `backend/composition.ts`.**
-No existe integración Supabase todavía.
+El modo JSON sigue disponible para desarrollo sin base de datos.
 
 `server/` es el servidor Express/PostgreSQL preexistente del panel de administración.
 Sus rutas y autenticación son independientes. El `/api/health` de Hono identifica
 el backend de contenido; el del puerto Express diagnostica PostgreSQL.
 
-### Desarrollo y variables de entorno
+### Desarrollo sin base de datos (modo JSON)
 
 ```bash
 npm ci
 npm run migrate:temas
-DEV_AUTH=true NODE_ENV=development npm run dev
+CONTENT_REPOSITORY=json DEV_AUTH=true NODE_ENV=development npm run dev
 ```
 
 La app queda en `http://localhost:5173/api`. También se puede copiar `.env.example`
@@ -197,7 +198,7 @@ Una lectura pública puede funcionar sin sesión; una ruta protegida devuelve
 401 sin identidad válida y 403 si el rol no es teacher. En producción, los
 headers de desarrollo siempre reciben 401 en rutas protegidas. El repositorio
 tiene además su propia barrera 501 para cualquier escritura desde una identidad
-confiable futura. Los datos dependientes de rol llevan `Cache-Control: no-store`.
+confiable. Los datos dependientes de rol llevan `Cache-Control: no-store`.
 
 ### Modelo, contratos y concurrencia
 
@@ -310,7 +311,7 @@ ese campo nunca sale por HTTP. No hay transacciones multi-tema ni bloqueo entre
 procesos, coordinación distribuida, búsqueda indexada o garantía de durabilidad
 mediante fsync. El historial aumenta el tamaño de los archivos.
 
-En Vercel los datos se empaquetan con `includeFiles: data/**`; el disco de la
+En Vercel se empaquetan los datos y la CA con `includeFiles: {data/**,backend/db/certs/**}`; el disco de la
 aplicación es de solo lectura y las escrituras devuelven 501 desde el repositorio.
 El catch-all es la **única función** bajo `api/`; las capas están fuera para no
 consumir funciones adicionales. No se ha realizado un despliegue remoto.
@@ -432,3 +433,181 @@ CRUD, reorder, snapshots, sanitización y tokens de concurrencia. El repositorio
 JSON se prueba en un directorio temporal, con escritores concurrentes y
 reapertura. También se prueba el adaptador Node sobre TCP y el plugin real de
 Vite; las pruebas no escriben en los temas del proyecto.
+
+## PostgreSQL en Supabase y gestión de usuarios
+
+### Instalación de la base de datos
+
+Configurar en el `.env` de la raíz (nunca en variables `VITE_*`):
+
+```dotenv
+CONTENT_REPOSITORY=postgres
+DATABASE_URL=postgresql://postgres:PASSWORD_URL_ENCODED@db.PROJECT_REF.supabase.co:5432/postgres
+DATABASE_SSL=true
+SUPABASE_URL=https://PROJECT_REF.supabase.co
+SUPABASE_PUBLISHABLE_KEY=CLAVE_PUBLICA_DEL_PROYECTO
+SUPABASE_SECRET_KEY=CLAVE_SECRET_DE_SERVIDOR
+```
+
+También se aceptan las claves legacy `SUPABASE_ANON_KEY` y
+`SUPABASE_SERVICE_ROLE_KEY`. Obtenerlas en Supabase → Project Settings → API Keys.
+La contraseña del URI es la contraseña PostgreSQL, **no** una API key. Codificar
+los caracteres especiales del password al construir el URI. Para Vercel se
+recomienda el URI de Supavisor (pooler) del panel Connect; el pool Node tiene
+máximo 3 conexiones por instancia y no usa prepared statements nombrados.
+
+La conexión verifica CA y hostname. Se incluye la CA pública de Supabase Root
+2021, distribuida en
+`https://supabase-downloads.s3.amazonaws.com/prod/ssl/prod-ca-2021.crt`;
+`DATABASE_CA_CERT` permite aportar otro PEM. Nunca se desactiva la verificación
+para conectar remotamente. `DATABASE_SSL=false` solo se admite con localhost en
+desarrollo.
+
+```bash
+npm ci
+npm run db:setup       # Migraciones SQL + importación de JSON
+npm run db:migrate     # Solo migraciones pendientes
+npm run db:seed        # Solo registros que no existen; conserva ediciones
+```
+
+Las migraciones usan un lock transaccional y checksums. No modificar SQL ya
+aplicado; crear una migración nueva. La importación es transaccional e idempotente;
+no borra ni sobrescribe temas existentes. Los temas importados reciben una
+revisión inicial; si el JSON ya tenía historial, se conserva ese historial.
+
+El esquema privado `fisicalab` contiene:
+
+| Tabla         | Finalidad                                                               |
+| ------------- | ----------------------------------------------------------------------- |
+| `categories`  | Metadatos de las categorías                                             |
+| `temas`       | Documento TemaConfig JSONB, estado, categoría, versión y borrado lógico |
+| `revisions`   | Snapshots completos; últimas 50 por tema                                |
+| `aliases`     | Slugs históricos que apuntan a un tema canónico                         |
+| `simulations` | Catálogo de compatibilidad, de solo lectura por HTTP                    |
+| `profiles`    | Perfil, rol `student`/`teacher`, estado activo y versión                |
+| `migrations`  | Registro de migraciones y checksum                                      |
+
+RLS está activado y no hay políticas para acceso directo de clientes. El backend
+accede mediante su conexión PostgreSQL de servidor. Cada escritura de contenido
+compara la versión, guarda el documento, inserta la revisión y poda el historial
+dentro de **una transacción PostgreSQL**. Ya no depende del disco de Vercel y las
+escrituras PostgreSQL funcionan también en producción.
+
+Los datos y la CA siguen incluidos en el paquete Vercel para soportar el modo
+JSON y la validación TLS. Las migraciones se ejecutan por CLI; no durante una
+petición HTTP ni al arrancar una función.
+
+### Identidades, permisos y primer maestro
+
+Supabase Auth mantiene las cuentas, contraseñas, sesiones, confirmación de correo
+y recuperación de credenciales. Las contraseñas no se almacenan en tablas de
+FísicaLab. El trigger `fisicalab_auth_user_created` crea un perfil `student` al
+crear una identidad y sincroniza su email. Se ignoran roles de `user_metadata`.
+
+En cada petición autenticada, `SupabaseAuthProvider` verifica el token mediante
+`GET /auth/v1/user` de Supabase (verificación real de firma/expiración, compatible
+con claves JWT modernas y legacy) y obtiene el rol/estado actual del perfil SQL.
+Un cambio de rol o desactivación se aplica a las siguientes peticiones sin
+esperar a que expire el JWT. Los headers `x-dev-*` **no funcionan** en modo postgres,
+incluso localmente. La clave de servidor solo se usa para la administración de
+identidades y nunca se devuelve al cliente.
+
+Crear el primer maestro mediante el CLI administrativo. En `.env`, configurar:
+
+```dotenv
+BOOTSTRAP_EMAIL=EMAIL_REAL_DEL_MAESTRO
+BOOTSTRAP_PASSWORD=CONTRASENA_SEGURA_DE_AL_MENOS_12_CARACTERES
+```
+
+```bash
+npm run users:bootstrap
+```
+
+Alternativamente crear una identidad en Supabase Auth y configurar
+`BOOTSTRAP_USER_ID` con su UUID antes de ejecutar el mismo comando; así no es
+necesario crear otra cuenta. El bootstrap solo funciona cuando no hay un maestro
+activo; no es un endpoint público. El repositorio bloquea la desactivación o
+degradación del último maestro, incluso con solicitudes concurrentes. Después
+del bootstrap, los maestros pueden crear alumnos u otros maestros por HTTP.
+Eliminar las variables de contraseña de bootstrap una vez creado el usuario.
+
+El registro público siempre crea alumnos. Si el proyecto requiere confirmación
+de email, `/auth/register` responde con un mensaje para revisar el correo y
+`session: null`; configurar Site URL, redirects y correo en Supabase Auth.
+El login entrega `data.session` y `data.user`; usar `session.access_token` como
+Bearer y renovar con `session.refresh_token`. Las claves de API no sustituyen al
+token de sesión de un usuario. Logout revoca las sesiones de renovación; los
+access JWT ya emitidos pueden ser válidos hasta expirar, como en Supabase Auth.
+El cliente debe borrar sus tokens al cerrar sesión. Desactivar un perfil bloquea
+el acceso a la app inmediatamente, independientemente de esa expiración.
+
+### Endpoints adicionales
+
+Todos llevan prefijo `/api`, validación Zod y body máximo 256 KiB.
+
+| Método | Path             | Acceso / cuerpo                                                      |
+| ------ | ---------------- | -------------------------------------------------------------------- |
+| POST   | `/auth/register` | Público; `{ email, password, name }`; no acepta rol                  |
+| POST   | `/auth/login`    | Público; `{ email, password }`                                       |
+| POST   | `/auth/refresh`  | Público; `{ refreshToken }`                                          |
+| GET    | `/auth/me`       | Usuario autenticado; perfil SQL                                      |
+| POST   | `/auth/logout`   | Usuario autenticado; revoca refresh sessions en Supabase             |
+| GET    | `/users`         | Teacher; filtros `q`, `limit`, `offset`, incluye inactivos           |
+| GET    | `/users/:id`     | Teacher; UUID de perfil                                              |
+| POST   | `/users`         | Teacher; `{ email, password, name, role? }`, rol por defecto student |
+| PATCH  | `/users/:id`     | Teacher; `{ name?, role?, active?, version? }` o `If-Match`          |
+| DELETE | `/users/:id`     | Teacher; `If-Match`; desactiva perfil y bloquea identidad, 204       |
+
+DELETE de usuario es lógico: conserva identidad y auditoría. El perfil inactivo
+no puede acceder a rutas protegidas aunque conserve un JWT. La administración
+en PostgreSQL y los bloqueos en Supabase Auth son dos sistemas distintos:
+desactivar se guarda primero en SQL; si el bloqueo remoto falla, el usuario
+sigue sin acceso a la app y se devuelve 503. Leer la nueva versión antes de
+reintentar. Reactivar desbloquea Auth antes de activar el perfil. El cambio de
+email y la recuperación de contraseña se gestionan en Supabase Auth; el trigger
+sincroniza los cambios de email.
+
+Si falta una clave de Auth, las lecturas públicas de PostgreSQL funcionan, pero
+login/registro devuelven 503 con un mensaje de configuración. Las rutas protegidas
+continúan cerradas (401 sin sesión). `/health` comprueba además el acceso a la
+tabla de temas; responde 503 si la base o las migraciones no están disponibles.
+No confundir este backend con las rutas Express preexistentes del puerto 3001.
+
+### Ejemplos con JWT
+
+```bash
+API=http://localhost:5173/api
+
+# Usar credenciales reales, no las claves de API del proyecto.
+curl -i -X POST "$API/auth/login" -H 'Content-Type: application/json' \
+  -d '{"email":"EMAIL_DEL_MAESTRO","password":"CONTRASENA_DEL_MAESTRO"}'
+
+# Copiar data.session.access_token de la respuesta anterior.
+TOKEN=TOKEN_DE_SESION
+AUTH=(-H "Authorization: Bearer $TOKEN")
+curl -i "$API/auth/me" "${AUTH[@]}"
+curl -i "$API/users?limit=20" "${AUTH[@]}"
+curl -i "$API/temas?status=draft" "${AUTH[@]}"
+
+curl -i -X POST "$API/users" "${AUTH[@]}" -H 'Content-Type: application/json' \
+  -d '{"email":"EMAIL_DEL_ALUMNO","password":"CONTRASENA_SEGURA_DEL_ALUMNO","name":"Alumno","role":"student"}'
+
+# Leer primero el tema y usar su versión actual.
+curl -i "$API/temas/mru" "${AUTH[@]}"
+VERSION=VERSION_ACTUAL
+curl -i -X PUT "$API/temas/mru/teoria" "${AUTH[@]}" -H 'Content-Type: application/json' \
+  -H "If-Match: \"$VERSION\"" -d '{"introduccion":"**Introducción editada**"}'
+
+curl -i -X POST "$API/auth/logout" "${AUTH[@]}"
+```
+
+La edición cambia el documento canónico de PostgreSQL; los JSON quedan como
+datos iniciales de importación. El dashboard estático sigue consumiendo los TS
+hasta conectarlo al HTTP backend. No se implementa un editor visual en este trabajo.
+
+Las pruebas SQL usan `@electric-sql/pglite` (solo dev), un motor PostgreSQL real
+compilado a WASM, para comprobar migraciones, triggers, rollback, versiones,
+retención de historial y protección del último maestro. Auth externo usa un
+gateway de prueba y pruebas del contrato HTTP de Supabase. `vitest.config.ts`
+fuerza modo JSON en los adaptadores de desarrollo para que una `.env` local
+nunca redirija las pruebas automatizadas al proyecto Supabase real.

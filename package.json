@@ -16,10 +16,16 @@
     "test": "vitest run",
     "migrate:temas": "tsx scripts/migrate-temas.ts",
     "typecheck:backend": "tsc --project tsconfig.json",
-    "lint:backend": "eslint backend api packages/shared-types/src scripts/migrate-temas.ts src/data/temas/types.ts src/vite.config.ts"
+    "lint:backend": "eslint backend api packages/shared-types/src scripts src/data/temas/types.ts src/vite.config.ts vitest.config.ts",
+    "db:migrate": "tsx scripts/database.ts migrate",
+    "db:seed": "tsx scripts/database.ts seed",
+    "db:setup": "tsx scripts/database.ts setup",
+    "users:bootstrap": "tsx scripts/database.ts bootstrap"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.9",
     "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
     "@types/sanitize-html": "^2.16.2",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",

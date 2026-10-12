@@ -29,3 +29,6 @@ export interface SimulationRepository {
 export interface AliasRepository {
   resolveAlias(slug: string): Promise<string>
 }
+export interface HealthRepository {
+  check(): Promise<void>
+}

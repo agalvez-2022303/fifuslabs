@@ -1,6 +1,6 @@
 export class AppError extends Error {
   constructor(
-    public readonly status: 400 | 401 | 403 | 404 | 409 | 413 | 422 | 501,
+    public readonly status: 400 | 401 | 403 | 404 | 409 | 413 | 422 | 429 | 501 | 503,
     public readonly code: string,
     message: string,
     public readonly details?: unknown
@@ -44,12 +44,17 @@ export class NotImplementedError extends AppError {
     super(
       501,
       'STORAGE_READ_ONLY',
-      'Las escrituras JSON solo están disponibles en desarrollo local. El repositorio Supabase aún no está implementado.'
+      'Las escrituras JSON solo están disponibles en desarrollo local. Configura CONTENT_REPOSITORY=postgres y las credenciales de Supabase para habilitar persistencia en producción.'
     )
   }
 }
 export class PayloadTooLargeError extends AppError {
   constructor() {
     super(413, 'PAYLOAD_TOO_LARGE', 'El body supera 256 KiB')
+  }
+}
+export class ServiceUnavailableError extends AppError {
+  constructor(message = 'Servicio de autenticación temporalmente no disponible') {
+    super(503, 'SERVICE_UNAVAILABLE', message)
   }
 }

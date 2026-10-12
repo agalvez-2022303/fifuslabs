@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
 import type { AppEnv } from '../http-types'
-export function healthRoutes() {
-  return new Hono<AppEnv>().get('/', c =>
-    c.json({ data: { status: 'ok', storage: 'json-temporary' } })
+import type { HealthService } from '../services/health-service'
+export function healthRoutes(storage = 'json-temporary', service?: HealthService) {
+  return new Hono<AppEnv>().get('/', async c =>
+    c.json({ data: service ? await service.get() : { status: 'ok', storage } })
   )
 }

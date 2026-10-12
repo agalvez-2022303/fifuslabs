@@ -13,5 +13,5 @@
       "@physicslab/shared-types": ["./packages/shared-types/src"]
     }
   },
-  "include": ["api/**/*", "backend/**/*", "scripts/**/*", "packages/**/*"]
+  "include": ["api/**/*", "backend/**/*", "scripts/**/*", "packages/**/*", "vitest.config.ts"]
 }
