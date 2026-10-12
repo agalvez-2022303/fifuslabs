@@ -1,0 +1,44 @@
+{
+  "slug": "distancia-desplazamiento",
+  "titulo": "Distancia vs Desplazamiento",
+  "teoria": "¿Qué es?\nLa distancia es la longitud de todo el camino que recorres (es un escalar y siempre se suma). El desplazamiento es la línea recta entre el punto de donde saliste y adónde llegaste (es un vector y tiene dirección).\n\nIdeas clave:\n1. La distancia nunca disminuye; aunque des la vuelta y regreses, tus pasos se siguen sumando.\n2. El desplazamiento puede ser cero si terminas exactamente en el mismo lugar de donde saliste.\n3. La distancia es un escalar (solo número con unidad); el desplazamiento es un vector (lleva dirección).\n4. La distancia recorrida siempre es mayor o igual que el tamaño del desplazamiento (d ≥ |Δr|).\n\nEjemplo cotidiano:\nSi das una vuelta completa a una cancha de fútbol de 400 metros de perímetro y vuelves a la línea de salida:\n- Tu distancia recorrida es 400 metros.\n- Tu desplazamiento es 0 metros (porque volviste al inicio).\n\nErrores comunes:\n- Creer que distancia y desplazamiento son sinónimos en física.\n- Pensar que el desplazamiento puede ser mayor a la distancia recorrida.\n- Olvidar que el desplazamiento requiere indicar hacia dónde fue (ejemplo: 10 metros al Norte).\n\nResumen:\nLa distancia mide todo el trayecto recorrido; el desplazamiento solo compara la posición inicial con la final en línea recta.",
+  "formulas": [
+    {
+      "expresion": "\\Delta \\vec{r} = \\vec{r}_f - \\vec{r}_i",
+      "descripcion": "Vector Desplazamiento",
+      "variables": [
+        { "simbolo": "Δr⃗", "descripcion": "Vector desplazamiento neto", "unidad": "m" },
+        { "simbolo": "r⃗_f", "descripcion": "Posición final", "unidad": "m" },
+        { "simbolo": "r⃗_i", "descripcion": "Posición inicial", "unidad": "m" }
+      ]
+    },
+    {
+      "expresion": "|\\Delta \\vec{r}| = \\sqrt{(x_f - x_i)^2 + (y_f - y_i)^2}",
+      "descripcion": "Módulo de Desplazamiento en 2 dimensiones",
+      "variables": [
+        { "simbolo": "|Δr⃗|", "descripcion": "Longitud del desplazamiento en línea recta", "unidad": "m" },
+        { "simbolo": "(x_i, y_i)", "descripcion": "Coordenada inicial", "unidad": "m" },
+        { "simbolo": "(x_f, y_f)", "descripcion": "Coordenada final", "unidad": "m" }
+      ]
+    },
+    {
+      "expresion": "d = d_1 + d_2 + d_3 + \\dots",
+      "descripcion": "Distancia Total Recorrida por tramos",
+      "variables": [
+        { "simbolo": "d", "descripcion": "Distancia total recorrida", "unidad": "m" },
+        { "simbolo": "d_1, d_2", "descripcion": "Longitud de cada tramo del camino", "unidad": "m" }
+      ]
+    }
+  ],
+  "glosario": [
+    { "termino": "Desplazamiento (Δr⃗)", "definicion": "Magnitud vectorial que mide la separación en línea recta entre el punto de origen y el de destino." },
+    { "termino": "Distancia (d)", "definicion": "Magnitud escalar que mide la longitud total del camino recorrido por un móvil." },
+    { "termino": "Escalar", "definicion": "Magnitud física que queda definida con un valor numérico y su unidad de medida (sin dirección)." },
+    { "termino": "Longitud de Trayectoria", "definicion": "Suma de las longitudes de todos los tramos o curvas por los que pasa un objeto." },
+    { "termino": "Módulo del Desplazamiento", "definicion": "Valor numérico y positivo de la longitud de la línea recta entre el inicio y el final." },
+    { "termino": "Posición Final (r⃗_f)", "definicion": "Ubicación del móvil al terminar su movimiento." },
+    { "termino": "Posición Inicial (r⃗_i)", "definicion": "Ubicación del móvil al comenzar su movimiento." },
+    { "termino": "Trayectoria", "definicion": "Camino o línea imaginaria trazada por un objeto al moverse." },
+    { "termino": "Vectorial", "definicion": "Magnitud física que requiere tamaño (módulo), dirección y sentido." }
+  ]
+}

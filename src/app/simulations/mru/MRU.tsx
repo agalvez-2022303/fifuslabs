@@ -1,0 +1,805 @@
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
+import { useCanvasRenderer } from '../../hooks/useCanvasRenderer'
+import { useLiveChart } from '../../hooks/useLiveChart'
+import { computeMRU, timeAtMRUPosition, solveMRUUnknown, type MRUParams, type MRUSolverInput } from './physics'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
+import styles from './MRU.module.css'
+
+const WORLD_MIN = -20   // m — límite izquierdo del plano
+const WORLD_MAX = 120   // m — límite derecho del plano
+const SLOW_FACTOR = 10  // factor de cámara lenta (0.1x)
+
+function renderLatexInline(expr: string): string {
+  try {
+    return katex.renderToString(expr, { throwOnError: false, displayMode: false })
+  } catch {
+    return expr
+  }
+}
+
+export default function MRUSimulation() {
+  // ─── Parámetros editables ───────────────────────────────────
+  const [params, setParams] = useState<MRUParams>({ x0: 0, v: 8 })
+  const [draft, setDraft] = useState({ x0: '0', v: '8' })
+
+  // ─── Estado de simulación ───────────────────────────────────
+  const [running, setRunning] = useState(false)
+  const [slowMode, setSlowMode] = useState(false)
+  const [elapsed, setElapsed] = useState(0)
+
+  // ─── Barreras de Fotopuertas arrastrables ────────────────────
+  const [barrierGreen, setBarrierGreen] = useState(30)
+  const [barrierRed, setBarrierRed] = useState(70)
+  const [timeGreen, setTimeGreen] = useState<number | null>(null)
+  const [timeRed, setTimeRed] = useState<number | null>(null)
+  const [hitGreen, setHitGreen] = useState(false)
+  const [hitRed, setHitRed] = useState(false)
+
+  // ─── Incógnitas para el Resolutor MRU ────────────────────────
+  const [solverInputs, setSolverInputs] = useState<MRUSolverInput>({ x0: 0, v: 8, t: 5 })
+  const [solverDraft, setSolverDraft] = useState({ x0: '0', x: '', v: '8', t: '5', deltaX: '' })
+
+  // ─── Refs de simulación ─────────────────────────────────────
+  const rafRef = useRef<number>(0)
+  const pauseAccRef = useRef<number>(0)
+  const lastTsRef = useRef<number>(0)
+  const runningRef = useRef(false)
+
+  // ─── Canvas principal ───────────────────────────────────────
+  const { canvasRef: mainCanvas, ctx: mainCtx, size: mainSize } = useCanvasRenderer()
+
+  // ─── Gráficas sincronizadas ─────────────────────────────────
+  const { canvasRef: chartXRef, ctx: ctxXT, size: sizeXT } = useCanvasRenderer()
+  const { canvasRef: chartVRef, ctx: ctxVT, size: sizeVT } = useCanvasRenderer()
+
+  const chartX = useLiveChart({ label: 'x', unitX: 's', unitY: 'm', autoScale: true })
+  const chartV = useLiveChart({
+    label: 'v',
+    unitX: 's',
+    unitY: 'm/s',
+    autoScale: false,
+    yMin: Math.min(-2, params.v - 2),
+    yMax: Math.max(15, params.v + 2),
+  })
+
+  // ─── Drag de barreras ───────────────────────────────────────
+  const draggingBarrier = useRef<'green' | 'red' | null>(null)
+
+  const worldToCanvas = useCallback((xWorld: number, canvasW: number): number => {
+    const worldRange = WORLD_MAX - WORLD_MIN
+    return ((xWorld - WORLD_MIN) / worldRange) * canvasW
+  }, [])
+
+  const canvasToWorld = useCallback((px: number, canvasW: number): number => {
+    const worldRange = WORLD_MAX - WORLD_MIN
+    return WORLD_MIN + (px / canvasW) * worldRange
+  }, [])
+
+  // ─── Dibujo del canvas principal ────────────────────────────
+  const drawMain = useCallback(
+    (t: number) => {
+      const ctx = mainCtx.current
+      const { width: W, height: H } = mainSize
+      if (!ctx || W === 0) return
+
+      ctx.clearRect(0, 0, W, H)
+
+      const state = computeMRU(params, t)
+      const carX = worldToCanvas(state.x, W)
+      const baseY = H * 0.60
+
+      // Fondo / Cielo
+      const sky = ctx.createLinearGradient(0, 0, 0, H)
+      sky.addColorStop(0, '#f8fafc')
+      sky.addColorStop(0.6, '#e2e8f0')
+      sky.addColorStop(1, '#cbd5e1')
+      ctx.fillStyle = sky
+      ctx.fillRect(0, 0, W, H)
+
+      // Pista de Experimentación MRU
+      const roadH = H * 0.24
+      const roadY = baseY - 4
+      ctx.fillStyle = '#1e293b'
+      ctx.fillRect(0, roadY, W, roadH)
+
+      // Líneas punteadas de carril
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = 2
+      ctx.setLineDash([24, 18])
+      ctx.lineDashOffset = -(state.x * 4) % 42
+      ctx.beginPath()
+      ctx.moveTo(0, roadY + roadH / 2)
+      ctx.lineTo(W, roadY + roadH / 2)
+      ctx.stroke()
+      ctx.setLineDash([])
+
+      // Bordes de la pista
+      ctx.strokeStyle = '#c8a932'
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.moveTo(0, roadY)
+      ctx.lineTo(W, roadY)
+      ctx.stroke()
+
+      ctx.strokeStyle = '#64748b'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.moveTo(0, roadY + roadH)
+      ctx.lineTo(W, roadY + roadH)
+      ctx.stroke()
+
+      // Escala numérica métrica
+      const tickStep = 10
+      ctx.font = '700 9px "JetBrains Mono", monospace'
+      ctx.fillStyle = '#475569'
+      ctx.textAlign = 'center'
+      ctx.strokeStyle = '#94a3b8'
+      ctx.lineWidth = 1
+
+      for (let m = Math.ceil(WORLD_MIN / tickStep) * tickStep; m <= WORLD_MAX; m += tickStep) {
+        const tx = worldToCanvas(m, W)
+        ctx.beginPath()
+        ctx.moveTo(tx, roadY + roadH)
+        ctx.lineTo(tx, roadY + roadH + 6)
+        ctx.stroke()
+        ctx.fillText(`${m}m`, tx, roadY + roadH + 18)
+      }
+
+      // ── Fotopuerta 1 (Sensor Verde) ──────────────────────────
+      const gx = worldToCanvas(barrierGreen, W)
+      ctx.strokeStyle = hitGreen ? '#10b981' : 'rgba(16, 185, 129, 0.7)'
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.moveTo(gx, roadY - 14)
+      ctx.lineTo(gx, roadY + roadH + 8)
+      ctx.stroke()
+      drawSensorFlag(ctx, gx, roadY - 14, '#10b981', 'S₁')
+
+      // ── Fotopuerta 2 (Sensor Rojo) ───────────────────────────
+      const rx = worldToCanvas(barrierRed, W)
+      ctx.strokeStyle = hitRed ? '#ef4444' : 'rgba(239, 68, 68, 0.7)'
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.moveTo(rx, roadY - 14)
+      ctx.lineTo(rx, roadY + roadH + 8)
+      ctx.stroke()
+      drawSensorFlag(ctx, rx, roadY - 14, '#ef4444', 'S₂')
+
+      // ── Vehículo Experimental ────────────────────────────────
+      if (carX >= -80 && carX <= W + 80) {
+        drawCar(ctx, carX, baseY, state.v)
+      }
+
+      // ── HUD Telemetría Superior ──────────────────────────────
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.94)'
+      ctx.strokeStyle = '#cbd5e1'
+      ctx.lineWidth = 1
+      roundRect(ctx, 12, 10, 260, 68, 8)
+      ctx.fill()
+      ctx.stroke()
+
+      ctx.font = '700 11px "JetBrains Mono", monospace'
+      ctx.textAlign = 'left'
+      ctx.fillStyle = '#059669'
+      ctx.fillText(`x(t) = ${state.x.toFixed(2)} m`, 22, 28)
+      ctx.fillStyle = '#0891b2'
+      ctx.fillText(`v(t) = ${state.v.toFixed(2)} m/s (Constante)`, 22, 44)
+      ctx.fillStyle = '#7c3aed'
+      ctx.fillText(`Δx = ${state.deltaX.toFixed(2)} m`, 22, 60)
+      ctx.fillStyle = '#24346c'
+      ctx.fillText(`t = ${t.toFixed(2)} s`, 175, 60)
+    },
+    [params, mainCtx, mainSize, worldToCanvas, barrierGreen, barrierRed, hitGreen, hitRed]
+  )
+
+  // ─── Loop de animación ───────────────────────────────────────
+  const loop = useCallback(
+    (timestamp: number) => {
+      if (!runningRef.current) return
+      if (lastTsRef.current === 0) lastTsRef.current = timestamp
+
+      const rawDt = (timestamp - lastTsRef.current) / 1000
+      lastTsRef.current = timestamp
+
+      const dt = slowMode ? rawDt / SLOW_FACTOR : rawDt
+      pauseAccRef.current += dt
+
+      const t = pauseAccRef.current
+      const state = computeMRU(params, t)
+
+      // Sensores / Fotopuertas
+      if (!hitGreen) {
+        const prevX = computeMRU(params, Math.max(0, t - dt)).x
+        if (
+          (prevX < barrierGreen && state.x >= barrierGreen) ||
+          (prevX > barrierGreen && state.x <= barrierGreen)
+        ) {
+          const exactT = timeAtMRUPosition(params, barrierGreen)
+          setTimeGreen(exactT ?? t)
+          setHitGreen(true)
+        }
+      }
+
+      if (!hitRed) {
+        const prevX = computeMRU(params, Math.max(0, t - dt)).x
+        if (
+          (prevX < barrierRed && state.x >= barrierRed) ||
+          (prevX > barrierRed && state.x <= barrierRed)
+        ) {
+          const exactT = timeAtMRUPosition(params, barrierRed)
+          setTimeRed(exactT ?? t)
+          setHitRed(true)
+        }
+      }
+
+      setElapsed(t)
+      drawMain(t)
+
+      chartX.push(t, state.x)
+      chartV.push(t, state.v)
+
+      const cxT = ctxXT.current
+      const cvT = ctxVT.current
+      if (cxT) chartX.draw(cxT, sizeXT.width, sizeXT.height)
+      if (cvT) chartV.draw(cvT, sizeVT.width, sizeVT.height)
+
+      rafRef.current = requestAnimationFrame(loop)
+    },
+    [params, slowMode, hitGreen, hitRed, barrierGreen, barrierRed, drawMain, chartX, chartV, ctxXT, ctxVT, sizeXT, sizeVT]
+  )
+
+  const startLoop = useCallback(() => {
+    lastTsRef.current = 0
+    runningRef.current = true
+    rafRef.current = requestAnimationFrame(loop)
+  }, [loop])
+
+  // ─── Controles ───────────────────────────────────────────────
+  const handleApply = () => {
+    const x0 = parseFloat(draft.x0) || 0
+    const v = parseFloat(draft.v) || 0
+    setParams({ x0, v })
+    handleReset()
+  }
+
+  const applyPreset = (x0: number, v: number) => {
+    setDraft({ x0: String(x0), v: String(v) })
+    setParams({ x0, v })
+    handleReset()
+  }
+
+  const handleReset = useCallback(() => {
+    runningRef.current = false
+    cancelAnimationFrame(rafRef.current)
+    lastTsRef.current = 0
+    pauseAccRef.current = 0
+    setRunning(false)
+    setElapsed(0)
+    setTimeGreen(null)
+    setTimeRed(null)
+    setHitGreen(false)
+    setHitRed(false)
+    chartX.reset()
+    chartV.reset()
+    drawMain(0)
+  }, [drawMain, chartX, chartV])
+
+  const handlePlay = () => {
+    if (running) {
+      runningRef.current = false
+      cancelAnimationFrame(rafRef.current)
+      setRunning(false)
+    } else {
+      setRunning(true)
+      startLoop()
+    }
+  }
+
+  useEffect(() => {
+    drawMain(0)
+  }, [drawMain])
+
+  useEffect(() => () => {
+    cancelAnimationFrame(rafRef.current)
+  }, [])
+
+  // ─── Arrastre de barreras sobre canvas ───────────────────────
+  const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!mainCanvas.current) return
+    const rect = mainCanvas.current.getBoundingClientRect()
+    const px = (e.clientX - rect.left) * (mainSize.width / rect.width)
+
+    const gxW = worldToCanvas(barrierGreen, mainSize.width)
+    const rxW = worldToCanvas(barrierRed, mainSize.width)
+
+    if (Math.abs(px - gxW) < 22) {
+      draggingBarrier.current = 'green'
+      mainCanvas.current.setPointerCapture(e.pointerId)
+    } else if (Math.abs(px - rxW) < 22) {
+      draggingBarrier.current = 'red'
+      mainCanvas.current.setPointerCapture(e.pointerId)
+    }
+  }
+
+  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!draggingBarrier.current || !mainCanvas.current) return
+    const rect = mainCanvas.current.getBoundingClientRect()
+    const px = (e.clientX - rect.left) * (mainSize.width / rect.width)
+    const wx = Math.round(canvasToWorld(px, mainSize.width))
+    const clamped = Math.min(WORLD_MAX - 5, Math.max(WORLD_MIN + 5, wx))
+
+    if (draggingBarrier.current === 'green') setBarrierGreen(clamped)
+    else setBarrierRed(clamped)
+  }
+
+  const handleCanvasPointerUp = () => {
+    draggingBarrier.current = null
+  }
+
+  const formatTime = (t: number | null, running_: boolean) => {
+    if (t === null && !running_) return '——:——'
+    if (t === null) return '00:00.00'
+    const mins = Math.floor(t / 60)
+    const secs = t % 60
+    return `${String(mins).padStart(2, '0')}:${secs.toFixed(2).padStart(5, '0')}`
+  }
+
+  const deltaT = timeGreen !== null && timeRed !== null ? Math.abs(timeRed - timeGreen) : null
+
+  // Table of Values data (0 to 10s step 1s)
+  const tableData = useMemo(() => {
+    const rows = []
+    for (let tStep = 0; tStep <= 10; tStep += 1) {
+      rows.push(computeMRU(params, tStep))
+    }
+    return rows
+  }, [params])
+
+  // Solver Result
+  const solverResult = useMemo(() => {
+    return solveMRUUnknown(solverInputs)
+  }, [solverInputs])
+
+  const handleSolverInput = (field: keyof MRUSolverInput, valStr: string) => {
+    setSolverDraft((prev) => ({ ...prev, [field]: valStr }))
+    const parsed = parseFloat(valStr)
+    setSolverInputs((prev) => {
+      const copy = { ...prev }
+      if (valStr === '' || isNaN(parsed)) {
+        delete copy[field]
+      } else {
+        copy[field] = parsed
+      }
+      return copy
+    })
+  }
+
+  return (
+    <div className={styles.sim}>
+      {/* ── Canvas Principal ──────────────────────────────────── */}
+      <div className={styles.canvasWrap}>
+        <canvas
+          ref={mainCanvas}
+          className={styles.canvas}
+          onPointerDown={handleCanvasPointerDown}
+          onPointerMove={handleCanvasPointerMove}
+          onPointerUp={handleCanvasPointerUp}
+          aria-label="Escena cinemática MRU interactiva"
+        />
+
+        <div className={styles.barrierHint}>
+          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>
+            drag_indicator
+          </span>
+          <span>Arrastra las fotopuertas S₁ y S₂ en la pista</span>
+        </div>
+      </div>
+
+      {/* ── Transport Bar / Controles ───────────────────────────── */}
+      <div className={styles.transportBar}>
+        <div className={styles.transportButtons}>
+          <button
+            className={`btn ${running ? 'btn--secondary' : 'btn--primary'}`}
+            onClick={handlePlay}
+            id="btn-play-pause-mru"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              {running ? 'pause' : 'play_arrow'}
+            </span>
+            {running ? 'Pausar Simulación' : 'Iniciar Simulación'}
+          </button>
+
+          <button className="btn btn--secondary" onClick={handleReset} id="btn-reset-mru">
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              restart_alt
+            </span>
+            Reiniciar
+          </button>
+
+          <button
+            className={`btn ${slowMode ? 'btn--gold' : 'btn--ghost'}`}
+            onClick={() => setSlowMode((s) => !s)}
+            id="btn-slow-motion-mru"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              slow_motion_video
+            </span>
+            Cámara Lenta (0.1x)
+          </button>
+        </div>
+
+        {/* Presets Rápidos */}
+        <div className={styles.presetsRow}>
+          <span className={styles.presetsLabel}>Preajustes:</span>
+          <button className={styles.presetChip} onClick={() => applyPreset(0, 10)}>
+            v = +10 m/s (Avance)
+          </button>
+          <button className={styles.presetChip} onClick={() => applyPreset(100, -8)}>
+            v = -8 m/s (Regreso)
+          </button>
+          <button className={styles.presetChip} onClick={() => applyPreset(20, 5)}>
+            x₀ = 20 m, v = 5 m/s
+          </button>
+        </div>
+      </div>
+
+      {/* ── Panel de Parámetros y Sensores Fotopuerta ──────────── */}
+      <div className={styles.panelGrid}>
+        {/* Card 1: Parámetros Cinemáticos */}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <div className={styles.cardTitleGroup}>
+              <span className="material-symbols-outlined" style={{ color: 'var(--corporate)' }}>
+                tune
+              </span>
+              <span className={styles.cardTitle}>Condiciones Iniciales MRU</span>
+            </div>
+            <button className="btn btn--primary btn--sm" onClick={handleApply} disabled={running}>
+              Aplicar Cambios
+            </button>
+          </div>
+
+          <div className={styles.fieldsGrid}>
+            <label className={styles.field}>
+              <span className={styles.fieldLabel}>Posición Inicial x₀ (m)</span>
+              <input
+                className={`input ${styles.inputField}`}
+                type="number"
+                inputMode="decimal"
+                step="1"
+                value={draft.x0}
+                onChange={(e) => setDraft((d) => ({ ...d, x0: e.target.value }))}
+                onKeyDown={(e) => e.key === 'Enter' && handleApply()}
+                disabled={running}
+              />
+            </label>
+
+            <label className={styles.field}>
+              <span className={styles.fieldLabel}>Velocidad Constante v (m/s)</span>
+              <input
+                className={`input ${styles.inputField}`}
+                type="number"
+                inputMode="decimal"
+                step="0.5"
+                value={draft.v}
+                onChange={(e) => setDraft((d) => ({ ...d, v: e.target.value }))}
+                onKeyDown={(e) => e.key === 'Enter' && handleApply()}
+                disabled={running}
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Card 2: Sensores de Fotopuertas */}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <div className={styles.cardTitleGroup}>
+              <span className="material-symbols-outlined" style={{ color: 'var(--gold)' }}>
+                timer
+              </span>
+              <span className={styles.cardTitle}>Cronometría y Fotopuertas S₁ y S₂</span>
+            </div>
+            {deltaT !== null && <span className={styles.deltaBadge}>Δt = {deltaT.toFixed(2)} s</span>}
+          </div>
+
+          <div className={styles.clocksGrid}>
+            <div className={styles.clockCard}>
+              <span className={styles.clockLabel}>Tiempo General (t)</span>
+              <span className={styles.clockValue}>{formatTime(elapsed, running)}</span>
+            </div>
+
+            <div className={`${styles.clockCard} ${hitGreen ? styles.clockGreenActive : ''}`}>
+              <div className={styles.clockHeader}>
+                <span className={styles.dotGreen} />
+                <span className={styles.clockLabel}>Sensor S₁ ({barrierGreen} m)</span>
+              </div>
+              <span className={styles.clockValue}>
+                {timeGreen !== null ? `${timeGreen.toFixed(2)} s` : 'Esperando...'}
+              </span>
+            </div>
+
+            <div className={`${styles.clockCard} ${hitRed ? styles.clockRedActive : ''}`}>
+              <div className={styles.clockHeader}>
+                <span className={styles.dotRed} />
+                <span className={styles.clockLabel}>Sensor S₂ ({barrierRed} m)</span>
+              </div>
+              <span className={styles.clockValue}>
+                {timeRed !== null ? `${timeRed.toFixed(2)} s` : 'Esperando...'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Gráficas Sincrónicas Sincronizadas (x-t y v-t) ───────── */}
+      <div className={styles.chartsSection}>
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <span className={styles.chartBadgeX}>x-t</span>
+            <span className={styles.chartTitle}>Posición vs Tiempo (Línea Recta de Pendiente v)</span>
+          </div>
+          <canvas ref={chartXRef} className={styles.chartCanvas} />
+        </div>
+
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <span className={styles.chartBadgeV}>v-t</span>
+            <span className={styles.chartTitle}>Velocidad vs Tiempo (Constante Horizontal)</span>
+          </div>
+          <canvas ref={chartVRef} className={styles.chartCanvas} />
+        </div>
+      </div>
+
+      {/* ── Resolutor de Incógnitas MRU ────────────────────────── */}
+      <div className={styles.solverCard}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardTitleGroup}>
+            <span className="material-symbols-outlined" style={{ color: 'var(--corporate)' }}>
+              calculate
+            </span>
+            <span className={styles.cardTitle}>Calculadora & Resolutor Paso a Paso MRU</span>
+          </div>
+          <span className={styles.deltaBadge}>x = x₀ + v·t</span>
+        </div>
+
+        <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+          Ingresa 2 variables conocidas para calcular automáticamente la tercera y ver su deducción paso a paso:
+        </p>
+
+        <div className={styles.fieldsGrid}>
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Posición Inicial x₀ (m)</span>
+            <input
+              className={`input ${styles.inputField}`}
+              type="number"
+              inputMode="decimal"
+              value={solverDraft.x0}
+              onChange={(e) => handleSolverInput('x0', e.target.value)}
+              placeholder="0"
+            />
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Velocidad v (m/s)</span>
+            <input
+              className={`input ${styles.inputField}`}
+              type="number"
+              inputMode="decimal"
+              value={solverDraft.v}
+              onChange={(e) => handleSolverInput('v', e.target.value)}
+              placeholder="v"
+            />
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Tiempo t (s)</span>
+            <input
+              className={`input ${styles.inputField}`}
+              type="number"
+              inputMode="decimal"
+              value={solverDraft.t}
+              onChange={(e) => handleSolverInput('t', e.target.value)}
+              placeholder="t"
+            />
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Posición Final x (m)</span>
+            <input
+              className={`input ${styles.inputField}`}
+              type="number"
+              inputMode="decimal"
+              value={solverDraft.x}
+              onChange={(e) => handleSolverInput('x', e.target.value)}
+              placeholder="x final"
+            />
+          </label>
+        </div>
+
+        {/* Desarrollo Matemático Paso a Paso */}
+        <div className={styles.stepsBox}>
+          <span style={{ fontWeight: 700, fontSize: '12px', color: 'var(--corporate-dark)' }}>
+            Desarrollo Matemático Paso a Paso:
+          </span>
+
+          {solverResult.isValid ? (
+            solverResult.steps.map((step, idx) => (
+              <div
+                key={idx}
+                className={styles.stepLine}
+                dangerouslySetInnerHTML={{ __html: renderLatexInline(step) }}
+              />
+            ))
+          ) : (
+            <div style={{ color: '#dc2626', fontSize: '12px', fontWeight: 600 }}>
+              {solverResult.errorMessage}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Tabla de Valores (t, x, v, Δx) ─────────────────────── */}
+      <div className={styles.tableCard}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardTitleGroup}>
+            <span className="material-symbols-outlined" style={{ color: 'var(--corporate)' }}>
+              table_chart
+            </span>
+            <span className={styles.cardTitle}>Tabla Tabular de Valores en Función del Tiempo</span>
+          </div>
+          <span className={styles.deltaBadge}>Δt = 1.0 s</span>
+        </div>
+
+        <div className={styles.tableWrap}>
+          <table className={styles.valueTable}>
+            <thead>
+              <tr>
+                <th>Tiempo t (s)</th>
+                <th>Posición x(t) (m)</th>
+                <th>Velocidad v(t) (m/s)</th>
+                <th>Desplazamiento Δx (m)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((row) => (
+                <tr key={row.t}>
+                  <td>{row.t.toFixed(1)} s</td>
+                  <td style={{ fontWeight: 700, color: 'var(--corporate)' }}>{row.x.toFixed(2)} m</td>
+                  <td>{row.v.toFixed(2)} m/s</td>
+                  <td style={{ color: 'var(--gold-dark)' }}>{row.deltaX.toFixed(2)} m</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function drawCar(ctx: CanvasRenderingContext2D, cx: number, baseY: number, v: number) {
+  const w = 76
+  const h = 26
+  const x = cx - w / 2
+
+  // Sombra del vehículo
+  ctx.fillStyle = 'rgba(0,0,0,0.35)'
+  ctx.beginPath()
+  ctx.ellipse(cx, baseY + 6, w * 0.44, 5, 0, 0, Math.PI * 2)
+  ctx.fill()
+
+  // Chasis principal (Verde Corporativo Esmeralda #059669)
+  ctx.fillStyle = '#059669'
+  ctx.beginPath()
+  roundRect(ctx, x, baseY - h, w, h, 6)
+  ctx.fill()
+
+  // Franja dorada
+  ctx.fillStyle = '#c8a932'
+  ctx.fillRect(x + 4, baseY - h + 14, w - 8, 3)
+
+  // Cabina del vehículo
+  ctx.fillStyle = '#1e293b'
+  ctx.beginPath()
+  roundRect(ctx, x + 16, baseY - h - 14, w - 32, 16, [4, 4, 0, 0])
+  ctx.fill()
+
+  // Cristales
+  ctx.fillStyle = '#6ee7b7'
+  ctx.beginPath()
+  roundRect(ctx, x + 18, baseY - h - 12, 16, 12, 2)
+  ctx.fill()
+  ctx.beginPath()
+  roundRect(ctx, x + 38, baseY - h - 12, 18, 12, 2)
+  ctx.fill()
+
+  // Faros
+  ctx.fillStyle = '#fef08a'
+  if (v >= 0) {
+    ctx.beginPath()
+    ctx.ellipse(x + w - 3, baseY - h + 8, 3, 4, 0, 0, Math.PI * 2)
+    ctx.fill()
+  } else {
+    ctx.beginPath()
+    ctx.ellipse(x + 3, baseY - h + 8, 3, 4, 0, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  // Ruedas
+  drawWheel(ctx, x + 16, baseY + 1, v)
+  drawWheel(ctx, x + w - 16, baseY + 1, v)
+}
+
+function drawWheel(ctx: CanvasRenderingContext2D, cx: number, cy: number, v: number) {
+  const r = 9
+  ctx.fillStyle = '#0f172a'
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
+  ctx.fill()
+
+  ctx.strokeStyle = '#94a3b8'
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  ctx.arc(cx, cy, r - 2, 0, Math.PI * 2)
+  ctx.stroke()
+
+  const angle = ((Date.now() / 100) * v * 0.1) % (Math.PI * 2)
+  ctx.strokeStyle = '#ffffff'
+  ctx.lineWidth = 1.2
+  for (let i = 0; i < 4; i++) {
+    const a = angle + (i * Math.PI) / 2
+    ctx.beginPath()
+    ctx.moveTo(cx, cy)
+    ctx.lineTo(cx + Math.cos(a) * (r - 2), cy + Math.sin(a) * (r - 2))
+    ctx.stroke()
+  }
+}
+
+function drawSensorFlag(ctx: CanvasRenderingContext2D, x: number, y: number, color: string, label: string) {
+  ctx.strokeStyle = color
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.moveTo(x, y)
+  ctx.lineTo(x, y - 22)
+  ctx.stroke()
+
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.moveTo(x, y - 22)
+  ctx.lineTo(x + 16, y - 16)
+  ctx.lineTo(x, y - 10)
+  ctx.closePath()
+  ctx.fill()
+
+  ctx.font = '700 8px "JetBrains Mono", monospace'
+  ctx.fillStyle = '#ffffff'
+  ctx.textAlign = 'center'
+  ctx.fillText(label, x + 7, y - 14)
+}
+
+function roundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  radii: number | number[]
+) {
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, w, h, radii as number)
+  } else {
+    const r = Array.isArray(radii) ? radii[0] : radii
+    ctx.beginPath()
+    ctx.moveTo(x + r, y)
+    ctx.lineTo(x + w - r, y)
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+    ctx.lineTo(x + w, y + h - r)
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+    ctx.lineTo(x + r, y + h)
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+    ctx.lineTo(x, y + r)
+    ctx.quadraticCurveTo(x, y, x + r, y)
+    ctx.closePath()
+  }
+}

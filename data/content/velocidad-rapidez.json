@@ -1,0 +1,44 @@
+{
+  "slug": "velocidad-rapidez",
+  "titulo": "Velocidad vs Rapidez",
+  "teoria": "¿Qué es?\nLa rapidez es qué tan rápido te mueves (solo el número, ej. 60 km/h). La velocidad es qué tan rápido te mueves MÁS la dirección hacia donde vas (ej. 60 km/h hacia el Norte).\n\nIdeas clave:\n1. El velocímetro de un carro mide rapidez instantánea (un valor escalar sin dirección).\n2. La rapidez media es la distancia total entre el tiempo (r = d / t).\n3. La velocidad media es el desplazamiento entre el tiempo (v = Δr / t).\n4. Si un vehículo toma una curva a rapidez constante, su velocidad SÍ cambia porque cambia su dirección.\n\nEjemplo cotidiano:\nSi das una vuelta a una pista circular de 300 metros en 60 segundos y regresas al punto de salida:\n- Tu rapidez media fue de 5 m/s (300 m / 60 s).\n- Tu velocidad media fue de 0 m/s (porque tu desplazamiento fue 0 m).\n\nErrores comunes:\n- Usar la palabra velocidad cuando solo se habla de un valor sin dirección.\n- Pensar que en las curvas la velocidad no cambia si el número del velocímetro se mantiene.\n\nResumen:\nLa rapidez indica la prisa del viaje (escalar); la velocidad agrega la dirección del movimiento (vector).",
+  "formulas": [
+    {
+      "expresion": "r_{\\text{med}} = \\frac{d}{\\Delta t}",
+      "descripcion": "Rapidez Media Escalar",
+      "variables": [
+        { "simbolo": "r_med", "descripcion": "Rapidez media", "unidad": "m/s" },
+        { "simbolo": "d", "descripcion": "Distancia total recorrida", "unidad": "m" },
+        { "simbolo": "Δt", "descripcion": "Tiempo total transcurrido", "unidad": "s" }
+      ]
+    },
+    {
+      "expresion": "\\vec{v}_{\\text{med}} = \\frac{\\Delta \\vec{r}}{\\Delta t}",
+      "descripcion": "Velocidad Media Vectorial",
+      "variables": [
+        { "simbolo": "v⃗_med", "descripcion": "Vector velocidad media", "unidad": "m/s" },
+        { "simbolo": "Δr⃗", "descripcion": "Vector desplazamiento neto", "unidad": "m" },
+        { "simbolo": "Δt", "descripcion": "Tiempo transcurrido", "unidad": "s" }
+      ]
+    },
+    {
+      "expresion": "v(\\text{m/s}) = \\frac{v(\\text{km/h})}{3.6}",
+      "descripcion": "Conversión de km/h a metros por segundo (m/s)",
+      "variables": [
+        { "simbolo": "v(m/s)", "descripcion": "Velocidad en el Sistema Internacional", "unidad": "m/s" },
+        { "simbolo": "v(km/h)", "descripcion": "Velocidad en kilómetros por hora", "unidad": "km/h" }
+      ]
+    }
+  ],
+  "glosario": [
+    { "termino": "Aceleración", "definicion": "Cambio de la velocidad (en valor o dirección) por unidad de tiempo." },
+    { "termino": "Rapidez Instantánea", "definicion": "Valor de la rapidez de un cuerpo en un instante preciso de tiempo." },
+    { "termino": "Rapidez Media", "definicion": "Distancia total recorrida dividida entre el tiempo total del viaje." },
+    { "termino": "Sistema Internacional (SI)", "definicion": "Estándar científico donde la velocidad y rapidez se miden en metros por segundo (m/s)." },
+    { "termino": "Velocidad (v⃗)", "definicion": "Magnitud vectorial que indica qué tan rápido cambia la posición y en qué dirección." },
+    { "termino": "Velocidad Instantánea", "definicion": "Vector velocidad de un cuerpo en un instante determinado." },
+    { "termino": "Velocidad Media", "definicion": "Cociente entre el vector desplazamiento neto y el tiempo empleado." },
+    { "termino": "Velocidad Tangencial", "definicion": "Velocidad cuya dirección es tangente a la curva del camino." },
+    { "termino": "Velocímetro", "definicion": "Instrumento que mide la rapidez instantánea de un vehículo." }
+  ]
+}

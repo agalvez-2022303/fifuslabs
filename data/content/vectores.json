@@ -1,0 +1,45 @@
+{
+  "slug": "vectores",
+  "titulo": "Vectores y Coordenadas",
+  "teoria": "¿Qué es?\nUn vector es una flecha que representa una cantidad física que tiene tamaño (magnitud), inclinación (dirección) y hacia dónde apunta (sentido).\n\nIdeas clave:\n1. A diferencia de un simple número, las cantidades vectoriales (como la fuerza o la velocidad) necesitan una dirección para estar completas.\n2. Coordenadas Rectangulares: Expresan el vector como un avance horizontal (V_x) y uno vertical (V_y).\n3. Coordenadas Polares: Expresan el vector con su longitud total (r) y su ángulo de inclinación (θ).\n4. Coordenadas Geográficas: Utilizan los puntos cardinales (Norte, Sur, Este, Oeste).\n\nEjemplo cotidiano:\nSi caminas 50 metros hacia el Noreste, los 50 metros son la magnitud (r) y la dirección es 45° al Noreste. Si lo mides por calles, avanzaste 35.3 metros al Este (V_x) y 35.3 metros al Norte (V_y).\n\nErrores comunes:\n- Olvidar que las componentes V_x o V_y pueden ser negativas según el cuadrante.\n- Medir el ángulo desde el eje Y en lugar de iniciar desde el eje +X.\n\nResumen:\nLos vectores nos permiten representar fuerzas, velocidades y desplazamientos en el espacio usando componentes rectangulares o coordenadas polares.",
+  "formulas": [
+    {
+      "expresion": "V_x = r \\cdot \\cos(\\theta), \\quad V_y = r \\cdot \\sin(\\theta)",
+      "descripcion": "Conversión de Coordenadas Polares a Rectangulares",
+      "variables": [
+        { "simbolo": "r", "descripcion": "Magnitud o módulo del vector", "unidad": "u / m / N" },
+        { "simbolo": "θ", "descripcion": "Ángulo polar desde +X", "unidad": "°" },
+        { "simbolo": "V_x", "descripcion": "Componente horizontal", "unidad": "u / m / N" },
+        { "simbolo": "V_y", "descripcion": "Componente vertical", "unidad": "u / m / N" }
+      ]
+    },
+    {
+      "expresion": "r = \\sqrt{V_x^2 + V_y^2}",
+      "descripcion": "Magnitud del Vector a partir de sus componentes rectangulares",
+      "variables": [
+        { "simbolo": "r", "descripcion": "Magnitud del vector", "unidad": "u / m / N" },
+        { "simbolo": "V_x", "descripcion": "Componente horizontal", "unidad": "u" },
+        { "simbolo": "V_y", "descripcion": "Componente vertical", "unidad": "u" }
+      ]
+    },
+    {
+      "expresion": "\\theta = \\arctan\\left(\\frac{|V_y|}{|V_x|}\\right)",
+      "descripcion": "Ángulo de dirección del vector en el plano",
+      "variables": [
+        { "simbolo": "θ", "descripcion": "Ángulo respecto al eje horizontal", "unidad": "°" },
+        { "simbolo": "V_x, V_y", "descripcion": "Componentes rectangulares", "unidad": "u" }
+      ]
+    }
+  ],
+  "glosario": [
+    { "termino": "Ángulo Polar (θ)", "definicion": "Ángulo medido en sentido contrario a las agujas del reloj partiendo del semieje positivo +X." },
+    { "termino": "Componente Vectorial", "definicion": "Proyección del vector sobre uno de los ejes cartesianos (horizontal V_x o vertical V_y)." },
+    { "termino": "Coordenadas Geográficas", "definicion": "Sistema que indica la dirección usando puntos cardinales (Norte, Sur, Este, Oeste)." },
+    { "termino": "Coordenadas Polares", "definicion": "Sistema que define un vector mediante su magnitud r y un ángulo θ." },
+    { "termino": "Coordenadas Rectangulares", "definicion": "Sistema que describe un vector mediante sus avances en los ejes X e Y." },
+    { "termino": "Dirección", "definicion": "Inclinación de la recta sobre la que actúa el vector, medida por su ángulo." },
+    { "termino": "Magnitud (Módulo)", "definicion": "Tamaño o longitud del vector; siempre es un valor positivo con su unidad de medida." },
+    { "termino": "Sentido", "definicion": "Hacia dónde apunta la flecha del vector (ejemplo: hacia el Noreste o hacia la derecha)." },
+    { "termino": "Vector", "definicion": "Magnitud física que tiene módulo (tamaño), dirección (inclinación) y sentido." }
+  ]
+}
