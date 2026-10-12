@@ -1,16 +1,6 @@
 import { z } from 'zod'
 
-/** Explicit allowlist of implemented components; never accept arbitrary paths. */
-export const SIM_COMPONENT_SLUGS = [
-  'vectores',
-  'mru',
-  'movimiento-aceleracion-constante',
-  'tres-fuerzas-equilibrio',
-  'suma-vectores',
-  'alcances-mru',
-  'distancia-desplazamiento',
-  'velocidad-rapidez',
-] as const
+import { SIM_COMPONENT_SLUGS } from './config'
 export const categoryIdSchema = z.enum([
   'mecanica',
   'oscilaciones-ondas',

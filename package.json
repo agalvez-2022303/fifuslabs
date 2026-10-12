@@ -15,7 +15,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "migrate:temas": "tsx scripts/migrate-temas.ts",
-    "typecheck:backend": "tsc --project tsconfig.json"
+    "typecheck:backend": "tsc --project tsconfig.json",
+    "lint:backend": "eslint backend api packages/shared-types/src scripts/migrate-temas.ts src/data/temas/types.ts src/vite.config.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

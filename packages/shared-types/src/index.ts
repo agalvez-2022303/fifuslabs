@@ -1,5 +1,6 @@
 export * from './temas'
 export * from './schemas'
+export * from './config'
 
 // ─── Categorías ───────────────────────────────────────────────────────────────
 

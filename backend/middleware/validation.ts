@@ -12,7 +12,9 @@ export function validate<T>(
     let input: unknown
     if (source === 'query') input = c.req.query()
     else {
-      if (!c.req.header('content-type')?.toLowerCase().startsWith('application/json'))
+      if (
+        c.req.header('content-type')?.split(';', 1)[0].trim().toLowerCase() !== 'application/json'
+      )
         throw new BadRequestError('Se requiere Content-Type: application/json')
       try {
         input = JSON.parse(c.get('rawBody'))

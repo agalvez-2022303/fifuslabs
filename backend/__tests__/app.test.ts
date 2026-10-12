@@ -88,6 +88,15 @@ describe('Hono HTTP API', () => {
     expect((await malformed.json()).error.code).toBe('BAD_REQUEST')
     expect((await app.request('/api/temas', { method: 'POST', ...json({}) })).status).toBe(422)
     expect((await app.request('/api/temas?limit=0')).status).toBe(422)
+    expect((await app.request('/api/temas/INVALID_SLUG')).status).toBe(422)
+    expect(
+      (
+        await app.request('/api/temas/mru/formulas/not-a-uuid', {
+          method: 'PATCH',
+          ...json({ expresion: 'x=1', version: 1 }),
+        })
+      ).status
+    ).toBe(422)
     expect((await app.request('/api/not-found')).status).toBe(404)
     expect(
       (await app.request('/api/temas/mru', { method: 'PATCH', ...json({ titulo: 'new' }) })).status

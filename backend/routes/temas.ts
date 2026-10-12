@@ -28,11 +28,10 @@ function response(c: Context<AppEnv>, tema: TemaConfig, status: 200 | 201 = 200)
 }
 export function temaRoutes(service: TemaService) {
   const routes = new Hono<AppEnv>()
-  routes.use('*', validateParams)
   routes.get('/', validate(listTemasSchema, 'query'), async c =>
     c.json({ data: await service.list(c.get('input') as TemasQuery, c.get('user')) })
   )
-  routes.get('/:slug', async c =>
+  routes.get('/:slug', validateParams, async c =>
     response(c, await service.get(c.req.param('slug'), c.get('user')))
   )
   const role = requireRole('teacher')
@@ -41,10 +40,20 @@ export function temaRoutes(service: TemaService) {
     c.header('Location', `/api/temas/${tema.slug}`)
     return response(c, tema, 201)
   })
-  routes.patch('/:slug', requireAuth, role, validate(patchTemaSchema), requireVersion, async c =>
-    response(c, await service.patch(c.req.param('slug'), c.get('input'), user(c), c.get('version')))
+  routes.patch(
+    '/:slug',
+    requireAuth,
+    role,
+    validateParams,
+    validate(patchTemaSchema),
+    requireVersion,
+    async c =>
+      response(
+        c,
+        await service.patch(c.req.param('slug'), c.get('input'), user(c), c.get('version'))
+      )
   )
-  routes.delete('/:slug', requireAuth, role, requireVersion, async c => {
+  routes.delete('/:slug', requireAuth, role, validateParams, requireVersion, async c => {
     const tema = await service.remove(c.req.param('slug'), user(c), c.get('version'))
     c.header('ETag', `"${tema.version}"`)
     return c.body(null, 204)
@@ -53,6 +62,7 @@ export function temaRoutes(service: TemaService) {
     '/:slug/status',
     requireAuth,
     role,
+    validateParams,
     validate(patchStatusSchema),
     requireVersion,
     async c =>
@@ -65,6 +75,7 @@ export function temaRoutes(service: TemaService) {
     '/:slug/teoria',
     requireAuth,
     role,
+    validateParams,
     validate(putTeoriaSchema),
     requireVersion,
     async c =>
@@ -85,6 +96,7 @@ export function temaRoutes(service: TemaService) {
       `/:slug/${kind}/reorder`,
       requireAuth,
       role,
+      validateParams,
       validate(reorderSchema),
       requireVersion,
       async c =>
@@ -106,6 +118,7 @@ export function temaRoutes(service: TemaService) {
       base,
       requireAuth,
       role,
+      validateParams,
       validate(itemCreateSchemas[kind] as z.ZodType),
       requireVersion,
       async c =>
@@ -125,6 +138,7 @@ export function temaRoutes(service: TemaService) {
       `${base}/:id`,
       requireAuth,
       role,
+      validateParams,
       validate(itemPatchSchemas[kind] as z.ZodType),
       requireVersion,
       async c =>
@@ -140,7 +154,7 @@ export function temaRoutes(service: TemaService) {
           )
         )
     )
-    routes.delete(`${base}/:id`, requireAuth, role, requireVersion, async c => {
+    routes.delete(`${base}/:id`, requireAuth, role, validateParams, requireVersion, async c => {
       const tema = await service.removeItem(
         c.req.param('slug')!,
         kind,
@@ -152,13 +166,14 @@ export function temaRoutes(service: TemaService) {
       return c.body(null, 204)
     })
   }
-  routes.get('/:slug/revisions', requireAuth, role, async c =>
+  routes.get('/:slug/revisions', requireAuth, role, validateParams, async c =>
     c.json({ data: await service.history(c.req.param('slug'), user(c)) })
   )
   routes.post(
     '/:slug/revisions/:id/restore',
     requireAuth,
     role,
+    validateParams,
     // A restore has no content payload; If-Match supplies its concurrency token.
     async (c, next) => {
       if (c.get('rawBody'))
