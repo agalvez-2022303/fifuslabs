@@ -10,13 +10,16 @@
     "dev": "npm run dev --workspace=src",
     "server": "node server/index.js",
     "dev:all": "concurrently -k \"npm run server\" \"npm run dev\"",
-    "build": "npm run build --workspace=src",
+    "build": "npm run typecheck:backend && npm run build --workspace=src",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write .",
     "test": "vitest run",
-    "migrate:temas": "tsx scripts/migrate-temas.ts"
+    "migrate:temas": "tsx scripts/migrate-temas.ts",
+    "typecheck:backend": "tsc --project tsconfig.json"
   },
   "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/sanitize-html": "^2.16.2",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "@vercel/node": "^3.0.0",
@@ -33,6 +36,8 @@
     "cors": "^2.8.6",
     "dotenv": "^18.0.7",
     "express": "^5.3.0",
-    "pg": "^8.23.1"
+    "katex": "^0.19.0",
+    "pg": "^8.23.1",
+    "sanitize-html": "^2.18.0"
   }
 }

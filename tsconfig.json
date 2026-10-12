@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@physicslab/shared-types": ["./packages/shared-types/src"]
+    }
+  },
+  "include": ["api/**/*", "backend/**/*", "scripts/**/*", "packages/**/*"]
+}
