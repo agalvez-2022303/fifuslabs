@@ -2,8 +2,8 @@ import React, { useState, useMemo, lazy, Suspense } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import { getTemaBySlug, type TemaConfig } from '../../data/temas'
-import katex from 'katex'
+import { useTemaApi } from '../hooks/useTemaApi'
+import { desarrolloHtml, formattedHtml, mathHtml } from '../utils/content-format'
 import 'katex/dist/katex.min.css'
 import styles from './TemaDashboard.module.css'
 
@@ -33,65 +33,11 @@ const SIMULATION_COMPONENTS: Record<string, React.LazyExoticComponent<React.Comp
   'velocidad-rapidez': lazy(() => import('../simulations/velocidad-rapidez/VelocidadRapidez')),
 }
 
-function renderLatex(expr: string): string {
-  try {
-    return katex.renderToString(expr, { throwOnError: false, displayMode: true })
-  } catch {
-    return expr
-  }
-}
+const renderLatex = (expr: string): string => mathHtml(expr, true)
+const renderLatexInline = (expr: string): string => mathHtml(expr)
+const renderFormattedContent = (text: string): string => formattedHtml(text)
 
-function renderLatexInline(expr: string): string {
-  try {
-    return katex.renderToString(expr, { throwOnError: false, displayMode: false })
-  } catch {
-    return expr
-  }
-}
-
-/** Renderiza texto con fórmulas LaTeX ($...$) y formato Markdown (**negrita**) */
-function renderFormattedContent(text: string): string {
-  if (!text) return ''
-
-  // 1. Reemplazar bloques $$...$$
-  let processed = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
-    try {
-      return katex.renderToString(math.trim(), { throwOnError: false, displayMode: true })
-    } catch {
-      return math
-    }
-  })
-
-  // 2. Reemplazar inline $...$
-  processed = processed.replace(/\$([^$]+?)\$/g, (_, math) => {
-    try {
-      return katex.renderToString(math.trim(), { throwOnError: false, displayMode: false })
-    } catch {
-      return math
-    }
-  })
-
-  // 3. Formato **negrita**
-  processed = processed.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
-
-  // 4. Saltos de línea
-  processed = processed.replace(/\n\n/g, '<br /><br />')
-  processed = processed.replace(/\n/g, '<br />')
-
-  return processed
-}
-
-/** Renderiza el desarrollo de una fórmula con notación matemática KaTeX */
-function renderDesarrollo(desarrollo: string): string {
-  if (!desarrollo) return ''
-  const trimmed = desarrollo.trim()
-
-  if (trimmed.includes('$')) {
-    return renderFormattedContent(trimmed)
-  }
-
-  return renderLatexInline(trimmed)
-}
+const renderDesarrollo = (desarrollo: string): string => desarrolloHtml(desarrollo)
 
 type TabType = 'simulacion' | 'formulas' | 'glosario' | 'teoria'
 
@@ -99,9 +45,7 @@ export default function TemaDashboard(): JSX.Element {
   const { id, seccion } = useParams<{ id: string; seccion?: string }>()
   const navigate = useNavigate()
 
-  const tema: TemaConfig | undefined = useMemo(() => {
-    return id ? getTemaBySlug(id) : undefined
-  }, [id])
+  const { tema, source, loading } = useTemaApi(id)
 
   const activeTab: TabType = useMemo(() => {
     if (seccion === 'formulas' || seccion === 'glosario' || seccion === 'teoria' || seccion === 'simulacion') {
@@ -123,6 +67,19 @@ export default function TemaDashboard(): JSX.Element {
         (g.categoria && g.categoria.toLowerCase().includes(q))
     )
   }, [tema, glossaryQuery])
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Header />
+        <main style={{ flex: 1, padding: '40px 20px', textAlign: 'center' }}>
+          <div className="spinner" />
+          <p style={{ color: 'var(--text-secondary)', marginTop: '12px' }}>Cargando tema…</p>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
   if (!tema) {
     return (
@@ -175,6 +132,12 @@ export default function TemaDashboard(): JSX.Element {
           </nav>
 
           <div className={styles.metaPills}>
+            {source === 'estatico' && (
+              <div className={styles.activePill} title="No pudimos contactar el servidor; se muestra la copia local">
+                <span className={styles.greenPulse} />
+                <span>Contenido en caché</span>
+              </div>
+            )}
             <div className={styles.activePill}>
               <span className={styles.greenPulse} />
               <span>Simulación Activa</span>
@@ -352,7 +315,7 @@ export default function TemaDashboard(): JSX.Element {
 
             <div className={styles.glossaryGrid}>
               {filteredGlossary.map((g) => (
-                <div key={g.termino} className={styles.glossaryCard}>
+                <div key={g.id} className={styles.glossaryCard}>
                   {g.categoria && <span className={styles.glossaryCategory}>{g.categoria}</span>}
                   <h3 className={styles.glossaryTerm}>{g.termino}</h3>
                   <p
@@ -365,7 +328,7 @@ export default function TemaDashboard(): JSX.Element {
 
             {filteredGlossary.length === 0 && (
               <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                No se encontraron términos para "{glossaryQuery}".
+                No se encontraron términos para &laquo;{glossaryQuery}&raquo;.
               </div>
             )}
           </div>
@@ -381,8 +344,8 @@ export default function TemaDashboard(): JSX.Element {
               />
             )}
 
-            {tema.teoria.secciones.map((sec, idx) => (
-              <section key={idx} className={styles.theorySection}>
+            {tema.teoria.secciones.map(sec => (
+              <section key={sec.id} className={styles.theorySection}>
                 <h3 className={styles.sectionHeading}>{sec.titulo}</h3>
                 <div
                   className={styles.sectionBody}
@@ -407,7 +370,7 @@ export default function TemaDashboard(): JSX.Element {
                 </div>
                 <ul className={styles.summaryList}>
                   {tema.teoria.resumen.map((r, i) => (
-                    <li key={i} dangerouslySetInnerHTML={{ __html: renderFormattedContent(r) }} />
+                    <li key={r.id ?? i} dangerouslySetInnerHTML={{ __html: renderFormattedContent(r.contenido ?? r) }} />
                   ))}
                 </ul>
               </div>

@@ -2,6 +2,7 @@ export * from './temas'
 export * from './schemas'
 export * from './config'
 export * from './users'
+export * from './ids'
 
 // ─── Categorías ───────────────────────────────────────────────────────────────
 
