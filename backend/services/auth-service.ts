@@ -2,6 +2,8 @@ import {
   loginSchema,
   refreshSchema,
   registerSchema,
+  passwordResetSchema,
+  changePasswordSchema,
   type AuthUser,
 } from '../../packages/shared-types/src'
 import type { IdentityGateway, IdentityResult } from '../auth/identity-gateway'
@@ -45,5 +47,16 @@ export class AuthService {
   }
   async logout(token: string, _user: AuthUser) {
     await this.identities.logout(token)
+  }
+  async requestReset(input: unknown) {
+    const parsed = passwordResetSchema.safeParse(input)
+    if (!parsed.success) throw new ValidationError('Correo inválido')
+    await this.identities.sendPasswordReset(parsed.data.email)
+    return { message: 'Si existe una cuenta con ese correo, recibirás instrucciones para recuperar el acceso.' }
+  }
+  async changePassword(input: unknown, token: string) {
+    const parsed = changePasswordSchema.safeParse(input)
+    if (!parsed.success) throw new ValidationError('La contraseña debe tener entre 12 y 128 caracteres')
+    await this.identities.changePassword(token, parsed.data.password)
   }
 }

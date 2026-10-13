@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { loginSchema, refreshSchema, registerSchema } from '../../packages/shared-types/src'
+import { changePasswordSchema, loginSchema, passwordResetSchema, refreshSchema, registerSchema } from '../../packages/shared-types/src'
 import type { AppEnv } from '../http-types'
 import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validation'
@@ -17,6 +17,11 @@ export function authRoutes(service: AuthService, users: UserService) {
   routes.post('/refresh', validate(refreshSchema), async c =>
     c.json({ data: await service.refresh(c.get('input')) })
   )
+  routes.post('/password-reset', validate(passwordResetSchema), async c => c.json({ data: await service.requestReset(c.get('input')) }))
+  routes.put('/password', requireAuth, validate(changePasswordSchema), async c => {
+    await service.changePassword(c.get('input'), c.req.header('authorization')!.slice(7))
+    return c.body(null, 204)
+  })
   routes.get('/me', requireAuth, async c => c.json({ data: await users.self(c.get('user')!) }))
   routes.post('/logout', requireAuth, async c => {
     await service.logout(c.req.header('authorization')!.slice(7), c.get('user')!)

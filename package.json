@@ -17,6 +17,7 @@
     "migrate:temas": "tsx scripts/migrate-temas.ts",
     "typecheck:backend": "tsc --project tsconfig.json",
     "lint:backend": "eslint backend api packages/shared-types/src scripts src/data/temas/types.ts src/vite.config.ts vitest.config.ts",
+    "verify:panel": "tsx backend/__tests__/panel-integration.ts",
     "db:migrate": "tsx scripts/database.ts migrate",
     "db:seed": "tsx scripts/database.ts seed",
     "db:setup": "tsx scripts/database.ts setup",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.9",
+    "@playwright/test": "^1.64.0",
     "@types/node": "^22.20.5",
     "@types/pg": "^8.23.1",
     "@types/sanitize-html": "^2.16.2",

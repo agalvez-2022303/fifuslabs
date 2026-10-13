@@ -545,18 +545,20 @@ el acceso a la app inmediatamente, independientemente de esa expiración.
 
 Todos llevan prefijo `/api`, validación Zod y body máximo 256 KiB.
 
-| Método | Path             | Acceso / cuerpo                                                      |
-| ------ | ---------------- | -------------------------------------------------------------------- |
-| POST   | `/auth/register` | Público; `{ email, password, name }`; no acepta rol                  |
-| POST   | `/auth/login`    | Público; `{ email, password }`                                       |
-| POST   | `/auth/refresh`  | Público; `{ refreshToken }`                                          |
-| GET    | `/auth/me`       | Usuario autenticado; perfil SQL                                      |
-| POST   | `/auth/logout`   | Usuario autenticado; revoca refresh sessions en Supabase             |
-| GET    | `/users`         | Teacher; filtros `q`, `limit`, `offset`, incluye inactivos           |
-| GET    | `/users/:id`     | Teacher; UUID de perfil                                              |
-| POST   | `/users`         | Teacher; `{ email, password, name, role? }`, rol por defecto student |
-| PATCH  | `/users/:id`     | Teacher; `{ name?, role?, active?, version? }` o `If-Match`          |
-| DELETE | `/users/:id`     | Teacher; `If-Match`; desactiva perfil y bloquea identidad, 204       |
+| Método | Path                   | Acceso / cuerpo                                                      |
+| ------ | ---------------------- | -------------------------------------------------------------------- |
+| POST   | `/auth/register`       | Público; `{ email, password, name }`; no acepta rol                  |
+| POST   | `/auth/login`          | Público; `{ email, password }`                                       |
+| POST   | `/auth/refresh`        | Público; `{ refreshToken }`                                          |
+| POST   | `/auth/password-reset` | Público; `{ email }`; respuesta genérica y sin revelar existencia    |
+| PUT    | `/auth/password`       | Usuario autenticado; `{ password }` de 12 a 128 caracteres           |
+| GET    | `/auth/me`             | Usuario autenticado; perfil SQL                                      |
+| POST   | `/auth/logout`         | Usuario autenticado; revoca refresh sessions en Supabase             |
+| GET    | `/users`               | Teacher; filtros `q`, `limit`, `offset`, incluye inactivos           |
+| GET    | `/users/:id`           | Teacher; UUID de perfil                                              |
+| POST   | `/users`               | Teacher; `{ email, password, name, role? }`, rol por defecto student |
+| PATCH  | `/users/:id`           | Teacher; `{ name?, role?, active?, version? }` o `If-Match`          |
+| DELETE | `/users/:id`           | Teacher; `If-Match`; desactiva perfil y bloquea identidad, 204       |
 
 DELETE de usuario es lógico: conserva identidad y auditoría. El perfil inactivo
 no puede acceder a rutas protegidas aunque conserve un JWT. La administración
@@ -564,8 +566,55 @@ en PostgreSQL y los bloqueos en Supabase Auth son dos sistemas distintos:
 desactivar se guarda primero en SQL; si el bloqueo remoto falla, el usuario
 sigue sin acceso a la app y se devuelve 503. Leer la nueva versión antes de
 reintentar. Reactivar desbloquea Auth antes de activar el perfil. El cambio de
-email y la recuperación de contraseña se gestionan en Supabase Auth; el trigger
-sincroniza los cambios de email.
+email se gestiona en Supabase Auth; el trigger sincroniza los cambios de email.
+
+## Panel de administración (FísicaLab Studio)
+
+`/admin` reproduce las vistas de diseño de `stitch_f_sicalab_admin_panel`: login,
+dashboard, catálogo de fórmulas y editor con vista previa del estudiante. El tema
+visual vive en `src/app/admin/Studio.css`, aislado bajo `.studio` para no alterar
+las páginas públicas, y aplica los tokens de `f_sicalab_studio/DESIGN.md`
+(azul marino `#1A456B`, dorado `#FFD141`, Montserrat/Inter/JetBrains Mono).
+
+| Ruta                                                  | Pantalla                                                  |
+| ----------------------------------------------------- | --------------------------------------------------------- |
+| `/admin/login`                                        | Acceso con Supabase Auth y recuperación de contraseña     |
+| `/admin/dashboard`                                    | KPIs, gráficos, últimos cambios y auditoría de pendientes |
+| `/admin/areas`                                        | Catálogo de áreas de conocimiento                         |
+| `/admin/temas`                                        | Listado, creación, edición de metadatos y retiro de temas |
+| `/admin/temas/nuevo`                                  | Alta de tema con estado inicial de borrador               |
+| `/admin/temas/:slug/revisiones`                       | Historial de 50 snapshots y restauración                  |
+| `/admin/teoria`                                       | Introducción, secciones y resumen                         |
+| `/admin/formulas`                                     | Catálogo con filtros, tabla/cuadrícula y exportación CSV  |
+| `/admin/formulas/nueva` · `/admin/formulas/:slug/:id` | Editor con teclado LaTeX y vista previa                   |
+| `/admin/glosario`                                     | Términos y definiciones                                   |
+| `/admin/ejercicios`                                   | Ejemplos resueltos asociados a fórmulas                   |
+| `/admin/usuarios`                                     | Alta, edición y desactivación de maestros y alumnos       |
+
+La sesión se guarda en `sessionStorage` o `localStorage` según «Mantener sesión»,
+se renueva sola antes de expirar y ante un 401, y se limpia al cerrar sesión. El
+rol se resuelve siempre contra el perfil en PostgreSQL. Los formularios envían la
+versión actual del tema mediante `If-Match`, por lo que un conflicto devuelve 409
+y el contenido local permanece en el formulario para poder reconciliarlo.
+
+Dos diferencias deliberadas respecto a las maquetas: la publicación es una
+propiedad del **tema completo** (no existe estado por fórmula), y los «ejercicios»
+son los ejemplos resueltos guardados en cada fórmula. Publicar o archivar desde el
+catálogo afecta a todo el tema y el panel lo advierte antes de confirmar. Los
+elementos solo pueden borrarse, no archivarse. Si el servicio responde sin
+identidad utilizable, el panel vuelve al login en lugar de mantener una sesión
+local obsoleta.
+
+La verificación de los flujos se ejecuta sin navegador:
+
+```bash
+npm run verify:panel
+```
+
+Arranca Vite contra el repositorio configurado y comprueba la superficie pública
+contra PostgreSQL y, cuando faltan credenciales del panel, los flujos
+autenticados en modo JSON + DevAuth. Con `SUPABASE_PANEL_EMAIL` y
+`SUPABASE_PANEL_PASSWORD` en el `.env` valida además el login real.
 
 Si falta una clave de Auth, las lecturas públicas de PostgreSQL funcionan, pero
 login/registro devuelven 503 con un mensaje de configuración. Las rutas protegidas

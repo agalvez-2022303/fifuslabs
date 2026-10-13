@@ -23,6 +23,8 @@ export class UnconfiguredIdentityGateway implements IdentityGateway {
   async logout(): Promise<never> {
     return this.fail()
   }
+  async sendPasswordReset(): Promise<never> { return this.fail() }
+  async changePassword(): Promise<never> { return this.fail() }
   async createUser(): Promise<never> {
     return this.fail()
   }

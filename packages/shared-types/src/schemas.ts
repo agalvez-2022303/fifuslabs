@@ -43,21 +43,21 @@ export const formulaInputSchema = z
     expresion: z.string().min(1).max(4000),
     descripcion: text,
     variables: z.array(variableSchema).max(50),
-    ejemploResuelto: ejemploSchema.optional(),
+    ejemploResuelto: ejemploSchema.nullable().optional(),
   })
   .strict()
 export const seccionInputSchema = z
   .object({
     titulo: shortText,
     contenido: text,
-    destacado: z.string().max(2000).optional(),
+    destacado: z.string().max(2000).nullable().optional(),
   })
   .strict()
 export const glosarioInputSchema = z
   .object({
     termino: shortText,
     definicion: z.string().min(1).max(4000),
-    categoria: shortText.optional(),
+    categoria: shortText.nullable().optional(),
   })
   .strict()
 export const resumenInputSchema = z.object({ contenido: z.string().min(1).max(4000) }).strict()

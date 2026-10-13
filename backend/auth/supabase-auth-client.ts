@@ -116,6 +116,12 @@ export class SupabaseAuthClient implements IdentityGateway {
   async logout(token: string) {
     await this.request('logout?scope=global', { method: 'POST', token })
   }
+  async sendPasswordReset(email: string) {
+    await this.request('recover', { method: 'POST', body: { email } })
+  }
+  async changePassword(token: string, password: string) {
+    await this.request('user', { method: 'PUT', token, body: { password } })
+  }
   async createUser(email: string, password: string): Promise<string> {
     const payload = await this.request('admin/users', {
       method: 'POST',

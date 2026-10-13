@@ -54,6 +54,13 @@ export class TestIdentityGateway implements IdentityGateway {
     for (const [token, user] of this.refreshTokens)
       if (user === id) this.refreshTokens.delete(token)
   }
+  async sendPasswordReset(_email: string) {}
+  async changePassword(token: string, password: string) {
+    const id = this.tokens.get(token)
+    const user = id ? this.users.get(id) : null
+    if (!user) throw new UnauthorizedError()
+    user.password = password
+  }
   async setDisabled(id: string, disabled: boolean) {
     const user = this.users.get(id)
     if (!user) throw new UnauthorizedError()

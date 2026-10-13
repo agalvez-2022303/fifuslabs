@@ -10,6 +10,8 @@ export interface IdentityGateway {
   register(email: string, password: string): Promise<IdentityResult>
   refresh(token: string): Promise<IdentityResult>
   logout(token: string): Promise<void>
+  sendPasswordReset(email: string): Promise<void>
+  changePassword(token: string, password: string): Promise<void>
   createUser(email: string, password: string): Promise<string>
   setDisabled(id: string, disabled: boolean): Promise<void>
   deleteUser(id: string): Promise<void>
