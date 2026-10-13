@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "buildCommand": "npm run build --workspace=src",
+  "buildCommand": "npm run build",
   "outputDirectory": "src/dist",
+  "functions": {
+    "api/[[...route]].ts": { "includeFiles": "{data/**,backend/db/certs/**}" }
+  },
   "rewrites": [
-    { "source": "/api/categories", "destination": "/api/categories.ts" },
-    { "source": "/api/simulations", "destination": "/api/simulations/index.ts" },
-    { "source": "/api/simulations/:slug", "destination": "/api/simulations/[slug].ts" },
-    { "source": "/api/content/:slug", "destination": "/api/content/[slug].ts" },
+    { "source": "/api/:path*", "destination": "/api/[[...route]]" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

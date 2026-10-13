@@ -1,3 +1,8 @@
+export * from './temas'
+export * from './schemas'
+export * from './config'
+export * from './users'
+
 // ─── Categorías ───────────────────────────────────────────────────────────────
 
 export type CategoryId =

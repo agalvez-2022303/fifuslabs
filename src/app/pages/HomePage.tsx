@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import HeroCanvas from '../components/HeroCanvas'
@@ -14,15 +14,15 @@ import {
 import styles from './HomePage.module.css'
 
 const CATEGORY_NAMES: Record<string, string> = {
-  mecanica:             'Mecánica Clásica & Cinemática',
+  mecanica: 'Mecánica Clásica & Cinemática',
   'oscilaciones-ondas': 'Oscilaciones y Ondas',
-  electrodinamica:      'Electrodinámica & Campo Eléctrico',
-  optica:               'Óptica Geométrica',
-  termodinamica:        'Termodinámica',
-  relatividad:          'Teoría de la Relatividad',
-  'fisica-atomica':     'Física Atómica',
-  'fisica-nuclear':     'Física Nuclear',
-  'estado-solido':      'Estado Sólido',
+  electrodinamica: 'Electrodinámica & Campo Eléctrico',
+  optica: 'Óptica Geométrica',
+  termodinamica: 'Termodinámica',
+  relatividad: 'Teoría de la Relatividad',
+  'fisica-atomica': 'Física Atómica',
+  'fisica-nuclear': 'Física Nuclear',
+  'estado-solido': 'Estado Sólido',
 }
 
 const CATEGORIES = Object.keys(CATEGORY_NAMES)
@@ -47,7 +47,10 @@ export default function HomePage() {
   }, [location.search, location.hash])
 
   const availableSims = useMemo(
-    () => (SHOW_COMING_SOON ? SIMULATIONS_REGISTRY : SIMULATIONS_REGISTRY.filter(s => s.estado === 'active')),
+    () =>
+      SHOW_COMING_SOON
+        ? SIMULATIONS_REGISTRY
+        : SIMULATIONS_REGISTRY.filter(s => s.estado === 'active'),
     []
   )
 
@@ -80,7 +83,10 @@ export default function HomePage() {
         <div className={styles.heroContent}>
           <div className={styles.heroHeaderBlock}>
             <div className={styles.heroBadge}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--corporate)' }}>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: '16px', color: 'var(--corporate)' }}
+              >
                 science
               </span>
               <span>Laboratorio virtual de física</span>
@@ -91,7 +97,8 @@ export default function HomePage() {
             </h1>
 
             <p className={styles.heroSubtitle}>
-              Practica con simulaciones interactivas, consulta fórmulas, explora el glosario y refuerza tu teoría de cada tema.
+              Practica con simulaciones interactivas, consulta fórmulas, explora el glosario y
+              refuerza tu teoría de cada tema.
             </p>
 
             {/* Stats Reales */}
@@ -109,15 +116,34 @@ export default function HomePage() {
 
             {/* Botones de acción */}
             <div className={styles.actionButtons}>
-              <a href="#simulaciones" className={styles.btnPrimary} onClick={scrollToSection('simulaciones')}>
+              <a
+                href="#simulaciones"
+                className={styles.btnPrimary}
+                onClick={scrollToSection('simulaciones')}
+              >
                 <span className="material-symbols-outlined">explore</span>
                 <span>Empezar a explorar</span>
               </a>
-              <a href="#como-funciona" className={styles.btnSecondary} onClick={scrollToSection('como-funciona')}>
+              <a
+                href="#como-funciona"
+                className={styles.btnSecondary}
+                onClick={scrollToSection('como-funciona')}
+              >
                 <span className="material-symbols-outlined">help_outline</span>
                 <span>Ver cómo funciona</span>
               </a>
             </div>
+
+            {/* Acceso exclusivo para maestros */}
+            <Link className={styles.teacherAccess} to="/admin/login">
+              <span className="material-symbols-outlined" aria-hidden="true">
+                login
+              </span>
+              <span>
+                <strong>Iniciar sesión</strong>
+                <small>Acceso para maestros y administradores de contenido</small>
+              </span>
+            </Link>
           </div>
         </div>
       </section>
@@ -129,7 +155,9 @@ export default function HomePage() {
             <summary className={styles.howSummary}>
               <span className={styles.howSummaryText}>
                 <span className={styles.howTitle}>¿Cómo funciona FísicaLab?</span>
-                <span className={styles.howDesc}>4 pasos sencillos para dominar cualquier concepto a tu ritmo</span>
+                <span className={styles.howDesc}>
+                  4 pasos sencillos para dominar cualquier concepto a tu ritmo
+                </span>
               </span>
               <span className={`material-symbols-outlined ${styles.howChevron}`} aria-hidden="true">
                 expand_more
@@ -143,7 +171,9 @@ export default function HomePage() {
                   <span className="material-symbols-outlined">touch_app</span>
                 </div>
                 <h3 className={styles.stepTitle}>Elige un tema</h3>
-                <p className={styles.stepText}>Explora vectores, cinemática, velocidad, alcance de móviles y estática.</p>
+                <p className={styles.stepText}>
+                  Explora vectores, cinemática, velocidad, alcance de móviles y estática.
+                </p>
               </div>
 
               <div className={styles.stepCard}>
@@ -152,7 +182,9 @@ export default function HomePage() {
                   <span className="material-symbols-outlined">tune</span>
                 </div>
                 <h3 className={styles.stepTitle}>Juega con la simulación</h3>
-                <p className={styles.stepText}>Ajusta variables en tiempo real y observa la respuesta gráfica inmediata.</p>
+                <p className={styles.stepText}>
+                  Ajusta variables en tiempo real y observa la respuesta gráfica inmediata.
+                </p>
               </div>
 
               <div className={styles.stepCard}>
@@ -161,7 +193,9 @@ export default function HomePage() {
                   <span className="material-symbols-outlined">functions</span>
                 </div>
                 <h3 className={styles.stepTitle}>Repasa fórmulas y glosario</h3>
-                <p className={styles.stepText}>Comprueba ecuaciones despejadas y definiciones claras de cada magnitud.</p>
+                <p className={styles.stepText}>
+                  Comprueba ecuaciones despejadas y definiciones claras de cada magnitud.
+                </p>
               </div>
 
               <div className={styles.stepCard}>
@@ -170,7 +204,9 @@ export default function HomePage() {
                   <span className="material-symbols-outlined">menu_book</span>
                 </div>
                 <h3 className={styles.stepTitle}>Lee la teoría</h3>
-                <p className={styles.stepText}>Consolida tu aprendizaje con explicaciones conceptuales y paso a paso.</p>
+                <p className={styles.stepText}>
+                  Consolida tu aprendizaje con explicaciones conceptuales y paso a paso.
+                </p>
               </div>
             </div>
           </details>
@@ -204,9 +240,7 @@ export default function HomePage() {
             >
               Todas las áreas
             </button>
-            {CATEGORIES.filter(cat =>
-              availableSims.some(s => s.categoriaId === cat)
-            ).map(cat => (
+            {CATEGORIES.filter(cat => availableSims.some(s => s.categoriaId === cat)).map(cat => (
               <button
                 key={cat}
                 className={`${styles.filterPill} ${filter === cat ? styles.filterPillActive : ''}`}
@@ -225,7 +259,10 @@ export default function HomePage() {
           <section className={styles.categorySection}>
             <div className={styles.sectionHeader}>
               <div className={styles.sectionTitleRow}>
-                <span className="material-symbols-outlined" style={{ color: 'var(--corporate)', fontSize: '20px' }}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ color: 'var(--corporate)', fontSize: '20px' }}
+                >
                   filter_list
                 </span>
                 <h2 className={styles.sectionTitle}>
@@ -244,7 +281,10 @@ export default function HomePage() {
               </div>
             ) : (
               <div className={styles.emptyState}>
-                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--slate-muted)' }}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: '48px', color: 'var(--slate-muted)' }}
+                >
                   search_off
                 </span>
                 <p>No se encontraron simulaciones que coincidan con &quot;{search}&quot;</p>
@@ -256,7 +296,10 @@ export default function HomePage() {
             <section key={catId} className={styles.categorySection}>
               <div className={styles.sectionHeader}>
                 <div className={styles.sectionTitleRow}>
-                  <span className="material-symbols-outlined" style={{ color: 'var(--corporate)', fontSize: '22px' }}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ color: 'var(--corporate)', fontSize: '22px' }}
+                  >
                     token
                   </span>
                   <h2 className={styles.sectionTitle}>{CATEGORY_NAMES[catId] ?? catId}</h2>

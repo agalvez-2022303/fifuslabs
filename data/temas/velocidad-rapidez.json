@@ -1,0 +1,125 @@
+{
+  "titulo": "Velocidad vs Rapidez",
+  "descripcionCorta": "Diferencia la rapidez (escalar) de la velocidad vectorial en movimientos rectilíneos y curvos.",
+  "categoriaId": "mecanica",
+  "dificultad": "intermedio",
+  "estado": "active",
+  "orden": 7,
+  "icono": "speed",
+  "etiquetas": [
+    "cinemática",
+    "velocidad",
+    "rapidez",
+    "órbita",
+    "vectorial"
+  ],
+  "formulaPrincipal": "r = \\frac{d}{\\Delta t} \\quad \\text{vs} \\quad \\vec{v} = \\frac{\\Delta \\vec{r}}{\\Delta t}",
+  "simComponentSlug": "velocidad-rapidez",
+  "id": "sim-012",
+  "slug": "velocidad-rapidez",
+  "status": "published",
+  "version": 1,
+  "updatedAt": "1970-01-01T00:00:00.000Z",
+  "teoria": {
+    "introduccion": "Aunque en la vida diaria usamos rapidez y velocidad como sinónimos, en física tienen significados muy distintos.",
+    "secciones": [
+      {
+        "titulo": "Diferencia entre rapidez y velocidad",
+        "contenido": "• **Rapidez:** Es un escalar que indica solo qué tan rápido te mueves (ej. $60\\text{ km/h}$). El velocímetro de tu carro mide rapidez.\n• **Velocidad:** Es un vector que indica qué tan rápido te mueves Y hacia qué dirección vas (ej. $60\\text{ km/h}$ al Norte).",
+        "id": "af4783a9-7e92-5160-870a-51e6e8b6969f"
+      }
+    ],
+    "resumen": [
+      {
+        "contenido": "La rapidez indica la magnitud de la velocidad (escalar sin dirección).",
+        "id": "3c49db73-32aa-5531-bb28-2ae9deaaa83e"
+      },
+      {
+        "contenido": "La velocidad es un vector que incluye magnitud, dirección y sentido.",
+        "id": "63976f06-0b37-570e-9811-08abde485447"
+      },
+      {
+        "contenido": "En curvas, la velocidad cambia aunque la rapidez del velocímetro se mantenga constante.",
+        "id": "c6185097-84d5-5d4f-bc53-60ca51f0153f"
+      }
+    ]
+  },
+  "formulas": [
+    {
+      "nombre": "Rapidez Media Escalar",
+      "expresion": "r_{\\text{med}} = \\frac{d}{\\Delta t}",
+      "descripcion": "Calcula el promedio de prisa o velocidad escalar en todo el viaje.",
+      "variables": [
+        {
+          "simbolo": "r_{\\text{med}}",
+          "descripcion": "Rapidez media",
+          "unidad": "m/s"
+        },
+        {
+          "simbolo": "d",
+          "descripcion": "Distancia total recorrida",
+          "unidad": "m"
+        },
+        {
+          "simbolo": "\\Delta t",
+          "descripcion": "Tiempo total empleado",
+          "unidad": "s"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Un automóvil recorre una distancia de 120 metros en 6 segundos. Halla su rapidez media.",
+        "datos": "d = 120 m, Δt = 6 s",
+        "desarrollo": "r_{\\text{med}} = \\frac{120}{6} = 20 \\text{ m/s}",
+        "resultado": "La rapidez media es de 20 m/s."
+      },
+      "id": "960a34ba-6221-5914-9abb-5da082b73879"
+    }
+  ],
+  "glosario": [
+    {
+      "termino": "Aceleración",
+      "definicion": "Cambio de la velocidad (en valor o dirección) por unidad de tiempo.",
+      "id": "66de38f7-7df3-59d4-88c4-4aa248ef6244"
+    },
+    {
+      "termino": "Rapidez Instantánea",
+      "definicion": "Valor de la rapidez de un cuerpo en un instante preciso de tiempo.",
+      "id": "260bb44e-5679-5c5a-a573-951eef602963"
+    },
+    {
+      "termino": "Rapidez Media",
+      "definicion": "Distancia total recorrida dividida entre el tiempo total del viaje.",
+      "id": "9e39ab47-db2c-5200-85cb-442dd773aaa8"
+    },
+    {
+      "termino": "Sistema Internacional (SI)",
+      "definicion": "Estándar científico donde la velocidad y rapidez se miden en metros por segundo (m/s).",
+      "id": "c8d4cdc4-2872-5b8c-a881-e9fa3f056358"
+    },
+    {
+      "termino": "Velocidad (v⃗)",
+      "definicion": "Magnitud vectorial que indica qué tan rápido cambia la posición y en qué dirección.",
+      "id": "c9d5d4da-503e-56c7-b0ba-78d3845a4894"
+    },
+    {
+      "termino": "Velocidad Instantánea",
+      "definicion": "Vector velocidad de un cuerpo en un instante determinado.",
+      "id": "e7e206a2-87d0-513e-a029-c0da568a7f8a"
+    },
+    {
+      "termino": "Velocidad Media",
+      "definicion": "Cociente entre el vector desplazamiento neto y el tiempo empleado.",
+      "id": "2245bad8-38db-5ac9-a8a2-96f4e97ca146"
+    },
+    {
+      "termino": "Velocidad Tangencial",
+      "definicion": "Velocidad cuya dirección es tangente a la curva del camino.",
+      "id": "69195851-f915-5398-b2ba-8149ad6db738"
+    },
+    {
+      "termino": "Velocímetro",
+      "definicion": "Instrumento que mide la rapidez instantánea de un vehículo.",
+      "id": "84b66b97-36fd-5a5b-a15e-dc36ccb8964b"
+    }
+  ]
+}

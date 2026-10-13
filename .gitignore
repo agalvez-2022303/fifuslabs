@@ -3,6 +3,7 @@ dist
 .vercel
 *.log
 .env
-.env.local
-
-.vercel
+.env.*
+!.env.example
+*.tsbuildinfo
+data/temas/*.tmp

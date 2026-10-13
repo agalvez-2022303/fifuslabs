@@ -1,12 +1,17 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "strict": false
+    "strict": true,
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@physicslab/shared-types": ["./packages/shared-types/src"]
+    }
   },
-  "include": ["api/**/*", "data/**/*", "packages/**/*"]
+  "include": ["api/**/*", "backend/**/*", "scripts/**/*", "packages/**/*", "vitest.config.ts"]
 }

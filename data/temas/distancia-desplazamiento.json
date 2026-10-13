@@ -1,0 +1,126 @@
+{
+  "titulo": "Distancia vs Desplazamiento",
+  "descripcionCorta": "Entiende la diferencia entre el camino recorrido (escalar) y el cambio en línea recta de posición (vector).",
+  "categoriaId": "mecanica",
+  "dificultad": "basico",
+  "estado": "active",
+  "orden": 6,
+  "icono": "route",
+  "etiquetas": [
+    "cinemática",
+    "distancia",
+    "desplazamiento",
+    "trayectoria",
+    "escalar",
+    "vectorial"
+  ],
+  "formulaPrincipal": "d = d_1 + d_2 \\quad \\text{vs} \\quad \\Delta \\vec{r} = \\vec{r}_f - \\vec{r}_i",
+  "simComponentSlug": "distancia-desplazamiento",
+  "id": "sim-011",
+  "slug": "distancia-desplazamiento",
+  "status": "published",
+  "version": 1,
+  "updatedAt": "1970-01-01T00:00:00.000Z",
+  "teoria": {
+    "introduccion": "¿Sabías que puedes caminar 100 metros y haberte desplazado 0 metros? En física, distancia y desplazamiento no son lo mismo.",
+    "secciones": [
+      {
+        "titulo": "Diferencia conceptual",
+        "contenido": "• **Distancia ($d$):** Es la longitud total del camino que recorres. Es un **escalar** (siempre suma y no le importa la dirección).\n• **Desplazamiento ($Delta \\vec{r}$):** Es la distancia en línea recta entre el punto inicial y el punto final. Es un **vector** (cuenta hacia dónde fuiste).",
+        "id": "b29fb64b-263f-592f-9f91-d98a5762fab8"
+      },
+      {
+        "titulo": "Explicación con un ejemplo cotidiano",
+        "contenido": "Si le das una vuelta completa a una cancha de fútbol de $400\\text{ m}$ de perímetro y regresas al punto de salida:\n\n• Tu **distancia recorrida** es de $400\\text{ m}$.\n• Tu **desplazamiento** es de $0\\text{ m}$ (porque terminaste en el mismo lugar de origen).",
+        "id": "a8fddca7-16fc-567a-a643-524cc17e49a4"
+      }
+    ],
+    "resumen": [
+      {
+        "contenido": "La distancia mide todo el camino recorrido (escalar siempre positivo).",
+        "id": "b54a198e-804a-52b5-97c8-922acc2d4dcc"
+      },
+      {
+        "contenido": "El desplazamiento mide la separación en línea recta entre inicio y fin (vector).",
+        "id": "04082bcf-6986-5444-a927-dcf263f31d7d"
+      },
+      {
+        "contenido": "Si no das la vuelta y vas en línea recta, la distancia es igual al módulo del desplazamiento.",
+        "id": "f9df2057-999b-5831-a71e-b1e529e69b6e"
+      }
+    ]
+  },
+  "formulas": [
+    {
+      "nombre": "Vector Desplazamiento",
+      "expresion": "\\Delta \\vec{r} = \\vec{r}_f - \\vec{r}_i",
+      "descripcion": "Calcula el cambio de ubicación en línea recta desde la posición inicial a la final.",
+      "variables": [
+        {
+          "simbolo": "\\Delta \\vec{r}",
+          "descripcion": "Vector desplazamiento neto",
+          "unidad": "m"
+        },
+        {
+          "simbolo": "\\vec{r}_i, \\vec{r}_f",
+          "descripcion": "Posiciones inicial y final",
+          "unidad": "m"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Estás en la marca x_i = 10 m y caminas hasta x_f = 35 m. Halla el desplazamiento.",
+        "datos": "x_i = 10 m, x_f = 35 m",
+        "desarrollo": "\\Delta x = 35 - 10 = 25 \\text{ m}",
+        "resultado": "El desplazamiento es de +25 m a la derecha."
+      },
+      "id": "92b0838d-4201-5ad0-b90c-0cd47153347c"
+    }
+  ],
+  "glosario": [
+    {
+      "termino": "Desplazamiento (Δr⃗)",
+      "definicion": "Magnitud vectorial que mide la separación en línea recta entre el punto de origen y el de destino.",
+      "id": "3c5c5ce3-7368-529c-b13f-f47c73b0f7e9"
+    },
+    {
+      "termino": "Distancia (d)",
+      "definicion": "Magnitud escalar que mide la longitud total del camino recorrido por un móvil.",
+      "id": "36dabc90-4258-5ea6-958b-c86290c8a400"
+    },
+    {
+      "termino": "Escalar",
+      "definicion": "Magnitud física que queda definida con un valor numérico y su unidad de medida (sin dirección).",
+      "id": "6d106811-7108-57a4-b03d-d33ad0f9ac89"
+    },
+    {
+      "termino": "Longitud de Trayectoria",
+      "definicion": "Suma de las longitudes de todos los tramos o curvas por los que pasa un objeto.",
+      "id": "4fe8b837-e884-5dd8-ac77-84d8100ab05b"
+    },
+    {
+      "termino": "Módulo del Desplazamiento",
+      "definicion": "Valor numérico y positivo de la longitud de la línea recta entre el inicio y el final.",
+      "id": "0227124f-62ad-595a-acd2-b7226b7ee196"
+    },
+    {
+      "termino": "Posición Final (r⃗_f)",
+      "definicion": "Ubicación del móvil al terminar su movimiento.",
+      "id": "56a2c9c5-f67d-5285-9e0d-86c1beee9c2a"
+    },
+    {
+      "termino": "Posición Inicial (r⃗_i)",
+      "definicion": "Ubicación del móvil al comenzar su movimiento.",
+      "id": "be2f23b8-d9d1-59c6-810c-0e1c0ada722a"
+    },
+    {
+      "termino": "Trayectoria",
+      "definicion": "Camino o línea imaginaria trazada por un objeto al moverse.",
+      "id": "f52251d6-618b-5c2f-a017-ad1ea2fdeef3"
+    },
+    {
+      "termino": "Vectorial",
+      "definicion": "Magnitud física que requiere tamaño (módulo), dirección y sentido.",
+      "id": "02ddaaf3-fd36-5417-a4be-4a14b887dc41"
+    }
+  ]
+}
