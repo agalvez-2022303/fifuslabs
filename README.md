@@ -616,6 +616,23 @@ contra PostgreSQL y, cuando faltan credenciales del panel, los flujos
 autenticados en modo JSON + DevAuth. Con `SUPABASE_PANEL_EMAIL` y
 `SUPABASE_PANEL_PASSWORD` en el `.env` valida además el login real.
 
+### Acceso al panel
+
+El dashboard público incluye un botón **Iniciar sesión** que lleva a
+`/admin/login`. Solo entran maestros activos; un alumno recibe 403 y el panel
+vuelve al formulario de acceso.
+
+El primer maestro se crea por CLI y ya existe en el proyecto:
+
+```bash
+npm run users:bootstrap   # requiere BOOTSTRAP_EMAIL y BOOTSTRAP_PASSWORD
+```
+
+Después de crearlo, borra `BOOTSTRAP_PASSWORD` del `.env`: el comando solo
+funciona mientras no exista ningún maestro activo, y la contraseña no se guarda
+en ninguna tabla de FísicaLab (vive cifrada en Supabase Auth). El nombre visible
+del perfil se edita en `/admin/usuarios`.
+
 Si falta una clave de Auth, las lecturas públicas de PostgreSQL funcionan, pero
 login/registro devuelven 503 con un mensaje de configuración. Las rutas protegidas
 continúan cerradas (401 sin sesión). `/health` comprueba además el acceso a la
