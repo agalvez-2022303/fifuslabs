@@ -4,6 +4,7 @@ import { AppError } from './errors'
 import type { AppEnv } from './http-types'
 import { identify } from './middleware/auth'
 import { bodyLimit } from './middleware/body-limit'
+import { AUTH_RATE_LIMITS, READ_RATE_LIMITS, rateLimit } from './middleware/rate-limit'
 import { categoryRoutes } from './routes/categories'
 import { healthRoutes } from './routes/health'
 import { legacyRoutes } from './routes/legacy'
@@ -25,9 +26,15 @@ export interface AppDependencies {
   accounts?: { auth: AuthService; users: UserService }
   storage?: 'json-temporary' | 'postgres'
   health?: HealthService
+  /** Shared limiter options; tests inject a clock and store for determinism. */
+  limiter?: { now?: () => number; store?: Map<string, { count: number; resetAt: number }> }
 }
 export function createApp(deps: AppDependencies) {
   const app = new Hono<AppEnv>()
+  const limiter = deps.limiter ?? {}
+  // Cheapest gate first: shed abusive traffic before parsing or touching the database.
+  app.use('/api/*', rateLimit(READ_RATE_LIMITS, limiter))
+  app.use('/api/auth/*', rateLimit(AUTH_RATE_LIMITS, limiter))
   app.use(
     '/api/*',
     identify(deps.auth),
