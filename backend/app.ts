@@ -42,6 +42,11 @@ export function createApp(deps: AppDependencies) {
       // Never share-cache role-dependent content or development identities.
       c.header('Cache-Control', 'no-store')
       c.header('Vary', 'Authorization, x-dev-user, x-dev-role')
+      // Defence in depth for non-Vercel deployments; vercel.json sets the same
+      // headers (plus CSP/HSTS) for the SPA and assets.
+      c.header('X-Content-Type-Options', 'nosniff')
+      c.header('X-Frame-Options', 'DENY')
+      c.header('Referrer-Policy', 'strict-origin-when-cross-origin')
       await next()
     },
     bodyLimit
