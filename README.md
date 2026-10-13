@@ -125,18 +125,23 @@ npm run test
 
 ## Panel de administración local
 
-1. Completa `.env` con `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` y `PORT` (usa `.env.example` como guía).
-2. Configura `VITE_API_URL` en `src/.env.local`, por ejemplo `http://localhost:3001/api`.
-3. Si todavía no se aplicó, ejecuta el esquema PostgreSQL existente y crea un admin temporal:
-   ```sql
-   INSERT INTO usuario (nombre, correo, password_hash, rol)
-   VALUES ('Administrador', 'admin@fisicalab.local', 'admin123', 'admin');
-   ```
-   Esta contraseña está en texto plano solo para desarrollo; nunca la uses en producción.
-4. Instala dependencias con `npm install` y levanta ambas aplicaciones con `npm run dev:all`.
+El panel usa Supabase Auth y PostgreSQL; ya no hay un servidor aparte.
 
-También puedes iniciar los procesos por separado con `npm run server` y `npm run dev`.
-El panel está en `/admin/login` y el endpoint de diagnóstico en `/api/health`.
+```bash
+cp .env.example .env   # completa DATABASE_URL, SUPABASE_URL y las claves
+npm ci
+npm run db:setup       # migraciones + importación de contenido
+npm run users:bootstrap
+npm run dev
+```
+
+El panel está en `/admin/login` y el diagnóstico en `/api/health`.
+Consulta la sección **PostgreSQL en Supabase y gestión de usuarios** para el
+detalle de variables, bootstrap del primer maestro y verificación.
+
+> El antiguo servidor Express de `server/` se eliminó: comparaba contraseñas en
+> texto plano y usaba un esquema `usuario` incompatible. Todo su alcance vive
+> ahora en `backend/` sobre Supabase Auth.
 
 ## Backend
 
@@ -168,10 +173,6 @@ actual en PostgreSQL. No acepta roles de headers, JWT decodificados sin verifica
 ni `user_metadata` como fuente de permisos.
 **La selección de implementaciones se cambia solo en `backend/composition.ts`.**
 El modo JSON sigue disponible para desarrollo sin base de datos.
-
-`server/` es el servidor Express/PostgreSQL preexistente del panel de administración.
-Sus rutas y autenticación son independientes. El `/api/health` de Hono identifica
-el backend de contenido; el del puerto Express diagnostica PostgreSQL.
 
 ### Desarrollo sin base de datos (modo JSON)
 
@@ -637,7 +638,6 @@ Si falta una clave de Auth, las lecturas públicas de PostgreSQL funcionan, pero
 login/registro devuelven 503 con un mensaje de configuración. Las rutas protegidas
 continúan cerradas (401 sin sesión). `/health` comprueba además el acceso a la
 tabla de temas; responde 503 si la base o las migraciones no están disponibles.
-No confundir este backend con las rutas Express preexistentes del puerto 3001.
 
 ### Ejemplos con JWT
 
