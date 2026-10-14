@@ -72,7 +72,8 @@ export function timeAtMRUPosition(params: MRUParams, targetX: number): number | 
  * Resolutor de incógnitas en MRU dado un conjunto de valores conocidos
  */
 export function solveMRUUnknown(input: MRUSolverInput): MRUSolverResult {
-  let { x0 = 0, x, v, t, deltaX } = input
+  const x0 = input.x0 ?? 0
+  let { x, v, t, deltaX } = input
   const steps: string[] = []
 
   // Si se conoce deltaX y x0, pero no x:

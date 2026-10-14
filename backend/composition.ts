@@ -15,6 +15,7 @@ import { AuthService } from './services/auth-service'
 import { UserService } from './services/user-service'
 import { HealthService } from './services/health-service'
 import { UnconfiguredIdentityGateway } from './auth/unconfigured-identity-gateway'
+import { EjercicioService } from './services/ejercicio-service'
 
 /** Only composition changes when Supabase repositories / JWT provider become available. */
 export function composeApp(dataDir = path.resolve(__dirname, '../data')) {
@@ -50,6 +51,7 @@ export function composeApp(dataDir = path.resolve(__dirname, '../data')) {
     return createApp({
       auth: new SupabaseAuthProvider(identities, profiles),
       temas,
+      ejercicios: new EjercicioService(repository, repository),
       storage: 'postgres',
       health: new HealthService(repository, 'postgres'),
       categories: new CategoryService(repository),
@@ -65,6 +67,7 @@ export function composeApp(dataDir = path.resolve(__dirname, '../data')) {
   return createApp({
     auth: new DevAuthProvider(),
     temas,
+    ejercicios: new EjercicioService(repository, repository),
     categories: new CategoryService(repository),
     legacy: new LegacyService(repository, repository, repository, temas),
   })

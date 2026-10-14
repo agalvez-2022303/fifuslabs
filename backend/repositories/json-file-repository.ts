@@ -5,19 +5,22 @@ import { z } from 'zod'
 import {
   categoryIdSchema,
   difficultySchema,
+  ejercicioSchema,
   slugSchema,
   temaSchema,
-} from '../../packages/shared-types/src'
-import type {
-  Category,
-  Simulation,
-  TemaConfig,
-  TemaRevision,
+  type Category,
+  type CreateEjercicioInput,
+  type Ejercicio,
+  type PatchEjercicioInput,
+  type Simulation,
+  type TemaConfig,
+  type TemaRevision,
 } from '../../packages/shared-types/src'
 import { NotImplementedError, ValidationError } from '../errors'
 import type {
   AliasRepository,
   CategoryRepository,
+  EjercicioRepository,
   RevisionRepository,
   SimulationRepository,
   TemaRepository,
@@ -59,7 +62,8 @@ export class JsonFileRepository
     CategoryRepository,
     RevisionRepository,
     SimulationRepository,
-    AliasRepository
+    AliasRepository,
+    EjercicioRepository
 {
   constructor(
     private readonly dataDir: string,
@@ -163,5 +167,96 @@ export class JsonFileRepository
           if (locks.get(file) === queue) locks.delete(file)
         })
     }
+  }
+  private ejerciciosFile(): string {
+    return path.join(this.dataDir, 'ejercicios.json')
+  }
+  private async readEjercicios(): Promise<Ejercicio[]> {
+    try {
+      const raw = await readFile(this.ejerciciosFile(), 'utf8')
+      const items: unknown = JSON.parse(raw)
+      return Array.isArray(items) ? items.map(item => ejercicioSchema.parse(item)) : []
+    } catch (error: unknown) {
+      if (missing(error)) return []
+      throw error
+    }
+  }
+  private async writeEjercicios(items: Ejercicio[]): Promise<void> {
+    await mkdir(this.dataDir, { recursive: true })
+    const file = this.ejerciciosFile()
+    const temp = `${file}.${randomUUID()}.tmp`
+    await writeFile(temp, `${JSON.stringify(items, null, 2)}\n`, 'utf8')
+    await rename(temp, file)
+  }
+  async listEjercicios(filter?: {
+    temaSlug?: string
+    dificultad?: string
+    q?: string
+  }): Promise<Ejercicio[]> {
+    let items = await this.readEjercicios()
+    if (filter?.temaSlug) items = items.filter(e => e.temaSlug === filter.temaSlug)
+    if (filter?.dificultad) items = items.filter(e => e.dificultad === filter.dificultad)
+    if (filter?.q) {
+      const query = filter.q.toLowerCase()
+      items = items.filter(
+        e => e.titulo.toLowerCase().includes(query) || e.enunciado.toLowerCase().includes(query)
+      )
+    }
+    return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  }
+  async getEjercicio(id: string): Promise<Ejercicio | null> {
+    const items = await this.readEjercicios()
+    return items.find(e => e.id === id) ?? null
+  }
+  async createEjercicio(input: CreateEjercicioInput): Promise<Ejercicio> {
+    const items = await this.readEjercicios()
+    const now = new Date().toISOString()
+    const ejercicio: Ejercicio = ejercicioSchema.parse({
+      id: randomUUID(),
+      temaSlug: input.temaSlug,
+      titulo: input.titulo,
+      enunciado: input.enunciado,
+      dificultad: input.dificultad,
+      respuesta: input.respuesta,
+      solucionDetallada: input.solucionDetallada ?? null,
+      parametros: input.parametros ?? {},
+      pistas: input.pistas ?? null,
+      estado: input.estado ?? 'published',
+      createdAt: now,
+      updatedAt: now,
+    })
+    items.push(ejercicio)
+    await this.writeEjercicios(items)
+    return ejercicio
+  }
+  async updateEjercicio(id: string, input: PatchEjercicioInput): Promise<Ejercicio | null> {
+    const items = await this.readEjercicios()
+    const index = items.findIndex(e => e.id === id)
+    if (index === -1) return null
+    const current = items[index]
+    const updated: Ejercicio = ejercicioSchema.parse({
+      ...current,
+      temaSlug: input.temaSlug ?? current.temaSlug,
+      titulo: input.titulo ?? current.titulo,
+      enunciado: input.enunciado ?? current.enunciado,
+      dificultad: input.dificultad ?? current.dificultad,
+      respuesta: input.respuesta ?? current.respuesta,
+      solucionDetallada:
+        input.solucionDetallada !== undefined ? input.solucionDetallada : current.solucionDetallada,
+      parametros: input.parametros !== undefined ? input.parametros : current.parametros,
+      pistas: input.pistas !== undefined ? input.pistas : current.pistas,
+      estado: input.estado ?? current.estado,
+      updatedAt: new Date().toISOString(),
+    })
+    items[index] = updated
+    await this.writeEjercicios(items)
+    return updated
+  }
+  async deleteEjercicio(id: string): Promise<boolean> {
+    const items = await this.readEjercicios()
+    const next = items.filter(e => e.id !== id)
+    if (next.length === items.length) return false
+    await this.writeEjercicios(next)
+    return true
   }
 }

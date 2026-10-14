@@ -1,7 +1,11 @@
 import { z } from 'zod'
 import {
+  ejercicioSchema,
   temaSchema,
   type Category,
+  type CreateEjercicioInput,
+  type Ejercicio,
+  type PatchEjercicioInput,
   type Simulation,
   type TemaConfig,
   type TemaRevision,
@@ -11,6 +15,7 @@ import { ConflictError } from '../errors'
 import type {
   AliasRepository,
   CategoryRepository,
+  EjercicioRepository,
   RevisionRepository,
   SimulationRepository,
   TemaRepository,
@@ -41,7 +46,8 @@ export class PostgresRepository
     CategoryRepository,
     RevisionRepository,
     SimulationRepository,
-    AliasRepository
+    AliasRepository,
+    EjercicioRepository
 {
   constructor(private readonly database: SqlPool) {}
   async check(): Promise<void> {
@@ -156,4 +162,116 @@ export class PostgresRepository
       client.release()
     }
   }
+  async listEjercicios(filter?: {
+    temaSlug?: string
+    dificultad?: string
+    q?: string
+  }): Promise<Ejercicio[]> {
+    const conditions: string[] = []
+    const values: unknown[] = []
+    if (filter?.temaSlug) {
+      values.push(filter.temaSlug)
+      conditions.push(`tema_slug = $${values.length}`)
+    }
+    if (filter?.dificultad) {
+      values.push(filter.dificultad)
+      conditions.push(`dificultad = $${values.length}`)
+    }
+    if (filter?.q) {
+      values.push(`%${filter.q}%`)
+      conditions.push(`(titulo ILIKE $${values.length} OR enunciado ILIKE $${values.length})`)
+    }
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
+    const result = await this.database.query(
+      `SELECT * FROM fisicalab.ejercicios ${where} ORDER BY created_at DESC`,
+      values
+    )
+    return result.rows.map(toEjercicio)
+  }
+  async getEjercicio(id: string): Promise<Ejercicio | null> {
+    const result = await this.database.query(
+      'SELECT * FROM fisicalab.ejercicios WHERE id = $1',
+      [id]
+    )
+    return result.rows[0] ? toEjercicio(result.rows[0]) : null
+  }
+  async createEjercicio(input: CreateEjercicioInput): Promise<Ejercicio> {
+    const result = await this.database.query(
+      `INSERT INTO fisicalab.ejercicios (tema_slug, titulo, enunciado, dificultad, respuesta, solucion_detallada, parametros, pistas, estado)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING *`,
+      [
+        input.temaSlug,
+        input.titulo,
+        input.enunciado,
+        input.dificultad,
+        input.respuesta,
+        input.solucionDetallada ?? null,
+        JSON.stringify(input.parametros ?? {}),
+        input.pistas ?? null,
+        input.estado ?? 'published',
+      ]
+    )
+    return toEjercicio(result.rows[0])
+  }
+  async updateEjercicio(id: string, input: PatchEjercicioInput): Promise<Ejercicio | null> {
+    const existing = await this.getEjercicio(id)
+    if (!existing) return null
+    const updated = {
+      temaSlug: input.temaSlug ?? existing.temaSlug,
+      titulo: input.titulo ?? existing.titulo,
+      enunciado: input.enunciado ?? existing.enunciado,
+      dificultad: input.dificultad ?? existing.dificultad,
+      respuesta: input.respuesta ?? existing.respuesta,
+      solucionDetallada:
+        input.solucionDetallada !== undefined ? input.solucionDetallada : existing.solucionDetallada,
+      parametros: input.parametros !== undefined ? input.parametros : existing.parametros,
+      pistas: input.pistas !== undefined ? input.pistas : existing.pistas,
+      estado: input.estado ?? existing.estado,
+    }
+    const result = await this.database.query(
+      `UPDATE fisicalab.ejercicios
+       SET tema_slug = $1, titulo = $2, enunciado = $3, dificultad = $4, respuesta = $5,
+           solucion_detallada = $6, parametros = $7, pistas = $8, estado = $9, updated_at = now()
+       WHERE id = $10
+       RETURNING *`,
+      [
+        updated.temaSlug,
+        updated.titulo,
+        updated.enunciado,
+        updated.dificultad,
+        updated.respuesta,
+        updated.solucionDetallada ?? null,
+        JSON.stringify(updated.parametros ?? {}),
+        updated.pistas ?? null,
+        updated.estado,
+        id,
+      ]
+    )
+    return result.rows[0] ? toEjercicio(result.rows[0]) : null
+  }
+  async deleteEjercicio(id: string): Promise<boolean> {
+    const result = await this.database.query('DELETE FROM fisicalab.ejercicios WHERE id = $1', [id])
+    return (result.rowCount ?? 0) > 0
+  }
+}
+
+function toEjercicio(row: Record<string, unknown>): Ejercicio {
+  return ejercicioSchema.parse({
+    id: String(row.id),
+    temaSlug: String(row.tema_slug),
+    titulo: String(row.titulo),
+    enunciado: String(row.enunciado),
+    dificultad: row.dificultad,
+    respuesta: String(row.respuesta),
+    solucionDetallada: row.solucion_detallada ?? null,
+    parametros:
+      typeof row.parametros === 'string'
+        ? JSON.parse(row.parametros)
+        : (row.parametros ?? {}),
+    pistas: row.pistas ?? null,
+    estado: row.estado,
+    createdAt: new Date(row.created_at as string | Date).toISOString(),
+    updatedAt: new Date(row.updated_at as string | Date).toISOString(),
+  })
 }

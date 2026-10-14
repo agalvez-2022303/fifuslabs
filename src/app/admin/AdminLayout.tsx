@@ -11,7 +11,7 @@ const navigation = [
   { label: 'Teoría', path: '/admin/teoria', icon: 'menu_book' },
   { label: 'Fórmulas', path: '/admin/formulas', icon: 'functions' },
   { label: 'Glosario', path: '/admin/glosario', icon: 'spellcheck' },
-  { label: 'Ejemplos resueltos', path: '/admin/ejercicios', icon: 'edit_note' },
+  { label: 'Ejercicios', path: '/admin/ejercicios', icon: 'quiz' },
   { label: 'Usuarios', path: '/admin/usuarios', icon: 'group' },
 ]
 

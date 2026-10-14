@@ -11,6 +11,7 @@ import { TopicEditorPage, TopicListPage } from './TopicPages'
 import TextEditorPage from './TextEditorPage'
 import UsersPage from './UsersPage'
 import RevisionPage from './RevisionPage'
+import ExercisesPage from './ExercisesPage'
 import { Loading } from './ui'
 import './Studio.css'
 
@@ -56,7 +57,7 @@ function AdminRouter() {
           <Route path="formulas/nueva" element={<FormulaEditorPage />} />
           <Route path="formulas/:slug/:id" element={<FormulaEditorPage />} />
           <Route path="glosario" element={<TextEditorPage glossary />} />
-          <Route path="ejercicios" element={<FormulaListPage examples />} />
+          <Route path="ejercicios" element={<ExercisesPage />} />
           <Route path="usuarios" element={<UsersPage />} />
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>

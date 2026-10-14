@@ -9,7 +9,8 @@ export async function migrateDatabase(
 ) {
   const files = (await readdir(dir)).filter(file => /^\d+_[a-z0-9_]+\.sql$/.test(file)).sort()
   for (const file of files) {
-    const sql = await readFile(path.join(dir, file), 'utf8')
+    const raw = await readFile(path.join(dir, file), 'utf8')
+    const sql = raw.replace(/\r\n/g, '\n')
     const checksum = createHash('sha256').update(sql).digest('hex')
     const client = await database.connect()
     try {

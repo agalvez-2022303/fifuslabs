@@ -1,5 +1,8 @@
 import type {
   Category,
+  CreateEjercicioInput,
+  Ejercicio,
+  PatchEjercicioInput,
   Simulation,
   TemaConfig,
   TemaRevision,
@@ -31,4 +34,11 @@ export interface AliasRepository {
 }
 export interface HealthRepository {
   check(): Promise<void>
+}
+export interface EjercicioRepository {
+  listEjercicios(filter?: { temaSlug?: string; dificultad?: string; q?: string }): Promise<Ejercicio[]>
+  getEjercicio(id: string): Promise<Ejercicio | null>
+  createEjercicio(input: CreateEjercicioInput): Promise<Ejercicio>
+  updateEjercicio(id: string, input: PatchEjercicioInput): Promise<Ejercicio | null>
+  deleteEjercicio(id: string): Promise<boolean>
 }

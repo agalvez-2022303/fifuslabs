@@ -408,7 +408,7 @@ export const distanciaDesplazamientoData: TemaConfig = {
     secciones: [
       {
         titulo: 'Diferencia conceptual',
-        contenido: '• **Distancia ($d$):** Es la longitud total del camino que recorres. Es un **escalar** (siempre suma y no le importa la dirección).\n• **Desplazamiento ($\Delta \\vec{r}$):** Es la distancia en línea recta entre el punto inicial y el punto final. Es un **vector** (cuenta hacia dónde fuiste).',
+        contenido: '• **Distancia ($d$):** Es la longitud total del camino que recorres. Es un **escalar** (siempre suma y no le importa la dirección).\n• **Desplazamiento ($\\\\Delta \\\\vec{r}$):** Es la distancia en línea recta entre el punto inicial y el punto final. Es un **vector** (cuenta hacia dónde fuiste).',
       },
       {
         titulo: 'Explicación con un ejemplo cotidiano',

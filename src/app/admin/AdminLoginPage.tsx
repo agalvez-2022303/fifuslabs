@@ -107,6 +107,12 @@ export default function AdminLoginPage() {
         </aside>
 
         <div className="studio-login-form-panel">
+          <div className="studio-login-top-bar">
+            <Link to="/" className="studio-back-button" title="Regresar al Dashboard">
+              <Icon name="arrow_back" />
+              <span>Regresar al Dashboard</span>
+            </Link>
+          </div>
           <div className="studio-login-form-heading">
             <h2>{recovery ? 'Recuperar acceso' : 'Iniciar sesión'}</h2>
             <p>

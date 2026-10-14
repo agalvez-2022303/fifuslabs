@@ -32,6 +32,7 @@
   --s-shadow-lg: 0 20px 40px -10px rgba(26, 69, 107, 0.2);
   --s-radius: 16px;
   --s-radius-input: 12px;
+  --s-radius-sm: 8px;
   --s-sidebar: 260px;
   --s-headline: 'Montserrat', var(--font-display), sans-serif;
   --s-body: 'Inter', var(--font-body), sans-serif;
@@ -904,6 +905,61 @@
   display: grid;
   gap: 16px;
 }
+.studio-login-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: -4px;
+}
+.studio-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--s-ink-2);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--s-surface);
+  border: 1px solid var(--s-outline-2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+.studio-back-button .studio-icon {
+  font-size: 18px;
+  color: var(--s-primary-2);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.studio-back-button:hover {
+  background: var(--s-low);
+  color: var(--s-primary);
+  border-color: var(--s-primary-fixed-2);
+  box-shadow: 0 2px 8px rgba(26, 69, 107, 0.08);
+  transform: translateX(-3px);
+}
+.studio-back-button:hover .studio-icon {
+  transform: translateX(-2px);
+  color: var(--s-primary);
+}
+.studio-back-button:active {
+  transform: translateX(-1px) scale(0.98);
+}
+.studio.is-dark .studio-back-button {
+  background: var(--s-low);
+  border-color: var(--s-outline-2);
+  color: var(--s-ink);
+  box-shadow: none;
+}
+.studio.is-dark .studio-back-button .studio-icon {
+  color: var(--s-primary-fixed-2);
+}
+.studio.is-dark .studio-back-button:hover {
+  background: var(--s-mid);
+  border-color: var(--s-primary-fixed);
+  color: var(--s-primary-fixed-2);
+}
 .studio-login-form-heading h2 {
   font-family: var(--s-headline);
   font-size: 24px;
@@ -1115,12 +1171,9 @@
 
 .studio-dashboard-panels {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
   gap: 16px;
   align-items: start;
-}
-.studio-dashboard-panels.lower {
-  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
 }
 .studio-panel-heading {
   display: flex;
@@ -1156,83 +1209,6 @@
   text-decoration: none;
 }
 .studio.is-dark .studio-panel-link {
-  color: var(--s-primary-fixed-2);
-}
-
-.studio-chart-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 11px;
-  color: var(--s-ink-2);
-  margin-bottom: 10px;
-}
-.studio-chart-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.studio-chart-legend i {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-}
-.studio-chart-legend i.theory,
-.studio-chart-bars .theory {
-  background: var(--s-primary-2);
-}
-.studio-chart-legend i.formula,
-.studio-chart-bars .formula {
-  background: var(--s-gold-dim);
-}
-.studio-chart-legend i.glossary,
-.studio-chart-bars .glossary {
-  background: var(--s-tertiary);
-}
-.studio-chart-legend i.example,
-.studio-chart-bars .example {
-  background: var(--s-primary-fixed-2);
-}
-.studio-bar-chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  min-height: 180px;
-}
-.studio-chart-group {
-  display: grid;
-  gap: 4px;
-  justify-items: center;
-  min-width: 76px;
-  flex: 1;
-}
-.studio-chart-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 150px;
-}
-.studio-chart-bars span {
-  width: 12px;
-  border-radius: 3px 3px 0 0;
-  min-height: 2px;
-}
-.studio-chart-group small {
-  font-size: 10px;
-  color: var(--s-ink-2);
-  max-width: 76px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.studio-chart-group strong {
-  font-family: var(--s-mono);
-  font-size: 11px;
-  color: var(--s-primary);
-}
-.studio.is-dark .studio-chart-group strong {
   color: var(--s-primary-fixed-2);
 }
 
@@ -1292,52 +1268,7 @@
   color: var(--s-ink-2);
 }
 
-.studio-pending-list {
-  display: grid;
-  gap: 8px;
-}
-.studio-pending-list > div {
-  display: grid;
-  gap: 6px;
-  padding: 10px;
-  border-radius: var(--s-radius-input);
-  background: var(--s-low);
-}
-.studio-pending-list strong {
-  font-size: 13px;
-}
-.studio-pending-list span {
-  font-size: 11px;
-  color: var(--s-ink-2);
-}
-.studio-pending-list .studio-button {
-  justify-self: end;
-}
-.studio-integrity {
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: var(--s-radius-input);
-  background: var(--s-low);
-  display: grid;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--s-ink-2);
-}
-.studio-integrity span {
-  display: flex;
-  justify-content: space-between;
-}
-.studio-integrity strong {
-  font-family: var(--s-mono);
-  color: var(--s-primary);
-}
-.studio.is-dark .studio-integrity strong {
-  color: var(--s-primary-fixed-2);
-}
-.studio-integrity progress {
-  width: 100%;
-  height: 8px;
-}
+
 
 /* ── Tables ──────────────────────────────────────────────────────────── */
 
@@ -2263,8 +2194,7 @@
 
 @media (max-width: 1180px) {
   .studio-editor-grid,
-  .studio-dashboard-panels,
-  .studio-dashboard-panels.lower {
+  .studio-dashboard-panels {
     grid-template-columns: minmax(0, 1fr);
   }
   .studio-student-preview {

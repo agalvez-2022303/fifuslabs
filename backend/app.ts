@@ -14,8 +14,10 @@ import type { LegacyService } from './services/legacy-service'
 import type { TemaService } from './services/tema-service'
 import type { AuthService } from './services/auth-service'
 import type { UserService } from './services/user-service'
+import type { EjercicioService } from './services/ejercicio-service'
 import { authRoutes } from './routes/auth'
 import { userRoutes } from './routes/users'
+import { ejercicioRoutes } from './routes/ejercicios'
 import type { HealthService } from './services/health-service'
 
 export interface AppDependencies {
@@ -23,6 +25,7 @@ export interface AppDependencies {
   temas: TemaService
   categories: CategoryService
   legacy: LegacyService
+  ejercicios?: EjercicioService
   accounts?: { auth: AuthService; users: UserService }
   storage?: 'json-temporary' | 'postgres'
   health?: HealthService
@@ -54,6 +57,9 @@ export function createApp(deps: AppDependencies) {
   app.route('/api/temas', temaRoutes(deps.temas))
   app.route('/api/categories', categoryRoutes(deps.categories))
   app.route('/api/health', healthRoutes(deps.storage, deps.health))
+  if (deps.ejercicios) {
+    app.route('/api/ejercicios', ejercicioRoutes(deps.ejercicios))
+  }
   if (deps.accounts) {
     app.route('/api/auth', authRoutes(deps.accounts.auth, deps.accounts.users))
     app.route('/api/users', userRoutes(deps.accounts.users))

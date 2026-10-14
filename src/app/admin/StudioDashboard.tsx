@@ -16,25 +16,31 @@ export default function StudioDashboard() {
       (sum, tema) => sum + tema.formulas.filter(item => item.ejemploResuelto).length,
       0
     )
-    const resources = temas.map(tema => ({
-      tema,
-      total:
-        1 +
-        tema.teoria.secciones.length +
-        tema.formulas.length +
-        tema.glosario.length +
-        tema.formulas.filter(item => item.ejemploResuelto).length,
-    }))
-    const published = resources
-      .filter(item => item.tema.status === 'published')
-      .reduce((sum, item) => sum + item.total, 0)
-    const drafts = resources
-      .filter(item => item.tema.status === 'draft')
-      .reduce((sum, item) => sum + item.total, 0)
-    const incomplete = temas.filter(
-      tema => !tema.formulas.length || !tema.glosario.length || !tema.teoria.secciones.length
-    )
-    return { theory, formulas, glossary, examples, resources, published, drafts, incomplete }
+    const published = temas
+      .filter(tema => tema.status === 'published')
+      .reduce(
+        (sum, tema) =>
+          sum +
+          1 +
+          tema.teoria.secciones.length +
+          tema.formulas.length +
+          tema.glosario.length +
+          tema.formulas.filter(item => item.ejemploResuelto).length,
+        0
+      )
+    const drafts = temas
+      .filter(tema => tema.status === 'draft')
+      .reduce(
+        (sum, tema) =>
+          sum +
+          1 +
+          tema.teoria.secciones.length +
+          tema.formulas.length +
+          tema.glosario.length +
+          tema.formulas.filter(item => item.ejemploResuelto).length,
+        0
+      )
+    return { theory, formulas, glossary, examples, published, drafts }
   }, [temas])
   if (loading && !temas.length) return <Loading text="Cargando el plan de contenido…" />
   if (error && !temas.length)
@@ -86,7 +92,6 @@ export default function StudioDashboard() {
   ]
   const total = summary.published + summary.drafts
   const percent = total ? Math.round((summary.published / total) * 100) : 0
-  const max = Math.max(1, ...summary.resources.map(item => item.total))
   const recent = [...temas]
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .filter(tema => `${tema.titulo} ${tema.slug}`.toLowerCase().includes(query.toLowerCase()))
@@ -153,116 +158,6 @@ export default function StudioDashboard() {
         </Link>
       </section>
       <section className="studio-dashboard-panels">
-        <article className="studio-card">
-          <header className="studio-panel-heading">
-            <div>
-              <h2>
-                <Icon name="bar_chart" />
-                Contenido por tema principal
-              </h2>
-              <p>Teoría, fórmulas, glosario y ejemplos del repositorio</p>
-            </div>
-            <span className="studio-count">Total: {total}</span>
-          </header>
-          <div className="studio-chart-legend">
-            <span>
-              <i className="theory" />
-              Teoría
-            </span>
-            <span>
-              <i className="formula" />
-              Fórmulas
-            </span>
-            <span>
-              <i className="glossary" />
-              Glosario
-            </span>
-            <span>
-              <i className="example" />
-              Ejemplos
-            </span>
-          </div>
-          <div
-            className="studio-bar-chart"
-            role="img"
-            aria-label="Distribución de contenido por tema"
-          >
-            {summary.resources.slice(0, 8).map(({ tema, total }) => (
-              <div className="studio-chart-group" key={tema.slug}>
-                <div className="studio-chart-bars">
-                  <span
-                    className="theory"
-                    style={{ height: `${((1 + tema.teoria.secciones.length) / max) * 100}%` }}
-                    title={`${1 + tema.teoria.secciones.length} artículos`}
-                  />
-                  <span
-                    className="formula"
-                    style={{ height: `${(tema.formulas.length / max) * 100}%` }}
-                    title={`${tema.formulas.length} fórmulas`}
-                  />
-                  <span
-                    className="glossary"
-                    style={{ height: `${(tema.glosario.length / max) * 100}%` }}
-                    title={`${tema.glosario.length} términos`}
-                  />
-                  <span
-                    className="example"
-                    style={{
-                      height: `${(tema.formulas.filter(item => item.ejemploResuelto).length / max) * 100}%`,
-                    }}
-                    title="Ejemplos"
-                  />
-                </div>
-                <small title={tema.titulo}>{tema.slug}</small>
-                <strong>{total}</strong>
-              </div>
-            ))}
-          </div>
-          <Link className="studio-panel-link" to="/admin/temas">
-            Ver desglose completo
-            <Icon name="arrow_forward" />
-          </Link>
-        </article>
-        <article className="studio-card">
-          <header className="studio-panel-heading">
-            <div>
-              <h2>
-                <Icon name="pie_chart" />
-                Estado del contenido
-              </h2>
-              <p>Publicación editorial por tema completo</p>
-            </div>
-          </header>
-          <div className="studio-donut-wrap">
-            <div
-              className="studio-donut"
-              style={{
-                background: total
-                  ? `conic-gradient(#10b981 0 ${percent}%, #fdcf3f ${percent}% 100%)`
-                  : 'var(--s-soft)',
-              }}
-            >
-              <div>
-                <strong>{total}</strong>
-                <small>RECURSOS</small>
-              </div>
-            </div>
-          </div>
-          <div className="studio-status-summary">
-            <div>
-              <Status status="published" />
-              <strong>{summary.published} elem.</strong>
-              <span>{percent}%</span>
-            </div>
-            <div>
-              <Status status="draft" />
-              <strong>{summary.drafts} elem.</strong>
-              <span>{total ? 100 - percent : 0}%</span>
-            </div>
-          </div>
-        </article>
-      </section>
-      <section className="studio-dashboard-panels lower">
         <article className="studio-card studio-table-card">
           <header className="studio-panel-heading">
             <div>
@@ -328,52 +223,38 @@ export default function StudioDashboard() {
           <header className="studio-panel-heading">
             <div>
               <h2>
-                <Icon name="pending_actions" />
-                Auditoría y pendientes
+                <Icon name="pie_chart" />
+                Estado del contenido
               </h2>
-              <p>Recursos que faltan en los temas actuales</p>
+              <p>Publicación editorial por tema completo</p>
             </div>
-            <span className="studio-count">{summary.incomplete.length} temas</span>
           </header>
-          <div className="studio-pending-list">
-            {summary.incomplete.slice(0, 8).map(tema => (
-              <div key={tema.slug}>
-                <strong>{tema.titulo}</strong>
-                <span>
-                  {[
-                    !tema.teoria.secciones.length && 'Sin secciones',
-                    !tema.formulas.length && 'Sin fórmulas',
-                    !tema.glosario.length && 'Sin glosario',
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </span>
-                <Link className="studio-button primary small" to={`/admin/temas/${tema.slug}`}>
-                  Completar
-                  <Icon name="arrow_forward" />
-                </Link>
+          <div className="studio-donut-wrap">
+            <div
+              className="studio-donut"
+              style={{
+                background: total
+                  ? `conic-gradient(#10b981 0 ${percent}%, #fdcf3f ${percent}% 100%)`
+                  : 'var(--s-soft)',
+              }}
+            >
+              <div>
+                <strong>{total}</strong>
+                <small>RECURSOS</small>
               </div>
-            ))}
+            </div>
           </div>
-          {!summary.incomplete.length && (
-            <Empty title="Contenido completo">
-              <p>Todos los temas tienen secciones, fórmulas y glosario.</p>
-            </Empty>
-          )}
-          <div className="studio-integrity">
-            <span>
-              Integridad de los temas
-              <strong>
-                {temas.length
-                  ? Math.round(((temas.length - summary.incomplete.length) / temas.length) * 100)
-                  : 0}
-                %
-              </strong>
-            </span>
-            <progress
-              max={Math.max(1, temas.length)}
-              value={temas.length - summary.incomplete.length}
-            />
+          <div className="studio-status-summary">
+            <div>
+              <Status status="published" />
+              <strong>{summary.published} elem.</strong>
+              <span>{percent}%</span>
+            </div>
+            <div>
+              <Status status="draft" />
+              <strong>{summary.drafts} elem.</strong>
+              <span>{total ? 100 - percent : 0}%</span>
+            </div>
           </div>
         </article>
       </section>

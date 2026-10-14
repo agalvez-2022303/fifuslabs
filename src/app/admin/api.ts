@@ -1,9 +1,11 @@
 import { z } from 'zod'
 import {
   categoryIdSchema,
+  ejercicioSchema,
   temaSchema,
   userProfileSchema,
   type Category,
+  type Ejercicio,
   type TemaConfig,
   type TemaRevision,
 } from '@physicslab/shared-types'
@@ -243,5 +245,30 @@ export const adminApi = {
       method: 'DELETE',
       headers: { 'If-Match': `"${version}"` },
     })
+  },
+  async ejercicios(
+    filter?: { tema?: string; dificultad?: string; q?: string },
+    signal?: AbortSignal
+  ): Promise<Ejercicio[]> {
+    const params = new URLSearchParams()
+    if (filter?.tema) params.set('tema', filter.tema)
+    if (filter?.dificultad) params.set('dificultad', filter.dificultad)
+    if (filter?.q) params.set('q', filter.q)
+    const qs = params.toString() ? `?${params.toString()}` : ''
+    return z.array(ejercicioSchema).parse(await request(`/ejercicios${qs}`, { signal }))
+  },
+  async getEjercicio(id: string, signal?: AbortSignal): Promise<Ejercicio> {
+    return ejercicioSchema.parse(await request(`/ejercicios/${encodeURIComponent(id)}`, { signal }))
+  },
+  async createEjercicio(body: unknown): Promise<Ejercicio> {
+    return ejercicioSchema.parse(await request('/ejercicios', json(body)))
+  },
+  async patchEjercicio(id: string, body: unknown): Promise<Ejercicio> {
+    return ejercicioSchema.parse(
+      await request(`/ejercicios/${encodeURIComponent(id)}`, json(body, 'PATCH'))
+    )
+  },
+  removeEjercicio(id: string) {
+    return request<void>(`/ejercicios/${encodeURIComponent(id)}`, { method: 'DELETE' })
   },
 }

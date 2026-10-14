@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useTemaApi } from '../hooks/useTemaApi'
+import { useEjerciciosApi } from '../hooks/useEjerciciosApi'
+import EjerciciosTab from './EjerciciosTab'
 import { desarrolloHtml, formattedHtml, mathHtml } from '../utils/content-format'
 import 'katex/dist/katex.min.css'
 import styles from './TemaDashboard.module.css'
@@ -45,7 +47,7 @@ const renderFormattedContent = (text: string): string => formattedHtml(text)
 
 const renderDesarrollo = (desarrollo: string): string => desarrolloHtml(desarrollo)
 
-type TabType = 'simulacion' | 'formulas' | 'glosario' | 'teoria'
+type TabType = 'simulacion' | 'formulas' | 'glosario' | 'teoria' | 'ejercicios'
 
 export default function TemaDashboard(): JSX.Element {
   const { id, seccion } = useParams<{ id: string; seccion?: string }>()
@@ -58,7 +60,8 @@ export default function TemaDashboard(): JSX.Element {
       seccion === 'formulas' ||
       seccion === 'glosario' ||
       seccion === 'teoria' ||
-      seccion === 'simulacion'
+      seccion === 'simulacion' ||
+      seccion === 'ejercicios'
     ) {
       return seccion as TabType
     }
@@ -66,6 +69,25 @@ export default function TemaDashboard(): JSX.Element {
   }, [seccion])
 
   const [glossaryQuery, setGlossaryQuery] = useState('')
+
+  // ── Ejercicios integration ──────────────────────────────────────────────
+  const { ejercicios, loading: loadingEjercicios } = useEjerciciosApi(tema?.slug)
+
+  /**
+   * Parameters loaded from an exercise card.  When the student clicks
+   * «Cargar en simulador» we store the preset here and switch to the
+   * simulation tab so they can see the result immediately.
+   */
+  const [loadedParams, setLoadedParams] = useState<Record<string, unknown> | null>(null)
+
+  function handleEjercicioLoad(params: Record<string, unknown>) {
+    setLoadedParams(params)
+    // Navigate to simulator tab (tema is guaranteed non-null here since
+    // this handler is only reachable after the early-return guards below)
+    if (id) navigate(`/tema/${id}/simulacion`)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  // ───────────────────────────────────────────────────────────────────────
 
   const filteredGlossary = useMemo(() => {
     if (!tema) return []
@@ -252,6 +274,40 @@ export default function TemaDashboard(): JSX.Element {
             </span>
             <span>Teoría</span>
           </button>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${activeTab === 'ejercicios' ? styles.tabBtnActive : ''}`}
+            onClick={() => handleTabChange('ejercicios')}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              quiz
+            </span>
+            <span>
+              Ejercicios
+              {ejercicios.length > 0 && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: 18,
+                    height: 18,
+                    borderRadius: 999,
+                    background: activeTab === 'ejercicios' ? 'var(--corporate)' : 'var(--sub-card-bg)',
+                    border: '1px solid var(--border-neutral)',
+                    color: activeTab === 'ejercicios' ? '#fff' : 'var(--text-secondary)',
+                    fontSize: 10,
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 700,
+                    marginLeft: 5,
+                    padding: '0 4px',
+                  }}
+                >
+                  {ejercicios.length}
+                </span>
+              )}
+            </span>
+          </button>
         </nav>
       </div>
 
@@ -260,8 +316,56 @@ export default function TemaDashboard(): JSX.Element {
         {/* Pestaña: Simulación */}
         {activeTab === 'simulacion' && (
           <div>
+            {ejercicios.length > 0 && !loadedParams && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  background: 'rgba(217, 119, 6, 0.08)',
+                  border: '1px solid rgba(217, 119, 6, 0.25)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '10px 16px',
+                  marginBottom: 14,
+                  fontSize: 13,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-primary)' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#d97706' }}>
+                    quiz
+                  </span>
+                  <span>
+                    <strong>{ejercicios.length} ejercicio{ejercicios.length !== 1 ? 's' : ''} disponible{ejercicios.length !== 1 ? 's' : ''}</strong> para practicar con este tema y simulación.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleTabChange('ejercicios')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    background: 'var(--corporate)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '6px 14px',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span>Ver ejercicios</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>arrow_forward</span>
+                </button>
+              </div>
+            )}
+
             {SimComponent ? (
               <Suspense
+                key={loadedParams ? JSON.stringify(loadedParams) : 'default'}
                 fallback={
                   <div
                     style={{
@@ -286,6 +390,55 @@ export default function TemaDashboard(): JSX.Element {
                   </div>
                 }
               >
+                {loadedParams && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      background: 'rgba(36,52,108,0.06)',
+                      border: '1px solid rgba(36,52,108,0.2)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '10px 14px',
+                      marginBottom: 12,
+                      fontSize: 12,
+                      color: 'var(--corporate-dark)',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: 16, color: 'var(--corporate)', flexShrink: 0 }}
+                    >
+                      tune
+                    </span>
+                    <span>
+                      <strong>Parámetros cargados desde ejercicio:&nbsp;</strong>
+                      {Object.entries(loadedParams)
+                        .map(([k, v]) => `${k} = ${String(v)}`)
+                        .join(' · ')}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setLoadedParams(null)}
+                      style={{
+                        marginLeft: 'auto',
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        color: 'var(--text-muted)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        padding: 0,
+                      }}
+                      aria-label="Cerrar aviso"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                        close
+                      </span>
+                    </button>
+                  </div>
+                )}
                 <SimComponent />
               </Suspense>
             ) : (
@@ -482,6 +635,16 @@ export default function TemaDashboard(): JSX.Element {
               </div>
             )}
           </div>
+        )}
+
+        {/* Pestaña: Ejercicios */}
+        {activeTab === 'ejercicios' && (
+          <EjerciciosTab
+            ejercicios={ejercicios}
+            loading={loadingEjercicios}
+            hasSimulator={Boolean(SimComponent)}
+            onLoad={handleEjercicioLoad}
+          />
         )}
       </main>
       <Footer />

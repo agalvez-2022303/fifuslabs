@@ -3,6 +3,7 @@ export * from './schemas'
 export * from './config'
 export * from './users'
 export * from './ids'
+export * from './ejercicios'
 
 // ─── Categorías ───────────────────────────────────────────────────────────────
 
