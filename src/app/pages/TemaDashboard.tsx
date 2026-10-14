@@ -2,96 +2,48 @@ import React, { useState, useMemo, lazy, Suspense } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import { getTemaBySlug, type TemaConfig } from '../../data/temas'
-import katex from 'katex'
+import { useTemaApi } from '../hooks/useTemaApi'
+import { desarrolloHtml, formattedHtml, mathHtml } from '../utils/content-format'
 import 'katex/dist/katex.min.css'
 import styles from './TemaDashboard.module.css'
 
 const CATEGORY_LABELS: Record<string, string> = {
-  mecanica:             'Mecánica Clásica & Cinemática',
+  mecanica: 'Mecánica Clásica & Cinemática',
   'oscilaciones-ondas': 'Oscilaciones y Ondas',
-  electrodinamica:      'Electrodinámica & Campo Eléctrico',
-  optica:               'Óptica Geométrica',
-  termodinamica:        'Termodinámica',
-  relatividad:          'Teoría de la Relatividad',
-  'fisica-atomica':     'Física Atómica',
-  'fisica-nuclear':     'Física Nuclear',
-  'estado-solido':      'Estado Sólido',
+  electrodinamica: 'Electrodinámica & Campo Eléctrico',
+  optica: 'Óptica Geométrica',
+  termodinamica: 'Termodinámica',
+  relatividad: 'Teoría de la Relatividad',
+  'fisica-atomica': 'Física Atómica',
+  'fisica-nuclear': 'Física Nuclear',
+  'estado-solido': 'Estado Sólido',
 }
 
 // Lazy simulations mapping
-const SIMULATION_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
-  'mru': lazy(() => import('../simulations/mru/MRU')),
+const SIMULATION_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
+  mru: lazy(() => import('../simulations/mru/MRU')),
   'movimiento-rectilineo-uniforme': lazy(() => import('../simulations/mru/MRU')),
   'alcances-mru': lazy(() => import('../simulations/alcances-mru/alcancesMRU')),
   'alcances-encuentros': lazy(() => import('../simulations/alcances-mru/alcancesMRU')),
-  'movimiento-aceleracion-constante': lazy(() => import('../simulations/constant-acceleration/ConstantAcceleration')),
-  'tres-fuerzas-equilibrio': lazy(() => import('../simulations/three-forces/ThreeForcesEquilibrium')),
+  'movimiento-aceleracion-constante': lazy(
+    () => import('../simulations/constant-acceleration/ConstantAcceleration')
+  ),
+  'tres-fuerzas-equilibrio': lazy(
+    () => import('../simulations/three-forces/ThreeForcesEquilibrium')
+  ),
   'suma-vectores': lazy(() => import('../simulations/force-composition/ForceComposition')),
-  'vectores': lazy(() => import('../simulations/vector-representation/VectorRepresentation')),
-  'distancia-desplazamiento': lazy(() => import('../simulations/distancia-desplazamiento/DistanciaDesplazamiento')),
+  vectores: lazy(() => import('../simulations/vector-representation/VectorRepresentation')),
+  'distancia-desplazamiento': lazy(
+    () => import('../simulations/distancia-desplazamiento/DistanciaDesplazamiento')
+  ),
   'velocidad-rapidez': lazy(() => import('../simulations/velocidad-rapidez/VelocidadRapidez')),
 }
 
-function renderLatex(expr: string): string {
-  try {
-    return katex.renderToString(expr, { throwOnError: false, displayMode: true })
-  } catch {
-    return expr
-  }
-}
+const renderLatex = (expr: string): string => mathHtml(expr, true)
+const renderLatexInline = (expr: string): string => mathHtml(expr)
+const renderFormattedContent = (text: string): string => formattedHtml(text)
 
-function renderLatexInline(expr: string): string {
-  try {
-    return katex.renderToString(expr, { throwOnError: false, displayMode: false })
-  } catch {
-    return expr
-  }
-}
-
-/** Renderiza texto con fórmulas LaTeX ($...$) y formato Markdown (**negrita**) */
-function renderFormattedContent(text: string): string {
-  if (!text) return ''
-
-  // 1. Reemplazar bloques $$...$$
-  let processed = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
-    try {
-      return katex.renderToString(math.trim(), { throwOnError: false, displayMode: true })
-    } catch {
-      return math
-    }
-  })
-
-  // 2. Reemplazar inline $...$
-  processed = processed.replace(/\$([^$]+?)\$/g, (_, math) => {
-    try {
-      return katex.renderToString(math.trim(), { throwOnError: false, displayMode: false })
-    } catch {
-      return math
-    }
-  })
-
-  // 3. Formato **negrita**
-  processed = processed.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
-
-  // 4. Saltos de línea
-  processed = processed.replace(/\n\n/g, '<br /><br />')
-  processed = processed.replace(/\n/g, '<br />')
-
-  return processed
-}
-
-/** Renderiza el desarrollo de una fórmula con notación matemática KaTeX */
-function renderDesarrollo(desarrollo: string): string {
-  if (!desarrollo) return ''
-  const trimmed = desarrollo.trim()
-
-  if (trimmed.includes('$')) {
-    return renderFormattedContent(trimmed)
-  }
-
-  return renderLatexInline(trimmed)
-}
+const renderDesarrollo = (desarrollo: string): string => desarrolloHtml(desarrollo)
 
 type TabType = 'simulacion' | 'formulas' | 'glosario' | 'teoria'
 
@@ -99,12 +51,15 @@ export default function TemaDashboard(): JSX.Element {
   const { id, seccion } = useParams<{ id: string; seccion?: string }>()
   const navigate = useNavigate()
 
-  const tema: TemaConfig | undefined = useMemo(() => {
-    return id ? getTemaBySlug(id) : undefined
-  }, [id])
+  const { tema, source, loading } = useTemaApi(id)
 
   const activeTab: TabType = useMemo(() => {
-    if (seccion === 'formulas' || seccion === 'glosario' || seccion === 'teoria' || seccion === 'simulacion') {
+    if (
+      seccion === 'formulas' ||
+      seccion === 'glosario' ||
+      seccion === 'teoria' ||
+      seccion === 'simulacion'
+    ) {
       return seccion as TabType
     }
     return 'simulacion'
@@ -117,18 +72,39 @@ export default function TemaDashboard(): JSX.Element {
     if (!glossaryQuery.trim()) return tema.glosario
     const q = glossaryQuery.toLowerCase()
     return tema.glosario.filter(
-      (g) =>
+      g =>
         g.termino.toLowerCase().includes(q) ||
         g.definicion.toLowerCase().includes(q) ||
         (g.categoria && g.categoria.toLowerCase().includes(q))
     )
   }, [tema, glossaryQuery])
 
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Header />
+        <main style={{ flex: 1, padding: '40px 20px', textAlign: 'center' }}>
+          <div className="spinner" />
+          <p style={{ color: 'var(--text-secondary)', marginTop: '12px' }}>Cargando tema…</p>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+
   if (!tema) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header />
-        <main style={{ flex: 1, padding: '40px 20px', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
+        <main
+          style={{
+            flex: 1,
+            padding: '40px 20px',
+            textAlign: 'center',
+            maxWidth: '600px',
+            margin: '0 auto',
+          }}
+        >
           <h2>Tema no encontrado</h2>
           <p style={{ color: 'var(--text-secondary)', margin: '16px 0 24px' }}>
             El tema que buscas no existe o ha sido movido.
@@ -167,7 +143,9 @@ export default function TemaDashboard(): JSX.Element {
         <div className={styles.topBarInner}>
           <nav className={styles.breadcrumbNav} aria-label="Ruta de navegación">
             <Link to="/" className={styles.backBtn}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_back</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                arrow_back
+              </span>
               <span>Inicio</span>
             </Link>
             <span className={styles.breadcrumbSep}>/</span>
@@ -175,6 +153,15 @@ export default function TemaDashboard(): JSX.Element {
           </nav>
 
           <div className={styles.metaPills}>
+            {source === 'estatico' && (
+              <div
+                className={styles.activePill}
+                title="No pudimos contactar el servidor; se muestra la copia local"
+              >
+                <span className={styles.greenPulse} />
+                <span>Contenido en caché</span>
+              </div>
+            )}
             <div className={styles.activePill}>
               <span className={styles.greenPulse} />
               <span>Simulación Activa</span>
@@ -187,9 +174,23 @@ export default function TemaDashboard(): JSX.Element {
       <div className={styles.topicHero}>
         <div className={styles.topicTitleGroup}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', borderRadius: 'var(--radius-md)', background: 'var(--corporate)', color: '#ffffff', flexShrink: 0 }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '38px',
+                height: '38px',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--corporate)',
+                color: '#ffffff',
+                flexShrink: 0,
+              }}
+            >
               {tema.icono.length > 2 ? (
-                <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>{tema.icono}</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>
+                  {tema.icono}
+                </span>
               ) : (
                 <span style={{ fontSize: '18px', fontWeight: 700 }}>{tema.icono}</span>
               )}
@@ -201,7 +202,9 @@ export default function TemaDashboard(): JSX.Element {
 
           <div className={styles.tagsRow}>
             <span className={styles.tagChip}>Nivel: {tema.dificultad.toUpperCase()}</span>
-            <span className={styles.tagChip}>{CATEGORY_LABELS[tema.categoriaId] || tema.categoriaId}</span>
+            <span className={styles.tagChip}>
+              {CATEGORY_LABELS[tema.categoriaId] || tema.categoriaId}
+            </span>
           </div>
         </div>
       </div>
@@ -214,7 +217,9 @@ export default function TemaDashboard(): JSX.Element {
             className={`${styles.tabBtn} ${activeTab === 'simulacion' ? styles.tabBtnActive : ''}`}
             onClick={() => handleTabChange('simulacion')}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>play_circle</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              play_circle
+            </span>
             <span>Simulador</span>
           </button>
           <button
@@ -222,7 +227,9 @@ export default function TemaDashboard(): JSX.Element {
             className={`${styles.tabBtn} ${activeTab === 'formulas' ? styles.tabBtnActive : ''}`}
             onClick={() => handleTabChange('formulas')}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>functions</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              functions
+            </span>
             <span>Fórmulas</span>
           </button>
           <button
@@ -230,7 +237,9 @@ export default function TemaDashboard(): JSX.Element {
             className={`${styles.tabBtn} ${activeTab === 'glosario' ? styles.tabBtnActive : ''}`}
             onClick={() => handleTabChange('glosario')}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>menu_book</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              menu_book
+            </span>
             <span>Glosario</span>
           </button>
           <button
@@ -238,7 +247,9 @@ export default function TemaDashboard(): JSX.Element {
             className={`${styles.tabBtn} ${activeTab === 'teoria' ? styles.tabBtnActive : ''}`}
             onClick={() => handleTabChange('teoria')}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>school</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              school
+            </span>
             <span>Teoría</span>
           </button>
         </nav>
@@ -252,9 +263,24 @@ export default function TemaDashboard(): JSX.Element {
             {SimComponent ? (
               <Suspense
                 fallback={
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px', flexDirection: 'column', gap: '12px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '300px',
+                      flexDirection: 'column',
+                      gap: '12px',
+                    }}
+                  >
                     <div className="spinner" />
-                    <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+                    <span
+                      style={{
+                        color: 'var(--text-muted)',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '13px',
+                      }}
+                    >
                       Cargando simulación interactiva...
                     </span>
                   </div>
@@ -263,10 +289,24 @@ export default function TemaDashboard(): JSX.Element {
                 <SimComponent />
               </Suspense>
             ) : (
-              <div style={{ textAlign: 'center', padding: '60px 20px', background: 'var(--card-bg)', borderRadius: 'var(--radius-xl)' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '36px', color: 'var(--gold)' }}>construction</span>
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '60px 20px',
+                  background: 'var(--card-bg)',
+                  borderRadius: 'var(--radius-xl)',
+                }}
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: '36px', color: 'var(--gold)' }}
+                >
+                  construction
+                </span>
                 <h3 style={{ marginTop: '12px' }}>Simulador en construcción</h3>
-                <p style={{ color: 'var(--text-secondary)' }}>Esta simulación estará disponible próximamente en FísicaLab.</p>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                  Esta simulación estará disponible próximamente en FísicaLab.
+                </p>
               </div>
             )}
           </div>
@@ -275,7 +315,7 @@ export default function TemaDashboard(): JSX.Element {
         {/* Pestaña: Fórmulas */}
         {activeTab === 'formulas' && (
           <div className={styles.formulasGrid}>
-            {tema.formulas.map((f) => (
+            {tema.formulas.map(f => (
               <article key={f.id} className={styles.formulaCard}>
                 <h3 className={styles.formulaTitle}>{f.nombre}</h3>
                 <div
@@ -291,7 +331,7 @@ export default function TemaDashboard(): JSX.Element {
                   <div className={styles.variablesSection}>
                     <span className={styles.varHeader}>Variables y Unidades:</span>
                     <div className={styles.varList}>
-                      {f.variables.map((v) => (
+                      {f.variables.map(v => (
                         <div key={v.simbolo} className={styles.varItem}>
                           <div>
                             <span
@@ -300,7 +340,9 @@ export default function TemaDashboard(): JSX.Element {
                             />
                             <span
                               style={{ marginLeft: '8px', color: 'var(--text-secondary)' }}
-                              dangerouslySetInnerHTML={{ __html: renderFormattedContent(v.descripcion) }}
+                              dangerouslySetInnerHTML={{
+                                __html: renderFormattedContent(v.descripcion),
+                              }}
                             />
                           </div>
                           <span className={styles.varUnit}>[{v.unidad}]</span>
@@ -313,20 +355,39 @@ export default function TemaDashboard(): JSX.Element {
                 {f.ejemploResuelto && (
                   <div className={styles.exampleCard}>
                     <div className={styles.exampleTitle}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'var(--gold)' }}>check_circle</span>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: '14px', color: 'var(--gold)' }}
+                      >
+                        check_circle
+                      </span>
                       Ejemplo Resuelto:
                     </div>
                     <div>
                       <strong>Enunciado: </strong>
-                      <span dangerouslySetInnerHTML={{ __html: renderFormattedContent(f.ejemploResuelto.enunciado) }} />
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: renderFormattedContent(f.ejemploResuelto.enunciado),
+                        }}
+                      />
                     </div>
                     <div style={{ marginTop: '4px' }}>
                       <strong>Desarrollo: </strong>
-                      <span dangerouslySetInnerHTML={{ __html: renderDesarrollo(f.ejemploResuelto.desarrollo) }} />
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: renderDesarrollo(f.ejemploResuelto.desarrollo),
+                        }}
+                      />
                     </div>
-                    <div style={{ fontWeight: 700, color: 'var(--corporate-dark)', marginTop: '4px' }}>
+                    <div
+                      style={{ fontWeight: 700, color: 'var(--corporate-dark)', marginTop: '4px' }}
+                    >
                       <strong>Resultado: </strong>
-                      <span dangerouslySetInnerHTML={{ __html: renderFormattedContent(f.ejemploResuelto.resultado) }} />
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: renderFormattedContent(f.ejemploResuelto.resultado),
+                        }}
+                      />
                     </div>
                   </div>
                 )}
@@ -345,14 +406,14 @@ export default function TemaDashboard(): JSX.Element {
                 className={styles.glossaryInput}
                 placeholder="Buscar término en el glosario..."
                 value={glossaryQuery}
-                onChange={(e) => setGlossaryQuery(e.target.value)}
+                onChange={e => setGlossaryQuery(e.target.value)}
                 aria-label="Buscar en el glosario"
               />
             </div>
 
             <div className={styles.glossaryGrid}>
-              {filteredGlossary.map((g) => (
-                <div key={g.termino} className={styles.glossaryCard}>
+              {filteredGlossary.map(g => (
+                <div key={g.id} className={styles.glossaryCard}>
                   {g.categoria && <span className={styles.glossaryCategory}>{g.categoria}</span>}
                   <h3 className={styles.glossaryTerm}>{g.termino}</h3>
                   <p
@@ -365,7 +426,7 @@ export default function TemaDashboard(): JSX.Element {
 
             {filteredGlossary.length === 0 && (
               <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                No se encontraron términos para "{glossaryQuery}".
+                No se encontraron términos para &laquo;{glossaryQuery}&raquo;.
               </div>
             )}
           </div>
@@ -377,12 +438,14 @@ export default function TemaDashboard(): JSX.Element {
             {tema.teoria.introduccion && (
               <p
                 className={styles.theoryIntro}
-                dangerouslySetInnerHTML={{ __html: renderFormattedContent(tema.teoria.introduccion) }}
+                dangerouslySetInnerHTML={{
+                  __html: renderFormattedContent(tema.teoria.introduccion),
+                }}
               />
             )}
 
-            {tema.teoria.secciones.map((sec, idx) => (
-              <section key={idx} className={styles.theorySection}>
+            {tema.teoria.secciones.map(sec => (
+              <section key={sec.id} className={styles.theorySection}>
                 <h3 className={styles.sectionHeading}>{sec.titulo}</h3>
                 <div
                   className={styles.sectionBody}
@@ -400,14 +463,20 @@ export default function TemaDashboard(): JSX.Element {
             {tema.teoria.resumen && tema.teoria.resumen.length > 0 && (
               <div className={styles.summaryBox}>
                 <div className={styles.summaryTitle}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--corporate)' }}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: '18px', color: 'var(--corporate)' }}
+                  >
                     checklist
                   </span>
                   Puntos Clave a Recordar
                 </div>
                 <ul className={styles.summaryList}>
                   {tema.teoria.resumen.map((r, i) => (
-                    <li key={i} dangerouslySetInnerHTML={{ __html: renderFormattedContent(r) }} />
+                    <li
+                      key={r.id ?? i}
+                      dangerouslySetInnerHTML={{ __html: renderFormattedContent(r.contenido ?? r) }}
+                    />
                   ))}
                 </ul>
               </div>

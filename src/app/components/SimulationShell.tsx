@@ -5,40 +5,24 @@ import Header from './Header'
 import Footer from './Footer'
 import styles from './SimulationShell.module.css'
 import type { Simulation, SimulationContent } from '@physicslab/shared-types'
-import katex from 'katex'
+import { formattedHtml, mathHtml } from '../utils/content-format'
 import 'katex/dist/katex.min.css'
 
-/** Renderiza una expresión LaTeX a HTML usando KaTeX */
+/** Renderiza una expresión LaTeX a HTML usando KaTeX (salida ya escapada por KaTeX). */
 function renderLatex(expr: string, displayMode = false): string {
-  try {
-    return katex.renderToString(expr, { throwOnError: false, displayMode })
-  } catch {
-    return expr
-  }
+  return mathHtml(expr, displayMode)
 }
 
-/** Formatea texto didáctico procesando expresiones LaTeX inline ($...$) y de bloque ($$...$$), negritas y saltos de línea */
+/**
+ * Formatea texto didáctico: LaTeX inline/de bloque, negritas y cursivas.
+ * Delega el escapado en `formattedHtml`, que escapa el texto plano ANTES de
+ * aplicar formato; aquí solo se añaden las cursivas y el bloque de display.
+ */
 function formatTheoryText(text: string): string {
-  // 1. Bloques LaTeX $$ ... $$ (display mode)
-  let result = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
-    return `<div class="${styles.katexDisplayBlock}">${renderLatex(math.trim(), true)}</div>`
-  })
-
-  // 2. Expresiones LaTeX inline $ ... $
-  result = result.replace(/\$([^$\n]+?)\$/g, (_, math) => {
-    return renderLatex(math.trim(), false)
-  })
-
-  // 3. Negritas **texto**
-  result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-
-  // 4. Cursivas sencillas *texto*
-  result = result.replace(/(^|[^*])\*(?!\*)([^*]+?)\*(?!\*)/g, '$1<em>$2</em>')
-
-  // 5. Saltos de línea simples dentro de párrafos
-  result = result.replace(/\n/g, '<br/>')
-
-  return result
+  if (!text) return ''
+  return formattedHtml(text)
+    .replace(/(^|[^*])\*(?!\*)([^*]+?)\*(?!\*)/g, '$1<em>$2</em>')
+    .replace(/<div class="katex-display">/g, `<div class="${styles.katexDisplayBlock}">`)
 }
 
 /** Renderiza una variable o símbolo matemático a HTML usando KaTeX */
@@ -46,7 +30,7 @@ function renderMathSymbol(expr: string): string {
   if (!expr) return ''
   const trimmed = expr.trim()
   // Si viene envuelta en delimitadores $ o $$, los removemos para KaTeX
-  if (/^\${1,2}([\s\S]+?)\${1,2}$/.test(trimmed)) {
+  if (/^\${1,2}[\s\S]+\${1,2}$/.test(trimmed)) {
     const math = trimmed.replace(/^\${1,2}|\${1,2}$/g, '').trim()
     return renderLatex(math, false)
   }

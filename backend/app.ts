@@ -4,6 +4,7 @@ import { AppError } from './errors'
 import type { AppEnv } from './http-types'
 import { identify } from './middleware/auth'
 import { bodyLimit } from './middleware/body-limit'
+import { AUTH_RATE_LIMITS, READ_RATE_LIMITS, rateLimit } from './middleware/rate-limit'
 import { categoryRoutes } from './routes/categories'
 import { healthRoutes } from './routes/health'
 import { legacyRoutes } from './routes/legacy'
@@ -25,9 +26,15 @@ export interface AppDependencies {
   accounts?: { auth: AuthService; users: UserService }
   storage?: 'json-temporary' | 'postgres'
   health?: HealthService
+  /** Shared limiter options; tests inject a clock and store for determinism. */
+  limiter?: { now?: () => number; store?: Map<string, { count: number; resetAt: number }> }
 }
 export function createApp(deps: AppDependencies) {
   const app = new Hono<AppEnv>()
+  const limiter = deps.limiter ?? {}
+  // Cheapest gate first: shed abusive traffic before parsing or touching the database.
+  app.use('/api/*', rateLimit(READ_RATE_LIMITS, limiter))
+  app.use('/api/auth/*', rateLimit(AUTH_RATE_LIMITS, limiter))
   app.use(
     '/api/*',
     identify(deps.auth),
@@ -35,6 +42,11 @@ export function createApp(deps: AppDependencies) {
       // Never share-cache role-dependent content or development identities.
       c.header('Cache-Control', 'no-store')
       c.header('Vary', 'Authorization, x-dev-user, x-dev-role')
+      // Defence in depth for non-Vercel deployments; vercel.json sets the same
+      // headers (plus CSP/HSTS) for the SPA and assets.
+      c.header('X-Content-Type-Options', 'nosniff')
+      c.header('X-Frame-Options', 'DENY')
+      c.header('Referrer-Policy', 'strict-origin-when-cross-origin')
       await next()
     },
     bodyLimit

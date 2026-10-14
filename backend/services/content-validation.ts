@@ -3,10 +3,18 @@ import sanitizeHtml from 'sanitize-html'
 import { temaSchema, type TemaConfig } from '../../packages/shared-types/src'
 import { ValidationError } from '../errors'
 
-/** No HTML allowed. Escape decoding restores plain text / LaTeX comparisons, not markup. */
+/**
+ * Strips every tag and attribute, leaving plain text.
+ *
+ * Markers are stored decoded (`<`, `>`, `&`) because the frontend escapes on
+ * render: storing `&amp;` instead would make it display literally. The loop
+ * normalizes once and then reaches a fixed point, so saving a topic repeatedly
+ * never mutates the text further. Encoded markup such as `&lt;script&gt;`
+ * survives as inert text and can never become live markup.
+ */
 export function sanitizeText(value: string): string {
   let current = value
-  // Reparse decoded entities too: encoded <script> must not become stored HTML.
+  // Re-parse to defeat nested encodings (&amp;lt;script&amp;gt;).
   for (let depth = 0; depth < 32; depth++) {
     const next = sanitizeHtml(current, {
       allowedTags: [],
@@ -17,7 +25,7 @@ export function sanitizeText(value: string): string {
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&amp;/g, '&')
-    if (next === current) return next
+    if (next === current) return current
     current = next
   }
   throw new ValidationError('Codificación HTML excesivamente anidada')
