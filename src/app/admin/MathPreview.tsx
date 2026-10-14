@@ -1,4 +1,4 @@
-﻿import { formattedHtml, mathHtml } from '../utils/content-format'
+import { formattedHtml, mathHtml } from '../utils/content-format'
 import 'katex/dist/katex.min.css'
 export function MathPreview({
   expression,

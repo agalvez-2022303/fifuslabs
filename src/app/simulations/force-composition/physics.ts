@@ -46,6 +46,7 @@ export interface AnalyticalResult {
   sumY: number
   resultant: VectorComponents
   quadrant: 'I' | 'II' | 'III' | 'IV' | 'Eje +X' | 'Eje +Y' | 'Eje -X' | 'Eje -Y' | 'Origen'
+  geographicText: string
   magnitudeDerivation: string
   angleDerivation: string
 }
@@ -67,8 +68,36 @@ export function toDegrees(rad: number): number {
 export function normalizeAngle(deg: number): number {
   let a = deg % 360
   if (a < 0) a += 360
-  if (Math.abs(a - 360) < 1e-9) return 0
+  if (Math.abs(a - 1e-9 - 360) < 1e-9) return 0
   return a
+}
+
+/**
+ * Convierte módulo y ángulo a notación de rumbo geográfico
+ */
+export function polarToGeographicalString(r: number, thetaDeg: number): string {
+  if (r < 1e-5) return 'Vector Nulo (0.00 u)'
+  const normTheta = normalizeAngle(thetaDeg)
+
+  if (Math.abs(normTheta - 0) < 1e-4 || Math.abs(normTheta - 360) < 1e-4) return `${r.toFixed(2)} u al Este`
+  if (Math.abs(normTheta - 90) < 1e-4) return `${r.toFixed(2)} u al Norte`
+  if (Math.abs(normTheta - 180) < 1e-4) return `${r.toFixed(2)} u al Oeste`
+  if (Math.abs(normTheta - 270) < 1e-4) return `${r.toFixed(2)} u al Sur`
+
+  if (normTheta > 0 && normTheta < 90) {
+    const alphaN = 90 - normTheta
+    return `${r.toFixed(2)} u, N ${alphaN.toFixed(2)}° E`
+  }
+  if (normTheta > 90 && normTheta < 180) {
+    const alphaN = normTheta - 90
+    return `${r.toFixed(2)} u, N ${alphaN.toFixed(2)}° O`
+  }
+  if (normTheta > 180 && normTheta < 270) {
+    const alphaS = 270 - normTheta
+    return `${r.toFixed(2)} u, S ${alphaS.toFixed(2)}° O`
+  }
+  const alphaS = normTheta - 270
+  return `${r.toFixed(2)} u, S ${alphaS.toFixed(2)}° E`
 }
 
 /**
@@ -205,6 +234,7 @@ export function computeAnalytical(vectors: Vector2D[]): AnalyticalResult {
   const ry = resultant.y
   const mag = resultant.magnitude
   const quadrant = getQuadrant(rx, ry)
+  const geographicText = polarToGeographicalString(mag, resultant.angleDeg)
 
   const magnitudeDerivation = `R = \\sqrt{R_x^2 + R_y^2} = \\sqrt{(${rx.toFixed(2)})^2 + (${ry.toFixed(2)})^2} = \\sqrt{${(rx * rx).toFixed(2)} + ${(ry * ry).toFixed(2)}} = ${mag.toFixed(2)}`
 
@@ -232,6 +262,7 @@ export function computeAnalytical(vectors: Vector2D[]): AnalyticalResult {
     sumY: ry,
     resultant,
     quadrant,
+    geographicText,
     magnitudeDerivation,
     angleDerivation,
   }

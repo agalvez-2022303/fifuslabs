@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { TemaConfig } from '@physicslab/shared-types'
 import { adminApi } from './api'
 import { useContent } from './ContentContext'

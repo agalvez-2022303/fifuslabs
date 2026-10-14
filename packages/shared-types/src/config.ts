@@ -1,4 +1,4 @@
-﻿/** Explicit configuration allowlist of implemented components; no user-provided import paths. */
+/** Explicit configuration allowlist of implemented components; no user-provided import paths. */
 export const SIM_COMPONENT_SLUGS = [
   'vectores',
   'mru',

@@ -1,9 +1,7 @@
 import {
   createEjercicioSchema,
   patchEjercicioSchema,
-  type CreateEjercicioInput,
   type Ejercicio,
-  type PatchEjercicioInput,
 } from '../../packages/shared-types/src'
 import { NotFoundError, ValidationError } from '../errors'
 import type { EjercicioRepository, TemaRepository } from '../repositories/interfaces'

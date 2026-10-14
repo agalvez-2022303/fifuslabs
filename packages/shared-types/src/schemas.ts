@@ -1,4 +1,4 @@
-﻿import { z } from 'zod'
+import { z } from 'zod'
 
 import { SIM_COMPONENT_SLUGS } from './config'
 export const categoryIdSchema = z.enum([

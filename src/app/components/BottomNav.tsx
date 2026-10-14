@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import styles from './BottomNav.module.css'
 
 interface Props {
@@ -7,11 +7,25 @@ interface Props {
 
 export default function BottomNav({ onOpenMenu }: Props): JSX.Element {
   const location = useLocation()
+  const navigate = useNavigate()
   const path = location.pathname
 
-  const isHome = path === '/'
-  const isAlcances = path.includes('alcances')
-  const isSims = path.startsWith('/tema') && !isAlcances
+  const isSearch = location.search.includes('buscar=1')
+  const isHome = path === '/' && !isSearch
+  const isSims = path.startsWith('/tema')
+
+  const handleSearchClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (path === '/') {
+      const searchInput = document.getElementById('search-simulations') as HTMLInputElement | null
+      if (searchInput) {
+        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        searchInput.focus()
+      }
+    } else {
+      navigate('/?buscar=1')
+    }
+  }
 
   return (
     <nav className={styles.bottomNav} aria-label="Navegación inferior móvil">
@@ -26,16 +40,17 @@ export default function BottomNav({ onOpenMenu }: Props): JSX.Element {
         <span>Inicio</span>
       </Link>
 
-      <Link
-        to="/tema/alcances-mru"
-        className={`${styles.navItem} ${isAlcances ? styles.navItemActive : ''}`}
-        aria-label="Abrir módulo Alcances y Encuentros MRU"
+      <button
+        type="button"
+        className={`${styles.navItem} ${isSearch ? styles.navItemActive : ''}`}
+        onClick={handleSearchClick}
+        aria-label="Buscar simulaciones y conceptos"
       >
         <div className={styles.navIconBox}>
-          <span className={`material-symbols-outlined ${styles.navIcon}`}>compare_arrows</span>
+          <span className={`material-symbols-outlined ${styles.navIcon}`}>search</span>
         </div>
-        <span>MRU</span>
-      </Link>
+        <span>Buscar</span>
+      </button>
 
       <button
         type="button"

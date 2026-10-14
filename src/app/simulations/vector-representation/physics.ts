@@ -126,8 +126,8 @@ export function polarToGeographic(r: number, thetaDeg: number): GeographicCoords
   // Azimut: 0° en Norte (+Y), 90° en Este (+X), 180° en Sur (-Y), 270° en Oeste (-X)
   const azimuthDeg = normalizeAngleDeg(90 - normTheta)
 
-  // Casos de ejes cardinales exactos (tolerancia 0.05°)
-  if (Math.abs(normTheta - 0) < 0.05 || Math.abs(normTheta - 360) < 0.05) {
+  // Casos de ejes cardinales exactos (tolerancia 1e-4)
+  if (Math.abs(normTheta - 0) < 1e-4 || Math.abs(normTheta - 360) < 1e-4) {
     return {
       r,
       cardinalExact: 'E',
@@ -140,7 +140,7 @@ export function polarToGeographic(r: number, thetaDeg: number): GeographicCoords
       quadrant: 'Eje +X',
     }
   }
-  if (Math.abs(normTheta - 90) < 0.05) {
+  if (Math.abs(normTheta - 90) < 1e-4) {
     return {
       r,
       cardinalExact: 'N',
@@ -153,7 +153,7 @@ export function polarToGeographic(r: number, thetaDeg: number): GeographicCoords
       quadrant: 'Eje +Y',
     }
   }
-  if (Math.abs(normTheta - 180) < 0.05) {
+  if (Math.abs(normTheta - 180) < 1e-4) {
     return {
       r,
       cardinalExact: 'O',
@@ -166,7 +166,7 @@ export function polarToGeographic(r: number, thetaDeg: number): GeographicCoords
       quadrant: 'Eje -X',
     }
   }
-  if (Math.abs(normTheta - 270) < 0.05) {
+  if (Math.abs(normTheta - 270) < 1e-4) {
     return {
       r,
       cardinalExact: 'S',
@@ -250,15 +250,15 @@ export function polarToGeographic(r: number, thetaDeg: number): GeographicCoords
 /**
  * Convierte rumbo geográfico a Coordenadas Polares (r, θ)
  * @param r Magnitud
- * @param primary 'N' | 'S' (o 'E' | 'O' para cardinal puro)
+ * @param primary 'N' | 'S' | 'E' | 'O' (cardinal principal)
  * @param angleDeg Ángulo de desvío (0° a 90°)
- * @param secondary 'E' | 'O' (o null si es cardinal puro)
+ * @param secondary 'E' | 'O' | 'N' | 'S' (cardinal secundario)
  */
 export function geographicToPolar(
   r: number,
   primary: 'N' | 'S' | 'E' | 'O',
   angleDeg: number = 0,
-  secondary: 'E' | 'O' | null = null
+  secondary: 'E' | 'O' | 'N' | 'S' | null = null
 ): PolarCoords {
   if (r <= 0) return { r: 0, thetaDeg: 0 }
 
@@ -277,19 +277,27 @@ export function geographicToPolar(
 
   if (primary === 'N') {
     if (secondary === 'E') {
-      // N alpha° E -> ángulo polar = 90° - alpha
       thetaDeg = 90 - alpha
-    } else {
-      // N alpha° O -> ángulo polar = 90° + alpha
+    } else if (secondary === 'O') {
       thetaDeg = 90 + alpha
     }
   } else if (primary === 'S') {
     if (secondary === 'O') {
-      // S alpha° O -> ángulo polar = 270° - alpha
       thetaDeg = 270 - alpha
-    } else {
-      // S alpha° E -> ángulo polar = 270° + alpha
+    } else if (secondary === 'E') {
       thetaDeg = 270 + alpha
+    }
+  } else if (primary === 'E') {
+    if (secondary === 'N') {
+      thetaDeg = alpha
+    } else if (secondary === 'S') {
+      thetaDeg = 360 - alpha
+    }
+  } else if (primary === 'O') {
+    if (secondary === 'N') {
+      thetaDeg = 180 - alpha
+    } else if (secondary === 'S') {
+      thetaDeg = 180 + alpha
     }
   }
 

@@ -1,4 +1,4 @@
-﻿import { z } from 'zod'
+import { z } from 'zod'
 import { authSessionSchema, userProfileSchema } from '@physicslab/shared-types'
 
 export const SESSION_KEY = 'fisicalab-studio-session'

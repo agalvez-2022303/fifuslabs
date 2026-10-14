@@ -1,41 +1,49 @@
 {
   "slug": "movimiento-aceleracion-constante",
-  "titulo": "Movimiento con Aceleración Constante",
-  "teoria": "El movimiento rectilíneo uniformemente acelerado (MRUA) es aquel en que la aceleración es constante y el objeto se mueve en línea recta. Las ecuaciones cinemáticas que lo describen son:\n\n- **Posición:** x(t) = x₀ + v₀·t + ½·a·t²\n- **Velocidad:** v(t) = v₀ + a·t\n- **Relación v-x:** v² = v₀² + 2·a·(x - x₀)\n\nCuando a = 0, el movimiento es rectilíneo uniforme (MRU). Cuando a > 0, el objeto acelera; cuando a < 0, desacelera.",
+  "titulo": "Movimiento con Aceleración Constante (MRUA)",
+  "teoria": "¿Qué es?\nEl MRUA es el movimiento en línea recta donde un objeto acelera o frena a un ritmo constante, haciendo que su velocidad cambie exactamente lo mismo en cada segundo.\n\nIdeas clave:\n1. La aceleración es constante (a ≠ 0).\n2. Si la aceleración es positiva (a > 0), el objeto gana velocidad.\n3. Si frena (a < 0), la velocidad disminuye.\n4. La posición varía de forma cuadrática (forma una parábola en la gráfica posición-tiempo x-t).\n\nEjemplo cotidiano:\nImagina que tu carro arranca cuando el semáforo se pone en verde con una aceleración constante de 2 m/s²:\n- En t = 0 s, va a 0 m/s.\n- En t = 1 s, va a 2 m/s.\n- En t = 2 s, va a 4 m/s.\n- En t = 3 s, va a 6 m/s.\n¡Cada segundo gana 2 m/s de rapidez!\n\nErrores comunes:\n- Confundir velocidad con aceleración (pensar que mucha aceleración significa ir rápido, cuando significa ganar velocidad rápidamente).\n- Olvidar elevar el tiempo al cuadrado (t²) en la fórmula de posición.\n\nResumen:\nEn el MRUA la aceleración constante hace que la velocidad aumente o disminuya en forma de línea recta y que la distancia recorrida forme una parábola.",
   "formulas": [
     {
-      "expresion": "x(t) = x₀ + v₀·t + ½·a·t²",
-      "descripcion": "Posición en función del tiempo",
+      "expresion": "x(t) = x_0 + v_0 t + \\frac{1}{2} a t^2",
+      "descripcion": "Ecuación Horaria de la Posición en MRUA",
       "variables": [
-        { "simbolo": "x", "descripcion": "Posición", "unidad": "m" },
-        { "simbolo": "x₀", "descripcion": "Posición inicial", "unidad": "m" },
-        { "simbolo": "v₀", "descripcion": "Velocidad inicial", "unidad": "m/s" },
-        { "simbolo": "a", "descripcion": "Aceleración", "unidad": "m/s²" },
-        { "simbolo": "t", "descripcion": "Tiempo", "unidad": "s" }
+        { "simbolo": "x(t)", "descripcion": "Posición en el tiempo t", "unidad": "m" },
+        { "simbolo": "x_0", "descripcion": "Posición inicial", "unidad": "m" },
+        { "simbolo": "v_0", "descripcion": "Velocidad inicial", "unidad": "m/s" },
+        { "simbolo": "a", "descripcion": "Aceleración constante", "unidad": "m/s²" },
+        { "simbolo": "t", "descripcion": "Tiempo transcurrido", "unidad": "s" }
       ]
     },
     {
-      "expresion": "v(t) = v₀ + a·t",
-      "descripcion": "Velocidad en función del tiempo",
+      "expresion": "v(t) = v_0 + a t",
+      "descripcion": "Ecuación de la Velocidad en función del tiempo",
       "variables": [
-        { "simbolo": "v", "descripcion": "Velocidad", "unidad": "m/s" },
-        { "simbolo": "v₀", "descripcion": "Velocidad inicial", "unidad": "m/s" },
-        { "simbolo": "a", "descripcion": "Aceleración", "unidad": "m/s²" },
-        { "simbolo": "t", "descripcion": "Tiempo", "unidad": "s" }
+        { "simbolo": "v(t)", "descripcion": "Velocidad en el instante t", "unidad": "m/s" },
+        { "simbolo": "v_0", "descripcion": "Velocidad inicial", "unidad": "m/s" },
+        { "simbolo": "a", "descripcion": "Aceleración constante", "unidad": "m/s²" },
+        { "simbolo": "t", "descripcion": "Tiempo transcurrido", "unidad": "s" }
+      ]
+    },
+    {
+      "expresion": "v_f^2 = v_0^2 + 2 a \\Delta x",
+      "descripcion": "Ecuación de Torricelli (sin usar el tiempo)",
+      "variables": [
+        { "simbolo": "v_f", "descripcion": "Velocidad final", "unidad": "m/s" },
+        { "simbolo": "v_0", "descripcion": "Velocidad inicial", "unidad": "m/s" },
+        { "simbolo": "a", "descripcion": "Aceleración constante", "unidad": "m/s²" },
+        { "simbolo": "Δx", "descripcion": "Distancia recorrida", "unidad": "m" }
       ]
     }
   ],
-  "unidades": [
-    { "magnitud": "Posición", "unidad": "Metro", "simbolo": "m" },
-    { "magnitud": "Velocidad", "unidad": "Metro por segundo", "simbolo": "m/s" },
-    { "magnitud": "Aceleración", "unidad": "Metro por segundo al cuadrado", "simbolo": "m/s²" },
-    { "magnitud": "Tiempo", "unidad": "Segundo", "simbolo": "s" }
-  ],
   "glosario": [
-    { "termino": "Posición", "definicion": "Ubicación del objeto en el eje de referencia, medida desde el origen." },
-    { "termino": "Velocidad", "definicion": "Rapidez de cambio de la posición respecto al tiempo." },
-    { "termino": "Aceleración", "definicion": "Rapidez de cambio de la velocidad respecto al tiempo." },
-    { "termino": "MRUA", "definicion": "Movimiento Rectilíneo Uniformemente Acelerado. La aceleración es constante." },
-    { "termino": "MRU", "definicion": "Movimiento Rectilíneo Uniforme. La velocidad es constante (a = 0)." }
+    { "termino": "Aceleración (a)", "definicion": "Ritmo de cambio de la velocidad por unidad de tiempo, medida en m/s²." },
+    { "termino": "Aceleración de la Gravedad (g)", "definicion": "Aceleración constante con la que caen los cuerpos cerca de la Tierra (9.8 m/s²)." },
+    { "termino": "Desaceleración (Frenado)", "definicion": "Aceleración con signo opuesto a la velocidad que reduce la rapidez del móvil." },
+    { "termino": "MRUA", "definicion": "Movimiento Rectilíneo Uniformemente Acelerado con aceleración constante y recta." },
+    { "termino": "Parábola", "definicion": "Curva característica que forma la gráfica posición-tiempo en el MRUA." },
+    { "termino": "Pendiente en gráfica v-t", "definicion": "La inclinación de la recta velocidad-tiempo representa la aceleración." },
+    { "termino": "Reposo", "definicion": "Estado de un móvil cuya velocidad inicial es cero (v₀ = 0 m/s)." },
+    { "termino": "Velocidad Final (v_f)", "definicion": "Velocidad alcanzada al concluir el tramo de tiempo analizado." },
+    { "termino": "Velocidad Inicial (v_0)", "definicion": "Velocidad que llevaba el móvil al comenzar el tiempo (t = 0 s)." }
   ]
 }

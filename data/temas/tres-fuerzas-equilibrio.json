@@ -1,0 +1,153 @@
+{
+  "titulo": "Tres Fuerzas en Equilibrio",
+  "descripcionCorta": "Aprende cómo tres fuerzas se cancelan entre sí para mantener un objeto inmóvil.",
+  "categoriaId": "mecanica",
+  "dificultad": "basico",
+  "estado": "active",
+  "orden": 3,
+  "icono": "△",
+  "etiquetas": [
+    "estática",
+    "equilibrio",
+    "vectores",
+    "fuerzas"
+  ],
+  "formulaPrincipal": "\\sum F_x = 0, \\quad \\sum F_y = 0",
+  "simComponentSlug": "tres-fuerzas-equilibrio",
+  "id": "sim-002",
+  "slug": "tres-fuerzas-equilibrio",
+  "status": "published",
+  "version": 1,
+  "updatedAt": "1970-01-01T00:00:00.000Z",
+  "teoria": {
+    "introduccion": "¿Por qué un semáforo colgado en medio de la calle no se cae? Gracias al equilibrio estático, las fuerzas de los cables se cancelan exactamente.",
+    "secciones": [
+      {
+        "titulo": "¿Qué es el equilibrio de tres fuerzas?",
+        "contenido": "Ocurre cuando tres fuerzas actúan sobre un mismo punto y su suma vectorial da cero.\n\n• **Condición horizontal:** Las fuerzas que jalan a la derecha deben igualar a las de la izquierda ($\\sum F_x = 0$).\n• **Condición vertical:** Las fuerzas que jalan hacia arriba deben igualar al peso hacia abajo ($\\sum F_y = 0$).",
+        "id": "e878eb5c-2916-5ef5-8db3-119e35ead0aa"
+      },
+      {
+        "titulo": "Explicación paso a paso con un ejemplo cotidiano",
+        "contenido": "Imagina una piñata sostenida por dos cuerdas amarradas a dos postes.\n\n1. El peso de la piñata tira verticalmente hacia abajo ($P$).\n2. La cuerda izquierda tira hacia arriba y la izquierda ($F_1$).\n3. La cuerda derecha tira hacia arriba y la derecha ($F_2$).\n4. Las fuerzas horizontales se anulan entre sí y las componentes verticales juntas cargan el peso.",
+        "id": "3e306597-e3ad-5088-b92d-6a261e3f4d11"
+      },
+      {
+        "titulo": "Errores comunes",
+        "contenido": "• Sumar los valores numéricos de las tensiones directamente sin descomponer en X e Y.\n• Confundir la masa en kilogramos (kg) con el peso en Newtons (N = kg · 9.8 m/s²).",
+        "id": "6c437b6c-9e8a-5ed5-96dc-5c4aaa75eed3"
+      }
+    ],
+    "resumen": [
+      {
+        "contenido": "Un cuerpo en equilibrio estático tiene aceleración cero y fuerza neta nula (ΣF = 0).",
+        "id": "0dc08391-8059-5581-85a6-0a8cef390309"
+      },
+      {
+        "contenido": "Las fuerzas se descomponen en los ejes X e Y para igualar las sumas a cero.",
+        "id": "f69a42d8-fada-5bcc-a66a-de4e13221fbd"
+      },
+      {
+        "contenido": "Si se dibujan secuencialmente, las tres fuerzas forman un triángulo cerrado.",
+        "id": "d089114a-c32b-5fd6-ae8d-ae658df435d3"
+      }
+    ]
+  },
+  "formulas": [
+    {
+      "nombre": "Primera Condición de Equilibrio (Fuerza Neta Nula)",
+      "expresion": "\\sum F_x = 0, \\quad \\sum F_y = 0",
+      "descripcion": "Para que un cuerpo esté en reposo estático, la suma de fuerzas en X e Y debe ser cero.",
+      "variables": [
+        {
+          "simbolo": "\\sum F_x",
+          "descripcion": "Suma de componentes horizontales",
+          "unidad": "N"
+        },
+        {
+          "simbolo": "\\sum F_y",
+          "descripcion": "Suma de componentes verticales",
+          "unidad": "N"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Dos fuerzas horizontales jalan un bloque en reposo: F₁ = +50 N hacia la derecha y F₂ hacia la izquierda. Halla F₂.",
+        "datos": "F₁ = 50 N, F₂ = ?",
+        "desarrollo": "\\sum F_x = 0 \\implies F_1 - F_2 = 0 \\implies 50 - F_2 = 0 \\implies F_2 = 50 \\text{ N}",
+        "resultado": "La fuerza F₂ debe ser de 50 N hacia la izquierda."
+      },
+      "id": "a5087611-e521-5537-b2cd-c6f94b013b3d"
+    },
+    {
+      "nombre": "Equilibrio Vertical al Sostener un Peso",
+      "expresion": "F_{1y} + F_{2y} = P",
+      "descripcion": "Las componentes verticales hacia arriba de las cuerdas deben sostener el peso total hacia abajo.",
+      "variables": [
+        {
+          "simbolo": "F_{1y}, F_{2y}",
+          "descripcion": "Componentes verticales de las cuerdas",
+          "unidad": "N"
+        },
+        {
+          "simbolo": "P",
+          "descripcion": "Peso suspendido (m · g)",
+          "unidad": "N"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Una piñata de peso P = 100 N está sostenida simétricamente por dos cuerdas. ¿Cuánto sostiene verticalmente cada cuerda?",
+        "datos": "P = 100 N, F_{1y} = F_{2y} = T_y",
+        "desarrollo": "T_y + T_y = 100 \\implies 2T_y = 100 \\implies T_y = 50 \\text{ N}",
+        "resultado": "Cada cuerda ejerce una fuerza vertical de 50 N."
+      },
+      "id": "83fe6106-17fd-5d4a-b1bc-c6545211678e"
+    }
+  ],
+  "glosario": [
+    {
+      "termino": "Diagrama de Cuerpo Libre (DCL)",
+      "definicion": "Dibujo donde se representan todas las fuerzas externas que actúan sobre un objeto.",
+      "id": "321f9399-025d-507d-bbac-c09d66bec6d5"
+    },
+    {
+      "termino": "Equilibrio Estático",
+      "definicion": "Estado de reposo donde la suma de todas las fuerzas aplicadas es igual a cero.",
+      "id": "c418135d-5ecb-5c78-9c0b-896d40898a45"
+    },
+    {
+      "termino": "Fuerza (F⃗)",
+      "definicion": "Interacción capaz de mover, detener o deformar un cuerpo, medida en Newtons (N).",
+      "id": "2f1784bd-0437-50fb-81b4-9a40619d8c85"
+    },
+    {
+      "termino": "Fuerza Neta",
+      "definicion": "Suma de todas las fuerzas que actúan sobre un cuerpo.",
+      "id": "9dfd0c08-fc96-5124-9c29-a2045fac9956"
+    },
+    {
+      "termino": "Newton (N)",
+      "definicion": "Unidad de fuerza del Sistema Internacional (1 N = 1 kg · m/s²).",
+      "id": "75baf466-8be0-5e71-9b1a-d31d9dc0d7ed"
+    },
+    {
+      "termino": "Peso (P)",
+      "definicion": "Fuerza de atracción gravitatoria que ejerce la Tierra sobre una masa (P = m · g).",
+      "id": "158ce1d3-824d-5747-891e-9fa26f9d3288"
+    },
+    {
+      "termino": "Polígono Cerrado",
+      "definicion": "Figura geométrica formada al conectar secuencialmente vectores de fuerza en equilibrio.",
+      "id": "cf0bed9a-9191-5651-9c6e-fb24fe056cbe"
+    },
+    {
+      "termino": "Tensión (T)",
+      "definicion": "Fuerza ejercida por una cuerda, cable o cadena tensada.",
+      "id": "fc42e173-1396-53e6-b99d-f5b94629b0b6"
+    },
+    {
+      "termino": "Teorema de Lami",
+      "definicion": "Ecuación trigonométrica que relaciona tres fuerzas en equilibrio con sus ángulos opuestos.",
+      "id": "c1e1ea0f-9e92-5610-ab52-6c740b8ee350"
+    }
+  ]
+}

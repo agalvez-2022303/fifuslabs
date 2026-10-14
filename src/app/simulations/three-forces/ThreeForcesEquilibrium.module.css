@@ -31,7 +31,7 @@
 
 .pulleyHint {
   position: absolute;
-  bottom: 12px;
+  top: 24px;
   left: 12px;
   display: flex;
   align-items: center;
@@ -46,6 +46,16 @@
   color: var(--text-muted);
   box-shadow: var(--shadow-sm);
   pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .pulleyHint {
+    top: 22px;
+    left: 8px;
+    padding: 3px 8px;
+    font-size: 10px;
+    max-width: calc(100% - 16px);
+  }
 }
 
 .panel {

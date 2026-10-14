@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   itemSchemas,
@@ -17,15 +17,15 @@ type Kind = 'secciones' | 'resumen' | 'glosario'
 type Item = TeoriaSeccion | ResumenItem | GlosarioItem
 const fields = {
   secciones: [
-    { key: 'titulo', label: 'T├¡tulo de la secci├│n', max: 300 },
-    { key: 'contenido', label: 'Contenido de la secci├│n', max: 20000, multiline: true },
+    { key: 'titulo', label: 'Título de la sección', max: 300 },
+    { key: 'contenido', label: 'Contenido de la sección', max: 20000, multiline: true },
     { key: 'destacado', label: 'Destacado (opcional)', max: 2000, multiline: true, optional: true },
   ],
   resumen: [{ key: 'contenido', label: 'Punto clave del resumen', max: 4000, multiline: true }],
   glosario: [
-    { key: 'termino', label: 'T├⌐rmino', max: 300 },
-    { key: 'definicion', label: 'Definici├│n', max: 4000, multiline: true },
-    { key: 'categoria', label: 'Categor├¡a del t├⌐rmino (opcional)', max: 300, optional: true },
+    { key: 'termino', label: 'Término', max: 300 },
+    { key: 'definicion', label: 'Definición', max: 4000, multiline: true },
+    { key: 'categoria', label: 'Categoría del término (opcional)', max: 300, optional: true },
   ],
 } satisfies Record<
   Kind,
@@ -77,7 +77,7 @@ function ItemForm({
     )
     const parsed = itemSchemas[kind].safeParse(body)
     if (!parsed.success) {
-      setError(parsed.error.issues.map(issue => issue.message).join(' ┬╖ '))
+      setError(parsed.error.issues.map(issue => issue.message).join(' · '))
       return
     }
     try {
@@ -97,7 +97,7 @@ function ItemForm({
               : kind === 'glosario'
                 ? (item as GlosarioItem).termino
                 : 'Punto del resumen'
-            : `A├▒adir ${kind === 'secciones' ? 'secci├│n' : kind === 'glosario' ? 't├⌐rmino' : 'punto clave'}`}
+            : `Añadir ${kind === 'secciones' ? 'sección' : kind === 'glosario' ? 'término' : 'punto clave'}`}
         </h3>
         {item && (
           <div className="studio-row-actions">
@@ -168,7 +168,7 @@ function ItemForm({
       </details>
       <footer>
         <button className="studio-button primary small" disabled={disabled}>
-          {item ? 'Guardar cambios' : 'A├▒adir al tema'}
+          {item ? 'Guardar cambios' : 'Añadir al tema'}
         </button>
         {item && <code title={item.id}>{item.id.slice(0, 8)}</code>}
       </footer>
@@ -212,9 +212,9 @@ export default function TextEditorPage({ glossary = false }: { glossary?: boolea
     setNotice('')
     try {
       remote.update(await adminApi.introduction(slug, intro, remote.tema.version))
-      setNotice('Introducci├│n guardada.')
+      setNotice('Introducción guardada.')
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'No se pudo guardar la introducci├│n')
+      setError(error instanceof Error ? error.message : 'No se pudo guardar la introducción')
     } finally {
       setBusy(false)
     }
@@ -226,7 +226,7 @@ export default function TextEditorPage({ glossary = false }: { glossary?: boolea
     try {
       await adminApi.removeItem(slug, pending.kind, pending.id, remote.tema.version)
       remote.update(await adminApi.getTema(slug))
-      setNotice('Elemento eliminado. La revisi├│n anterior conserva su contenido.')
+      setNotice('Elemento eliminado. La revisión anterior conserva su contenido.')
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'No se pudo eliminar')
     } finally {
@@ -266,8 +266,8 @@ export default function TextEditorPage({ glossary = false }: { glossary?: boolea
   return (
     <div className="studio-page">
       <PageHeading
-        title={glossary ? 'Gesti├│n del glosario' : 'Editor de teor├¡a y resumen'}
-        description="Edita el contenido textual con formato **negrita** y expresiones LaTeX entre $ΓÇª$."
+        title={glossary ? 'Gestión del glosario' : 'Editor de teoría y resumen'}
+        description="Edita el contenido textual con formato **negrita** y expresiones LaTeX entre $…$."
       >
         <select
           aria-label="Seleccionar tema para editar"
@@ -287,7 +287,7 @@ export default function TextEditorPage({ glossary = false }: { glossary?: boolea
         <Message>
           {error || remote.error}
           <button className="studio-button small" onClick={remote.reload}>
-            Recargar versi├│n
+            Recargar versión
           </button>
         </Message>
       )}
@@ -299,16 +299,16 @@ export default function TextEditorPage({ glossary = false }: { glossary?: boolea
           <>
             <div className="studio-editor-context">
               <strong>{tema.titulo}</strong>
-              <span>Versi├│n {tema.version} ┬╖ Estado heredado del tema</span>
+              <span>Versión {tema.version} · Estado heredado del tema</span>
               <Link to={`/admin/temas/${slug}/revisiones`}>Ver revisiones</Link>
             </div>
             {!glossary && (
               <form className="studio-card studio-form-section" onSubmit={introduction}>
                 <header>
                   <Icon name="edit_note" />
-                  <h2>Introducci├│n al tema</h2>
+                  <h2>Introducción al tema</h2>
                 </header>
-                <Field label="Introducci├│n">
+                <Field label="Introducción">
                   <textarea
                     disabled={busy}
                     required
@@ -323,7 +323,7 @@ export default function TextEditorPage({ glossary = false }: { glossary?: boolea
                   <TextPreview text={intro} />
                 </details>
                 <button className="studio-button primary" disabled={busy}>
-                  Guardar introducci├│n
+                  Guardar introducción
                 </button>
               </form>
             )}
@@ -333,10 +333,10 @@ export default function TextEditorPage({ glossary = false }: { glossary?: boolea
                   <header>
                     <h2>
                       {kind === 'secciones'
-                        ? 'Secciones de teor├¡a'
+                        ? 'Secciones de teoría'
                         : kind === 'resumen'
                           ? 'Resumen y puntos clave'
-                          : 'T├⌐rminos del glosario'}
+                          : 'Términos del glosario'}
                     </h2>
                     <span className="studio-count">{collection(tema, kind).length} elementos</span>
                   </header>
@@ -374,7 +374,7 @@ export default function TextEditorPage({ glossary = false }: { glossary?: boolea
           onCancel={() => setPending(null)}
           onConfirm={() => void erase()}
         >
-          <p>Se eliminar├í del tema. Podr├ís recuperar el snapshot anterior desde las revisiones.</p>
+          <p>Se eliminará del tema. Podrás recuperar el snapshot anterior desde las revisiones.</p>
         </Confirm>
       )}
     </div>

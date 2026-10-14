@@ -19,6 +19,13 @@
   cursor: crosshair;
 }
 
+@media (max-width: 600px) {
+  .canvasWrap {
+    aspect-ratio: 16 / 9;
+    min-height: 240px;
+  }
+}
+
 .canvas {
   display: block;
   width: 100%;
@@ -74,7 +81,14 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.presetsRow::-webkit-scrollbar {
+  display: none;
 }
 
 .presetsLabel {
@@ -82,18 +96,23 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--slate-muted);
+  flex-shrink: 0;
 }
 
 .presetChip {
   background: var(--sub-card-bg);
   border: 1px solid var(--border-neutral);
   border-radius: var(--radius-full);
-  padding: 3px 10px;
+  padding: 4px 10px;
+  min-height: 36px;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
   color: var(--corporate);
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  touch-action: manipulation;
   transition: all var(--transition-fast);
 }
 

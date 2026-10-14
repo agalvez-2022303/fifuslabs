@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════
    DistanciaDesplazamiento.module.css
    Estilos para la simulación de Distancia vs. Desplazamiento.
    Basados en el Design System Stitch de FísicaLab.
@@ -41,7 +41,14 @@
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  flex-wrap: wrap;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.presetGroup::-webkit-scrollbar {
+  display: none;
 }
 
 .presetLabel {
@@ -54,10 +61,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .presetBtn {
   padding: 6px 12px;
+  min-height: 38px;
   border-radius: var(--radius-md);
   font-size: var(--text-xs);
   font-family: var(--font-mono);
@@ -70,6 +79,9 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  touch-action: manipulation;
 }
 
 .presetBtn:hover {

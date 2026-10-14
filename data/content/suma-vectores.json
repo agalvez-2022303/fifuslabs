@@ -1,44 +1,45 @@
 {
   "slug": "suma-vectores",
-  "titulo": "Suma de vectores",
-  "teoria": "La suma vectorial determina el vector resultante $\\vec{R} = \\sum \\vec{V}_i$ equivalente a la acción combinada de múltiples vectores.\n\n### Métodos Gráficos:\n1. **Para 2 vectores:**\n   - **Método del Paralelogramo:** Los dos vectores se dibujan con origen común. Se trazan rectas paralelas a cada vector pasando por el extremo del otro. La diagonal desde el origen común hasta el vértice opuesto es el vector resultante $\\vec{R}$.\n   - **Método del Triángulo:** Se dibuja el primer vector $\\vec{V}_1$ desde el origen y se traslada el segundo $\\vec{V}_2$ de manera que su origen coincida con el extremo de $\\vec{V}_1$ (cabeza con cola). El vector que cierra el triángulo desde el origen hasta el extremo de $\\vec{V}_2$ es $\\vec{R}$.\n\n2. **Para 3 o más vectores:**\n   - **Método del Polígono:** Se encadenan todos los vectores consecutivamente de forma cabeza con cola (el origen de cada vector en el extremo del anterior). El vector resultante $\\vec{R}$ va desde el origen del primer vector hasta el extremo del último, cerrando el polígono.\n\n### Método Analítico (Descomposición en Componentes):\n1. Cada vector se descompone en sus componentes rectangulares:\n   $$V_{ix} = |V_i| \\cdot \\cos(\\theta_i), \\quad V_{iy} = |V_i| \\cdot \\sin(\\theta_i)$$\n2. Se suman algebraicamente las componentes de cada eje:\n   $$R_x = \\sum V_{ix}, \\quad R_y = \\sum V_{iy}$$\n3. Se calcula el módulo y la dirección angular del vector resultante:\n   $$|R| = \\sqrt{R_x^2 + R_y^2}, \\quad \\theta = \\arctan\\left(\\frac{|R_y|}{|R_x|}\\right) \\quad (\\text{ajustado al cuadrante})$$",
+  "titulo": "Suma de Vectores",
+  "teoria": "¿Qué es?\nEs la operación para combinar dos o más vectores (como fuerzas o desplazamientos) y encontrar una sola flecha equivalente llamada Vector Resultante (R).\n\nIdeas clave:\n1. No podemos sumar vectores como números simples a menos que vayan exactamente en la misma dirección.\n2. Método gráfico: Colocamos la cola del segundo vector en la punta del primero. La resultante se dibuja desde el inicio del primero hasta la punta del último.\n3. Método analítico: Sumamos todas las componentes horizontales (R_x = A_x + B_x) y todas las verticales (R_y = A_y + B_y).\n4. La magnitud de la resultante se calcula al final con el teorema de Pitágoras.\n\nEjemplo cotidiano:\nImagina que caminas 4 metros al Este y luego 3 metros al Norte. Aunque caminaste 7 metros en total, tu desplazamiento directo en línea recta desde el origen es de 5 metros hacia el Noreste.\n\nErrores comunes:\n- Sumar las magnitudes directamente (pensar que 4 + 3 da 7 en línea recta).\n- Olvidar que si un vector apunta a la izquierda o hacia abajo, su componente es negativa.\n\nResumen:\nSumar vectores nos permite hallar el efecto combinado de varias fuerzas o movimientos. El método analítico descompone en X e Y, suma los componentes y obtiene la resultante final con Pitágoras.",
   "formulas": [
     {
-      "expresion": "V_x = |V| \\cdot \\cos(\\theta), \\quad V_y = |V| \\cdot \\sin(\\theta)",
-      "descripcion": "Descomposición ortogonal de cada vector individual",
+      "expresion": "R_x = A_x + B_x, \\quad R_y = A_y + B_y",
+      "descripcion": "Suma de componentes rectangulares en X e Y",
       "variables": [
-        { "simbolo": "V_x", "descripcion": "Componente horizontal", "unidad": "u" },
-        { "simbolo": "V_y", "descripcion": "Componente vertical", "unidad": "u" },
-        { "simbolo": "|V|", "descripcion": "Módulo del vector", "unidad": "u" },
-        { "simbolo": "θ", "descripcion": "Ángulo polar respecto al eje +X", "unidad": "°" }
+        { "simbolo": "R_x", "descripcion": "Suma total en el eje horizontal X", "unidad": "u / N / m" },
+        { "simbolo": "R_y", "descripcion": "Suma total en el eje vertical Y", "unidad": "u / N / m" },
+        { "simbolo": "A_x, B_x", "descripcion": "Componentes horizontales de cada vector", "unidad": "u" },
+        { "simbolo": "A_y, B_y", "descripcion": "Componentes verticales de cada vector", "unidad": "u" }
       ]
     },
     {
-      "expresion": "R_x = \\sum_{i=1}^n V_{ix}, \\quad R_y = \\sum_{i=1}^n V_{iy}",
-      "descripcion": "Sumatoria de componentes cartesianas en la tabla analítica",
+      "expresion": "R = \\sqrt{R_x^2 + R_y^2}",
+      "descripcion": "Módulo o magnitud del Vector Resultante",
       "variables": [
-        { "simbolo": "R_x", "descripcion": "Componente X de la resultante", "unidad": "u" },
-        { "simbolo": "R_y", "descripcion": "Componente Y de la resultante", "unidad": "u" }
+        { "simbolo": "R", "descripcion": "Magnitud final de la resultante", "unidad": "u / N / m" },
+        { "simbolo": "R_x", "descripcion": "Componente horizontal total", "unidad": "u" },
+        { "simbolo": "R_y", "descripcion": "Componente vertical total", "unidad": "u" }
       ]
     },
     {
-      "expresion": "|R| = \\sqrt{R_x^2 + R_y^2}, \\quad \\theta_R = \\arctan(R_y / R_x)",
-      "descripcion": "Módulo y ángulo de la resultante analítica",
+      "expresion": "\\theta_R = \\arctan\\left(\\frac{|R_y|}{|R_x|}\\right)",
+      "descripcion": "Ángulo de dirección de la resultante",
       "variables": [
-        { "simbolo": "|R|", "descripcion": "Módulo de la resultante", "unidad": "u" },
-        { "simbolo": "θ_R", "descripcion": "Ángulo de la resultante", "unidad": "°" }
+        { "simbolo": "θ_R", "descripcion": "Ángulo de inclinación resultante", "unidad": "°" },
+        { "simbolo": "R_x, R_y", "descripcion": "Componentes totales en X e Y", "unidad": "u" }
       ]
     }
   ],
-  "unidades": [
-    { "magnitud": "Magnitud Vectorial", "unidad": "Unidades arbitrarias / Newton / Metro", "simbolo": "u / N / m" },
-    { "magnitud": "Ángulo de Inclinación", "unidad": "Grado sexagesimal", "simbolo": "°" }
-  ],
   "glosario": [
-    { "termino": "Suma Vectorial", "definicion": "Operación matemática que combina dos o más vectores para hallar un único vector equivalente (resultante)." },
-    { "termino": "Método del Paralelogramo", "definicion": "Método geométrico para sumar dos vectores concurrentes usando un paralelogramo donde la diagonal es la resultante." },
-    { "termino": "Método del Triángulo", "definicion": "Método gráfico punta-cola para dos vectores que forman un triángulo cerrado con la resultante." },
-    { "termino": "Método del Polígono", "definicion": "Extensión del método punta-cola para sumar 3 o más vectores encadenados consecutivamente." },
-    { "termino": "Método Analítico", "definicion": "Procedimiento algebraico exacto basado en descomponer vectores en una tabla cartesiana y sumar sus componentes." }
+    { "termino": "Componente Rectangular", "definicion": "Proyección de un vector sobre el eje horizontal X o vertical Y." },
+    { "termino": "Descomposición Vectorial", "definicion": "Separación de un vector en dos proyecciones perpendiculares." },
+    { "termino": "Método Analítico", "definicion": "Procedimiento matemático exacto que suma vectores mediante sus componentes X e Y." },
+    { "termino": "Método del Paralelogramo", "definicion": "Método gráfico para sumar dos vectores formando un cuadrilátero." },
+    { "termino": "Método del Polígono", "definicion": "Método gráfico para sumar varios vectores conectándolos cabeza con cola." },
+    { "termino": "Método del Triángulo", "definicion": "Método gráfico donde la resultante une el inicio del primer vector con el fin del segundo." },
+    { "termino": "Resultante (R)", "definicion": "Vector único equivalente que produce el mismo efecto que todos los vectores sumados." },
+    { "termino": "Vector Equilibrante", "definicion": "Vector de igual tamaño pero sentido contrario a la resultante que logra anular todas las fuerzas." },
+    { "termino": "Vectores Concurrentes", "definicion": "Vectores cuyas líneas de acción se cruzan en un mismo punto." }
   ]
 }

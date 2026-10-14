@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
 export function Icon({ name }: { name: string }) {
@@ -11,7 +11,7 @@ export function Icon({ name }: { name: string }) {
 export function PageHeading({
   title,
   description,
-  eyebrow = 'CONTENIDO PEDAG├ôGICO',
+  eyebrow = 'CONTENIDO PEDAGÓGICO',
   children,
 }: {
   title: string
@@ -52,7 +52,7 @@ export function Message({ children, success = false }: { children: ReactNode; su
     </div>
   )
 }
-export function Loading({ text = 'Cargando contenidoΓÇª' }: { text?: string }) {
+export function Loading({ text = 'Cargando contenido…' }: { text?: string }) {
   return (
     <div className="studio-loading" role="status">
       <span className="studio-spinner" />
@@ -105,13 +105,13 @@ export function Pagination({
     <footer className="studio-pagination">
       <span>
         {total
-          ? `Mostrando ${(page - 1) * pageSize + 1}ΓÇô${Math.min(total, page * pageSize)} de ${total}`
+          ? `Mostrando ${(page - 1) * pageSize + 1}–${Math.min(total, page * pageSize)} de ${total}`
           : '0 resultados'}
       </span>
       <label>
-        Filas por p├ígina{' '}
+        Filas por página{' '}
         <select
-          aria-label="Filas por p├ígina"
+          aria-label="Filas por página"
           value={pageSize}
           onChange={event => onSize(Number(event.target.value))}
         >
@@ -200,7 +200,7 @@ export function Confirm({
             disabled={busy}
             onClick={onConfirm}
           >
-            {busy ? 'ProcesandoΓÇª' : 'Confirmar'}
+            {busy ? 'Procesando…' : 'Confirmar'}
           </button>
         </footer>
       </div>

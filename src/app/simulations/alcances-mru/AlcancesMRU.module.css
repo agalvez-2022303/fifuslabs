@@ -347,6 +347,18 @@
   word-break: break-all;
 }
 
+@media (max-width: 400px) {
+  .telemetryGrid {
+    gap: 4px;
+  }
+  .telemetryCard {
+    padding: 8px 4px;
+  }
+  .telemetryValue {
+    font-size: clamp(0.9rem, 3.2vw, 1.2rem);
+  }
+}
+
 /* Result Box */
 .resultBox {
   border-radius: var(--radius-md);

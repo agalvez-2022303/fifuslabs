@@ -1,0 +1,129 @@
+{
+  "titulo": "Suma de Vectores",
+  "descripcionCorta": "Calcula el efecto combinado de múltiples vectores usando métodos gráficos y analíticos.",
+  "categoriaId": "mecanica",
+  "dificultad": "basico",
+  "estado": "active",
+  "orden": 4,
+  "icono": "⊕",
+  "etiquetas": [
+    "vectores",
+    "suma vectorial",
+    "resultante",
+    "analítico"
+  ],
+  "formulaPrincipal": "R_x = A_x + B_x, \\quad R_y = A_y + B_y, \\quad R = \\sqrt{R_x^2 + R_y^2}",
+  "simComponentSlug": "suma-vectores",
+  "id": "sim-003",
+  "slug": "suma-vectores",
+  "status": "published",
+  "version": 1,
+  "updatedAt": "1970-01-01T00:00:00.000Z",
+  "teoria": {
+    "introduccion": "Si dos personas jalan una caja en direcciones diferentes, ¿hacia dónde se moverá la caja? La suma vectorial nos da la respuesta exacta.",
+    "secciones": [
+      {
+        "titulo": "¿Qué es la suma de vectores?",
+        "contenido": "Es el proceso de encontrar un único vector equivalente (llamado Resultante $\\vec{R}$) que produce el mismo efecto que varias fuerzas o desplazamientos combinados.",
+        "id": "d33a7d20-a8ec-59bf-ab40-02952598838d"
+      },
+      {
+        "titulo": "Métodos para sumar vectores",
+        "contenido": "• **Método Gráfico (Cabeza con cola):** Se dibuja el segundo vector donde termina el primero. La resultante se traza desde el origen inicial hasta la punta final.\n• **Método Analítico (Componentes):** Se suman todas las componentes horizontales ($R_x = \\sum V_x$) y verticales ($R_y = \\sum V_y$), y luego se calcula la magnitud con Pitágoras ($R = \\sqrt{R_x^2 + R_y^2}$).",
+        "id": "ff23d02f-bfb4-5efc-beb4-1196f8aa2cdf"
+      },
+      {
+        "titulo": "Errores comunes",
+        "contenido": "• Sumar los valores numéricos directamente (pensar que $4\\text{ m} + 3\\text{ m} = 7\\text{ m}$ en diagonal).\n• Olvidar colocar signos negativos a las componentes que apuntan hacia la izquierda o abajo.",
+        "id": "16df2390-5db1-513b-abc1-25b3a65787bb"
+      }
+    ],
+    "resumen": [
+      {
+        "contenido": "La resultante R reemplaza a todos los vectores sumados produciendo el mismo efecto.",
+        "id": "daf4ca93-44f3-5356-9d87-72494ccad5c3"
+      },
+      {
+        "contenido": "En el método analítico sumamos componentes X por un lado e Y por otro.",
+        "id": "f46b3287-2659-58c6-93fa-2f9a47821cb9"
+      },
+      {
+        "contenido": "El módulo de la resultante se obtiene con el teorema de Pitágoras.",
+        "id": "9abcafbf-7623-533a-9cac-04ccc784ac6f"
+      }
+    ]
+  },
+  "formulas": [
+    {
+      "nombre": "Vector Resultante por Componentes",
+      "expresion": "R_x = A_x + B_x, \\quad R_y = A_y + B_y, \\quad R = \\sqrt{R_x^2 + R_y^2}",
+      "descripcion": "Método analítico universal para sumar dos o más vectores descomponiendo en ejes ortogonales.",
+      "variables": [
+        {
+          "simbolo": "R_x, R_y",
+          "descripcion": "Componentes cartesianas del vector resultante",
+          "unidad": "u / N / m"
+        },
+        {
+          "simbolo": "R",
+          "descripcion": "Módulo del vector resultante",
+          "unidad": "u / N / m"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Suma dos vectores: A_x = 4 m, A_y = 0 m y B_x = 0 m, B_y = 3 m. Halla la resultante.",
+        "datos": "A = (4, 0) m, B = (0, 3) m",
+        "desarrollo": "R_x = 4 + 0 = 4 \\text{ m}, \\quad R_y = 0 + 3 = 3 \\text{ m}. \\quad R = \\sqrt{4^2 + 3^2} = \\sqrt{25} = 5 \\text{ m}",
+        "resultado": "El vector resultante es R = 5 m a 36.87° del eje +X."
+      },
+      "id": "438fbb40-689c-54d4-a676-be70def95b79"
+    }
+  ],
+  "glosario": [
+    {
+      "termino": "Componente Rectangular",
+      "definicion": "Proyección de un vector sobre el eje horizontal X o vertical Y.",
+      "id": "129dbeea-1fe3-5d87-a4dd-e617265bd0e4"
+    },
+    {
+      "termino": "Descomposición Vectorial",
+      "definicion": "Separación de un vector en dos proyecciones perpendiculares.",
+      "id": "3e97f186-5763-5456-871e-3bfcad515abc"
+    },
+    {
+      "termino": "Método Analítico",
+      "definicion": "Procedimiento matemático exacto que suma vectores mediante sus componentes X e Y.",
+      "id": "eb005bb1-5954-59e3-9ae8-17a5b21a4ad1"
+    },
+    {
+      "termino": "Método del Paralelogramo",
+      "definicion": "Método gráfico para sumar dos vectores formando un cuadrilátero.",
+      "id": "489bca76-0e6b-5fe9-a423-5584bbf70d82"
+    },
+    {
+      "termino": "Método del Polígono",
+      "definicion": "Método gráfico para sumar varios vectores conectándolos cabeza con cola.",
+      "id": "206d16bb-2e6d-524f-873b-342efd939c53"
+    },
+    {
+      "termino": "Método del Triángulo",
+      "definicion": "Método gráfico donde la resultante une el inicio del primer vector con el fin del segundo.",
+      "id": "f10ba692-0549-54b4-a3af-0b608bd47c08"
+    },
+    {
+      "termino": "Resultante (R)",
+      "definicion": "Vector único equivalente que produce el mismo efecto que todos los vectores sumados.",
+      "id": "4e2268a5-9701-5c41-bce7-edf2bfe02f34"
+    },
+    {
+      "termino": "Vector Equilibrante",
+      "definicion": "Vector de igual tamaño pero sentido contrario a la resultante que logra anular todas las fuerzas.",
+      "id": "98a807d9-7156-546b-9a2f-ec8f171834ed"
+    },
+    {
+      "termino": "Vectores Concurrentes",
+      "definicion": "Vectores cuyas líneas de acción se cruzan en un mismo punto.",
+      "id": "4d076098-08e3-50b3-89f3-6abe364edff4"
+    }
+  ]
+}

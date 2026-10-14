@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useContent } from './ContentContext'
 import { Empty, Icon, Loading, Message, PageHeading } from './ui'
 
@@ -9,9 +9,9 @@ export default function AdminCrudPage() {
   return (
     <div className="studio-page">
       <PageHeading
-        title="├üreas de conocimiento"
-        description="Cat├ílogo que organiza los temas de F├¡sicaLab. Selecciona un ├írea para explorar su contenido."
-        eyebrow="ORGANIZACI├ôN DEL CURR├ìCULO"
+        title="Áreas de conocimiento"
+        description="Catálogo que organiza los temas de FísicaLab. Selecciona un área para explorar su contenido."
+        eyebrow="ORGANIZACIÓN DEL CURRÍCULO"
       >
         <button className="studio-button" onClick={() => void reload()}>
           <Icon name="refresh" />
@@ -30,7 +30,7 @@ export default function AdminCrudPage() {
             <strong>{temas.filter(tema => tema.categoriaId === cat.id).length} temas</strong>
             <Link
               className="studio-button"
-              to={`/admin/temas?q=${encodeURIComponent(cat.nombre === 'Mec├ínica' ? '' : cat.nombre)}`}
+              to={`/admin/temas?q=${encodeURIComponent(cat.nombre === 'Mecánica' ? '' : cat.nombre)}`}
             >
               <Icon name="folder_open" />
               Explorar temas
@@ -38,7 +38,7 @@ export default function AdminCrudPage() {
           </article>
         ))}
       </section>
-      {!categories.length && <Empty title="No hay ├íreas disponibles" />}
+      {!categories.length && <Empty title="No hay áreas disponibles" />}
     </div>
   )
 }

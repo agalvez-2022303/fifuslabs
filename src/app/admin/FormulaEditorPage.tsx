@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import katex from 'katex'
 import {
@@ -38,16 +38,16 @@ const fromFormula = (formula: FormulaDoc): FormulaDraft => ({
   withExample: Boolean(formula.ejemploResuelto),
 })
 const symbols = [
-  ['Estructuras', ['x/y', '\\frac{x}{y}'], ['ΓêÜx', '\\sqrt{x}'], ['x┬▓', 'x^{2}'], ['xß╡ó', 'x_{i}']],
-  ['Operadores', ['┬╖', '\\cdot'], ['┬▒', '\\pm'], ['Vector', '\\vec{v}'], ['Γêæ', '\\sum']],
+  ['Estructuras', ['x/y', '\\frac{x}{y}'], ['√x', '\\sqrt{x}'], ['x²', 'x^{2}'], ['xᵢ', 'x_{i}']],
+  ['Operadores', ['·', '\\cdot'], ['±', '\\pm'], ['Vector', '\\vec{v}'], ['∑', '\\sum']],
   [
     'Griegas',
-    ['╬ö', '\\Delta'],
-    ['╬╕', '\\theta'],
-    ['╬╗', '\\lambda'],
-    ['╬╝', '\\mu'],
-    ['╧ë', '\\omega'],
-    ['╧Ç', '\\pi'],
+    ['Δ', '\\Delta'],
+    ['θ', '\\theta'],
+    ['λ', '\\lambda'],
+    ['μ', '\\mu'],
+    ['ω', '\\omega'],
+    ['π', '\\pi'],
   ],
 ] as const
 
@@ -84,13 +84,13 @@ export default function FormulaEditorPage() {
         setTema(tema)
         if (id) {
           const formula = tema.formulas.find(item => item.id === id)
-          if (!formula) throw new Error('La f├│rmula solicitada ya no existe en este tema.')
+          if (!formula) throw new Error('La fórmula solicitada ya no existe en este tema.')
           setDraft(fromFormula(formula))
         }
       })
       .catch((error: unknown) => {
         if (!abort.signal.aborted)
-          setError(error instanceof Error ? error.message : 'No se pudo cargar la f├│rmula')
+          setError(error instanceof Error ? error.message : 'No se pudo cargar la fórmula')
       })
       .finally(() => {
         if (!abort.signal.aborted) setLoading(false)
@@ -104,7 +104,7 @@ export default function FormulaEditorPage() {
     try {
       katex.renderToString(draft.expresion, { throwOnError: true, trust: false, maxExpand: 1000 })
     } catch {
-      latexError = 'La sintaxis LaTeX a├║n no es v├ílida.'
+      latexError = 'La sintaxis LaTeX aún no es válida.'
     }
   }
   function insert(value: string) {
@@ -130,7 +130,7 @@ export default function FormulaEditorPage() {
     })
     if (!payload.success) {
       setError(
-        payload.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(' ┬╖ ')
+        payload.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(' · ')
       )
       return
     }
@@ -152,7 +152,7 @@ export default function FormulaEditorPage() {
       const formula = saved.formulas.find(
         item => item.id === currentId.current || !previous.has(item.id)
       )
-      if (!formula) throw new Error('La f├│rmula se guard├│, pero no se recibi├│ su identificador.')
+      if (!formula) throw new Error('La fórmula se guardó, pero no se recibió su identificador.')
       currentId.current = formula.id
       stored = true
       setTema(saved)
@@ -162,12 +162,12 @@ export default function FormulaEditorPage() {
         setTema(saved)
         update(saved)
       }
-      setNotice('F├│rmula guardada correctamente en PostgreSQL.')
+      setNotice('Fórmula guardada correctamente en PostgreSQL.')
       setDraft(fromFormula(formula))
       if (!id) navigate(`/admin/formulas/${saved.slug}/${formula.id}`, { replace: true })
     } catch (error: unknown) {
       setError(
-        `${stored ? 'La f├│rmula se guard├│; no se pudo completar la publicaci├│n del tema. ' : ''}${error instanceof Error ? error.message : 'No se pudo guardar'}`
+        `${stored ? 'La fórmula se guardó; no se pudo completar la publicación del tema. ' : ''}${error instanceof Error ? error.message : 'No se pudo guardar'}`
       )
     } finally {
       setBusy(false)
@@ -180,7 +180,7 @@ export default function FormulaEditorPage() {
   if (contentLoading && !temas.length) return <Loading />
   if (!temas.length)
     return (
-      <Empty title="Crea un tema antes de a├▒adir f├│rmulas">
+      <Empty title="Crea un tema antes de añadir fórmulas">
         <p>{contentError}</p>
         <Link className="studio-button primary" to="/admin/temas/nuevo">
           Nuevo tema
@@ -193,11 +193,11 @@ export default function FormulaEditorPage() {
       <header className="studio-editor-heading">
         <div>
           <h1>
-            Editor de F├│rmulas y Ecuaciones{' '}
-            <span className="studio-chip gold">{id ? 'Modo edici├│n' : 'Nueva f├│rmula'}</span>
+            Editor de Fórmulas y Ecuaciones{' '}
+            <span className="studio-chip gold">{id ? 'Modo edición' : 'Nueva fórmula'}</span>
           </h1>
           <p>
-            Define el formalismo matem├ítico, variables del SI y casos de resoluci├│n para F├¡sicaLab.
+            Define el formalismo matemático, variables del SI y casos de resolución para FísicaLab.
           </p>
         </div>
         {tema && (
@@ -211,7 +211,7 @@ export default function FormulaEditorPage() {
         <Message>
           {error}
           <button className="studio-button small" onClick={() => setReloadKey(value => value + 1)}>
-            Recargar versi├│n del servidor
+            Recargar versión del servidor
           </button>
         </Message>
       )}
@@ -223,8 +223,8 @@ export default function FormulaEditorPage() {
             <header>
               <Icon name="account_tree" />
               <div>
-                <h2>1. Vinculaci├│n curricular</h2>
-                <p>Ubicaci├│n dentro de la malla pedag├│gica y nomenclatura</p>
+                <h2>1. Vinculación curricular</h2>
+                <p>Ubicación dentro de la malla pedagógica y nomenclatura</p>
               </div>
               <small>Paso 1 de 5</small>
             </header>
@@ -249,17 +249,17 @@ export default function FormulaEditorPage() {
                 <input readOnly value={currentId.current || 'Se genera al guardar'} />
               </Field>
             </div>
-            <Field label="Nombre formal de la ecuaci├│n">
+            <Field label="Nombre formal de la ecuación">
               <input
                 required
                 maxLength={300}
                 value={draft.nombre}
                 onChange={event => set('nombre', event.target.value)}
-                placeholder="Ej. Ecuaci├│n horaria del MRU"
+                placeholder="Ej. Ecuación horaria del MRU"
               />
             </Field>
             <small>
-              ├ürea asignada: <strong>{category?.nombre ?? 'ΓÇö'}</strong>. La publicaci├│n se
+              Área asignada: <strong>{category?.nombre ?? '—'}</strong>. La publicación se
               administra desde el tema.
             </small>
           </article>
@@ -267,7 +267,7 @@ export default function FormulaEditorPage() {
             <header>
               <Icon name="functions" />
               <div>
-                <h2>2. Expresi├│n matem├ítica</h2>
+                <h2>2. Expresión matemática</h2>
                 <p>Editor asistido con soporte de sintaxis LaTeX</p>
               </div>
             </header>
@@ -288,7 +288,7 @@ export default function FormulaEditorPage() {
               {draft.expresion ? (
                 <MathPreview expression={draft.expresion} display />
               ) : (
-                <span className="studio-muted">Introduce una expresi├│n o selecciona s├¡mbolos</span>
+                <span className="studio-muted">Introduce una expresión o selecciona símbolos</span>
               )}
             </div>
             <details ref={advanced} className="studio-advanced" open>
@@ -296,7 +296,7 @@ export default function FormulaEditorPage() {
                 <Icon name="code" />
                 Modo avanzado (Sintaxis LaTeX)
               </summary>
-              <Field label="C├│digo LaTeX">
+              <Field label="Código LaTeX">
                 <textarea
                   ref={input}
                   required
@@ -309,7 +309,7 @@ export default function FormulaEditorPage() {
               </Field>
               <small className={latexError ? 'studio-danger-text' : ''}>
                 {latexError ||
-                  (draft.expresion ? 'Sintaxis v├ílida ┬╖ KaTeX' : 'La expresi├│n es obligatoria')}
+                  (draft.expresion ? 'Sintaxis válida · KaTeX' : 'La expresión es obligatoria')}
               </small>
             </details>
           </article>
@@ -317,19 +317,19 @@ export default function FormulaEditorPage() {
             <header>
               <Icon name="menu_book" />
               <div>
-                <h2>3. Fundamento y principio f├¡sico</h2>
-                <p>Explicaci├│n intuitiva para el estudiante</p>
+                <h2>3. Fundamento y principio físico</h2>
+                <p>Explicación intuitiva para el estudiante</p>
               </div>
               <small>Markdown y LaTeX</small>
             </header>
-            <Field label="Descripci├│n pedag├│gica">
+            <Field label="Descripción pedagógica">
               <textarea
                 required
                 rows={4}
                 maxLength={20000}
                 value={draft.descripcion}
                 onChange={event => set('descripcion', event.target.value)}
-                placeholder="Explica qu├⌐ representa la f├│rmula y cu├índo se utiliza."
+                placeholder="Explica qué representa la fórmula y cuándo se utiliza."
               />
             </Field>
             <small>{draft.descripcion.length.toLocaleString('es-GT')} / 20.000 caracteres</small>
@@ -339,7 +339,7 @@ export default function FormulaEditorPage() {
               <Icon name="tune" />
               <div>
                 <h2>4. Variables y unidades del SI</h2>
-                <p>Desglose param├⌐trico de la expresi├│n</p>
+                <p>Desglose paramétrico de la expresión</p>
               </div>
               <button
                 type="button"
@@ -364,14 +364,14 @@ export default function FormulaEditorPage() {
                       key={key}
                       label={
                         key === 'simbolo'
-                          ? 'S├¡mbolo'
+                          ? 'Símbolo'
                           : key === 'descripcion'
-                            ? 'Magnitud f├¡sica'
+                            ? 'Magnitud física'
                             : 'Unidad SI'
                       }
                     >
                       <input
-                        aria-label={`${key === 'simbolo' ? 'S├¡mbolo' : key === 'descripcion' ? 'Magnitud f├¡sica' : 'Unidad SI'} ${index + 1}`}
+                        aria-label={`${key === 'simbolo' ? 'Símbolo' : key === 'descripcion' ? 'Magnitud física' : 'Unidad SI'} ${index + 1}`}
                         required={key !== 'unidad'}
                         maxLength={key === 'simbolo' ? 200 : key === 'unidad' ? 100 : 1000}
                         value={variable[key]}
@@ -406,7 +406,7 @@ export default function FormulaEditorPage() {
             </div>
             {!draft.variables.length && (
               <p className="studio-muted">
-                Agrega los s├¡mbolos, su significado y unidad de medida.
+                Agrega los símbolos, su significado y unidad de medida.
               </p>
             )}
           </article>
@@ -415,7 +415,7 @@ export default function FormulaEditorPage() {
               <Icon name="fact_check" />
               <div>
                 <h2>5. Caso de ejemplo guiado</h2>
-                <p>Problema con sustituci├│n num├⌐rica y soluci├│n</p>
+                <p>Problema con sustitución numérica y solución</p>
               </div>
             </header>
             <label className="studio-checkbox-label">
@@ -465,7 +465,7 @@ export default function FormulaEditorPage() {
                 onClick={() => setMobile(true)}
               >
                 <Icon name="smartphone" />
-                M├│vil
+                Móvil
               </button>
               <button
                 type="button"
@@ -479,22 +479,22 @@ export default function FormulaEditorPage() {
           </header>
           <article className={`studio-card studio-preview-frame${mobile ? ' mobile' : ''}`}>
             <div className="studio-preview-title">
-              <span className="studio-chip navy">{category?.nombre ?? 'F├¡sicaLab'}</span>
+              <span className="studio-chip navy">{category?.nombre ?? 'FísicaLab'}</span>
               <small>{tema?.titulo}</small>
-              <h2>{draft.nombre || 'Nombre de la ecuaci├│n'}</h2>
+              <h2>{draft.nombre || 'Nombre de la ecuación'}</h2>
             </div>
             <div className="studio-formula-hero">
-              <span className="studio-chip gold">ECUACI├ôN FUNDAMENTAL</span>
+              <span className="studio-chip gold">ECUACIÓN FUNDAMENTAL</span>
               {draft.expresion ? (
                 <MathPreview expression={draft.expresion} display />
               ) : (
-                <span>f(x) = ΓÇª</span>
+                <span>f(x) = …</span>
               )}
             </div>
             <div className="studio-preview-body">
               <small>CONCEPTO CLAVE</small>
               <TextPreview
-                text={draft.descripcion || 'La descripci├│n pedag├│gica aparecer├í aqu├¡.'}
+                text={draft.descripcion || 'La descripción pedagógica aparecerá aquí.'}
               />
               {!!draft.variables.length && (
                 <>
@@ -516,12 +516,12 @@ export default function FormulaEditorPage() {
                 <div className="studio-example">
                   <h3>
                     <Icon name="lightbulb" />
-                    Ejemplo resuelto de aplicaci├│n
+                    Ejemplo resuelto de aplicación
                   </h3>
                   <TextPreview text={draft.ejemplo.enunciado} />
                   <pre>{draft.ejemplo.datos}</pre>
                   <TextPreview text={draft.ejemplo.desarrollo} />
-                  <strong>Soluci├│n: {draft.ejemplo.resultado}</strong>
+                  <strong>Solución: {draft.ejemplo.resultado}</strong>
                 </div>
               )}
               {tema?.status === 'published' && tema.simComponentSlug && (
@@ -532,7 +532,7 @@ export default function FormulaEditorPage() {
                   to={`/tema/${tema.slug}/simulacion`}
                 >
                   <Icon name="science" />
-                  Abrir simulaci├│n
+                  Abrir simulación
                 </Link>
               )}
             </div>
@@ -544,7 +544,7 @@ export default function FormulaEditorPage() {
             {notice
               ? 'Cambios guardados'
               : tema
-                ? `Versi├│n ${tema.version} ┬╖ ${latexError || 'Vista previa en tiempo real'}`
+                ? `Versión ${tema.version} · ${latexError || 'Vista previa en tiempo real'}`
                 : 'Preparando editor'}
           </span>
           <div>
@@ -552,7 +552,7 @@ export default function FormulaEditorPage() {
               Cancelar
             </Link>
             <button className="studio-button" type="submit" disabled={busy || loading || !tema}>
-              {busy ? 'GuardandoΓÇª' : 'Guardar f├│rmula'}
+              {busy ? 'Guardando…' : 'Guardar fórmula'}
             </button>
             {tema?.status === 'draft' && (
               <button

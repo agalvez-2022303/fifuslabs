@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import type { TemaConfig, TemaRevision } from '@physicslab/shared-types'
 import { adminApi, ApiError } from './api'
@@ -57,7 +57,7 @@ export default function RevisionPage() {
       update(saved)
       setTema(saved)
       setHistory(await adminApi.revisions(slug))
-      setNotice('Revisi├│n restaurada como una nueva versi├│n del tema.')
+      setNotice('Revisión restaurada como una nueva versión del tema.')
       setConfirm(null)
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'No se pudo restaurar')
@@ -70,10 +70,10 @@ export default function RevisionPage() {
     <div className="studio-page">
       <PageHeading
         title="Historial y revisiones"
-        description={`Snapshots completos de /${slug}. Se conservan las ├║ltimas 50 revisiones.`}
+        description={`Snapshots completos de /${slug}. Se conservan las últimas 50 revisiones.`}
       >
         <Link className="studio-button" to="/admin/temas">
-          Volver al cat├ílogo
+          Volver al catálogo
         </Link>
         <button className="studio-button" onClick={() => setReload(value => value + 1)}>
           <Icon name="refresh" />
@@ -88,8 +88,8 @@ export default function RevisionPage() {
         <>
           {!tema && history.length > 0 && (
             <Message>
-              El tema est├í retirado. Restaurar una revisi├│n recuperar├í su contenido y estado de
-              publicaci├│n.
+              El tema está retirado. Restaurar una revisión recuperará su contenido y estado de
+              publicación.
             </Message>
           )}
           <section className="studio-card studio-table-card">
@@ -97,10 +97,10 @@ export default function RevisionPage() {
               <table className="studio-table">
                 <thead>
                   <tr>
-                    <th>Versi├│n</th>
+                    <th>Versión</th>
                     <th>Fecha</th>
                     <th>Editor</th>
-                    <th>Operaci├│n</th>
+                    <th>Operación</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
@@ -143,7 +143,7 @@ export default function RevisionPage() {
                 </tbody>
               </table>
             </div>
-            {!history.length && <Empty title="Este tema a├║n no tiene revisiones" />}
+            {!history.length && <Empty title="Este tema aún no tiene revisiones" />}
           </section>
           {selected && (
             <article className="studio-card studio-snapshot">
@@ -176,8 +176,8 @@ export default function RevisionPage() {
           onConfirm={() => void restore()}
         >
           <p>
-            Se recuperar├ín los metadatos, teor├¡a, f├│rmulas, glosario y estado de la versi├│n{' '}
-            {confirm.snapshot.version}. La restauraci├│n crea una nueva revisi├│n.
+            Se recuperarán los metadatos, teoría, fórmulas, glosario y estado de la versión{' '}
+            {confirm.snapshot.version}. La restauración crea una nueva revisión.
           </p>
         </Confirm>
       )}

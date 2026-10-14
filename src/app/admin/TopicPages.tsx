@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   createTemaSchema,
@@ -62,7 +62,7 @@ export function TopicListPage() {
         )
       )
     } catch (error: unknown) {
-      setFailure(error instanceof Error ? error.message : 'No se pudo cambiar la publicaci├│n')
+      setFailure(error instanceof Error ? error.message : 'No se pudo cambiar la publicación')
     } finally {
       setBusy(false)
     }
@@ -87,9 +87,9 @@ export function TopicListPage() {
   return (
     <div className="studio-page">
       <PageHeading
-        title="Gesti├│n de temas did├ícticos"
-        description="Organiza la teor├¡a, las f├│rmulas y el glosario de cada tema."
-        eyebrow="CURR├ìCULO Y CONTENIDO"
+        title="Gestión de temas didácticos"
+        description="Organiza la teoría, las fórmulas y el glosario de cada tema."
+        eyebrow="CURRÍCULO Y CONTENIDO"
       >
         <button className="studio-button" onClick={() => void reload()}>
           <Icon name="refresh" />
@@ -121,7 +121,7 @@ export function TopicListPage() {
             <input
               type="search"
               aria-label="Buscar temas"
-              placeholder="Buscar temas, slugs o etiquetasΓÇª"
+              placeholder="Buscar temas, slugs o etiquetas…"
               value={q}
               onChange={event => {
                 setQ(event.target.value)
@@ -130,14 +130,14 @@ export function TopicListPage() {
             />
           </label>
           <select
-            aria-label="├ürea del tema"
+            aria-label="Área del tema"
             value={category}
             onChange={event => {
               setCategory(event.target.value)
               setPage(1)
             }}
           >
-            <option value="">Todas las ├íreas</option>
+            <option value="">Todas las áreas</option>
             {categories.map(cat => (
               <option key={cat.id} value={cat.id}>
                 {cat.nombre}
@@ -164,10 +164,10 @@ export function TopicListPage() {
             <thead>
               <tr>
                 <th>Tema y slug</th>
-                <th>├ürea y nivel</th>
+                <th>Área y nivel</th>
                 <th>Recursos</th>
                 <th>Estado</th>
-                <th>Actualizaci├│n</th>
+                <th>Actualización</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -185,7 +185,7 @@ export function TopicListPage() {
                   <td>
                     <span>{tema.teoria.secciones.length} secciones</span>
                     <small>
-                      {tema.formulas.length} f├│rmulas ┬╖ {tema.glosario.length} t├⌐rminos
+                      {tema.formulas.length} fórmulas · {tema.glosario.length} términos
                     </small>
                   </td>
                   <td>
@@ -281,7 +281,7 @@ export function TopicListPage() {
           busy={busy}
         >
           <p>
-            Se ocultar├í ┬½{confirmation.titulo}┬╗ de las lecturas p├║blicas. Sus revisiones permitir├ín
+            Se ocultará «{confirmation.titulo}» de las lecturas públicas. Sus revisiones permitirán
             restaurarlo.
           </p>
         </Confirm>
@@ -377,7 +377,7 @@ export function TopicEditorPage() {
     })
     if (!metadata.success) {
       setError(
-        metadata.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(' ┬╖ ')
+        metadata.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(' · ')
       )
       return
     }
@@ -414,7 +414,7 @@ export function TopicEditorPage() {
           remote.tema.version
         )
       )
-      setNotice('Publicaci├│n actualizada.')
+      setNotice('Publicación actualizada.')
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'No se pudo actualizar')
     } finally {
@@ -424,11 +424,11 @@ export function TopicEditorPage() {
   return (
     <div className="studio-page">
       <PageHeading
-        title={slug ? 'Editar tema' : 'Nuevo tema did├íctico'}
-        description="Define los metadatos. La simulaci├│n se referencia mediante una lista de componentes permitidos."
+        title={slug ? 'Editar tema' : 'Nuevo tema didáctico'}
+        description="Define los metadatos. La simulación se referencia mediante una lista de componentes permitidos."
       >
         <Link className="studio-button" to="/admin/temas">
-          Volver al cat├ílogo
+          Volver al catálogo
         </Link>
         {remote.tema && (
           <>
@@ -447,7 +447,7 @@ export function TopicEditorPage() {
         <Message>
           {error || remote.error}
           <button className="studio-button small" onClick={remote.reload}>
-            Recargar versi├│n
+            Recargar versión
           </button>
         </Message>
       )}
@@ -457,7 +457,7 @@ export function TopicEditorPage() {
       ) : (
         <form className="studio-card studio-topic-form" onSubmit={save}>
           <div className="studio-two-fields">
-            <Field label="T├¡tulo">
+            <Field label="Título">
               <input
                 required
                 maxLength={300}
@@ -472,8 +472,8 @@ export function TopicEditorPage() {
               label="Slug"
               hint={
                 slug
-                  ? 'El slug es inmutable despu├⌐s de crear el tema.'
-                  : 'Solo min├║sculas, n├║meros y guiones.'
+                  ? 'El slug es inmutable después de crear el tema.'
+                  : 'Solo minúsculas, números y guiones.'
               }
             >
               <input
@@ -489,7 +489,7 @@ export function TopicEditorPage() {
               />
             </Field>
           </div>
-          <Field label="Descripci├│n corta">
+          <Field label="Descripción corta">
             <textarea
               required
               maxLength={1000}
@@ -499,7 +499,7 @@ export function TopicEditorPage() {
             />
           </Field>
           <div className="studio-two-fields">
-            <Field label="├ürea">
+            <Field label="Área">
               <select
                 value={values.categoriaId}
                 onChange={event => set('categoriaId', event.target.value)}
@@ -516,26 +516,26 @@ export function TopicEditorPage() {
                 value={values.dificultad}
                 onChange={event => set('dificultad', event.target.value)}
               >
-                <option value="basico">B├ísico</option>
+                <option value="basico">Básico</option>
                 <option value="intermedio">Intermedio</option>
                 <option value="avanzado">Avanzado</option>
               </select>
             </Field>
-            <Field label="Componente de simulaci├│n">
+            <Field label="Componente de simulación">
               <select
                 value={values.simComponentSlug}
                 onChange={event => set('simComponentSlug', event.target.value)}
               >
-                <option value="">Sin simulaci├│n vinculada</option>
+                <option value="">Sin simulación vinculada</option>
                 {SIM_COMPONENT_SLUGS.map(item => (
                   <option key={item}>{item}</option>
                 ))}
               </select>
             </Field>
-            <Field label="Disponibilidad de simulaci├│n">
+            <Field label="Disponibilidad de simulación">
               <select value={values.estado} onChange={event => set('estado', event.target.value)}>
                 <option value="active">Activa</option>
-                <option value="coming-soon">Pr├│ximamente</option>
+                <option value="coming-soon">Próximamente</option>
               </select>
             </Field>
             <Field label="Orden">
@@ -558,13 +558,13 @@ export function TopicEditorPage() {
               />
             </Field>
           </div>
-          <Field label="Etiquetas" hint="Separadas por comas, m├íximo 30">
+          <Field label="Etiquetas" hint="Separadas por comas, máximo 30">
             <input
               value={values.etiquetas}
               onChange={event => set('etiquetas', event.target.value)}
             />
           </Field>
-          <Field label="F├│rmula principal (LaTeX)">
+          <Field label="Fórmula principal (LaTeX)">
             <input
               maxLength={4000}
               value={values.formulaPrincipal}
@@ -572,7 +572,7 @@ export function TopicEditorPage() {
             />
           </Field>
           {!slug && (
-            <Field label="Introducci├│n inicial">
+            <Field label="Introducción inicial">
               <textarea
                 required
                 maxLength={20000}
@@ -587,12 +587,12 @@ export function TopicEditorPage() {
               className="studio-button primary"
               disabled={busy || (Boolean(slug) && !remote.tema)}
             >
-              {busy ? 'GuardandoΓÇª' : 'Guardar metadatos'}
+              {busy ? 'Guardando…' : 'Guardar metadatos'}
             </button>
             <small>
               {remote.tema
-                ? `Versi├│n ${remote.tema.version}. Guarda tus cambios antes de publicar.`
-                : 'Se crear├í como borrador.'}
+                ? `Versión ${remote.tema.version}. Guarda tus cambios antes de publicar.`
+                : 'Se creará como borrador.'}
             </small>
           </footer>
         </form>
@@ -602,11 +602,11 @@ export function TopicEditorPage() {
           <h2>Editar contenido del tema</h2>
           <Link to={`/admin/teoria?tema=${slug}`}>
             <Icon name="menu_book" />
-            Introducci├│n, secciones y resumen
+            Introducción, secciones y resumen
           </Link>
           <Link to={`/admin/formulas?tema=${slug}`}>
             <Icon name="functions" />
-            F├│rmulas y ejemplos
+            Fórmulas y ejemplos
           </Link>
           <Link to={`/admin/glosario?tema=${slug}`}>
             <Icon name="spellcheck" />

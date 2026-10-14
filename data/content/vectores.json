@@ -1,41 +1,45 @@
 {
   "slug": "vectores",
-  "titulo": "Vectores",
-  "teoria": "Un vector en el plano puede describirse en tres sistemas de coordenadas fundamentales:\n\n1. **Coordenadas Rectangulares (Cartesianas):** Especificado mediante sus proyecciones sobre los ejes ortogonales: $\\vec{A} = (A_x, A_y) = A_x\\hat{i} + A_y\\hat{j}$.\n\n2. **Coordenadas Polares:** Expresado por su magnitud (módulo) $r \\ge 0$ y su ángulo polar $\\theta \\in [0^\\circ, 360^\\circ)$, medido en sentido antihorario a partir del semieje positivo $+X$.\n   - Magnitud: $r = \\sqrt{A_x^2 + A_y^2}$\n   - Ángulo: $\\theta = \\arctan(|A_y| / |A_x|)$, ajustado según el cuadrante cartesiano.\n\n3. **Coordenadas Geográficas (Rumbo):** Utilizadas en navegación, topografía y cinemática vectorial. El vector se especifica con su magnitud $r$ y una dirección referida a los puntos cardinales (Norte, Sur, Este, Oeste).\n   - Se toma el eje Norte o Sur como referencia primaria, seguido del ángulo de desviación hacia el Este u Oeste (ejemplo: $N\\;30^\\circ\\;E$ o $S\\;45^\\circ\\;O$).\n   - Ejes exactos: Norte ($90^\\circ$), Sur ($270^\\circ$), Este ($0^\\circ$), Oeste ($180^\\circ$).",
+  "titulo": "Vectores y Coordenadas",
+  "teoria": "¿Qué es?\nUn vector es una flecha que representa una cantidad física que tiene tamaño (magnitud), inclinación (dirección) y hacia dónde apunta (sentido).\n\nIdeas clave:\n1. A diferencia de un simple número, las cantidades vectoriales (como la fuerza o la velocidad) necesitan una dirección para estar completas.\n2. Coordenadas Rectangulares: Expresan el vector como un avance horizontal (V_x) y uno vertical (V_y).\n3. Coordenadas Polares: Expresan el vector con su longitud total (r) y su ángulo de inclinación (θ).\n4. Coordenadas Geográficas: Utilizan los puntos cardinales (Norte, Sur, Este, Oeste).\n\nEjemplo cotidiano:\nSi caminas 50 metros hacia el Noreste, los 50 metros son la magnitud (r) y la dirección es 45° al Noreste. Si lo mides por calles, avanzaste 35.3 metros al Este (V_x) y 35.3 metros al Norte (V_y).\n\nErrores comunes:\n- Olvidar que las componentes V_x o V_y pueden ser negativas según el cuadrante.\n- Medir el ángulo desde el eje Y en lugar de iniciar desde el eje +X.\n\nResumen:\nLos vectores nos permiten representar fuerzas, velocidades y desplazamientos en el espacio usando componentes rectangulares o coordenadas polares.",
   "formulas": [
     {
-      "expresion": "r = \\sqrt{A_x^2 + A_y^2}",
-      "descripcion": "Módulo o magnitud del vector a partir de sus componentes rectangulares",
+      "expresion": "V_x = r \\cdot \\cos(\\theta), \\quad V_y = r \\cdot \\sin(\\theta)",
+      "descripcion": "Conversión de Coordenadas Polares a Rectangulares",
       "variables": [
-        { "simbolo": "r", "descripcion": "Magnitud del vector", "unidad": "u" },
-        { "simbolo": "A_x", "descripcion": "Componente horizontal", "unidad": "u" },
-        { "simbolo": "A_y", "descripcion": "Componente vertical", "unidad": "u" }
+        { "simbolo": "r", "descripcion": "Magnitud o módulo del vector", "unidad": "u / m / N" },
+        { "simbolo": "θ", "descripcion": "Ángulo polar desde +X", "unidad": "°" },
+        { "simbolo": "V_x", "descripcion": "Componente horizontal", "unidad": "u / m / N" },
+        { "simbolo": "V_y", "descripcion": "Componente vertical", "unidad": "u / m / N" }
       ]
     },
     {
-      "expresion": "A_x = r \\cdot \\cos(\\theta), \\quad A_y = r \\cdot \\sin(\\theta)",
-      "descripcion": "Descomposición de coordenadas polares a rectangulares",
+      "expresion": "r = \\sqrt{V_x^2 + V_y^2}",
+      "descripcion": "Magnitud del Vector a partir de sus componentes rectangulares",
       "variables": [
-        { "simbolo": "θ", "descripcion": "Ángulo polar respecto a +X", "unidad": "°" }
+        { "simbolo": "r", "descripcion": "Magnitud del vector", "unidad": "u / m / N" },
+        { "simbolo": "V_x", "descripcion": "Componente horizontal", "unidad": "u" },
+        { "simbolo": "V_y", "descripcion": "Componente vertical", "unidad": "u" }
       ]
     },
     {
-      "expresion": "\\text{Rumbo (Cuad. I)}: N\\;(90^\\circ - \\theta)\\;E",
-      "descripcion": "Conversión de ángulo polar en el primer cuadrante a rumbo geográfico",
+      "expresion": "\\theta = \\arctan\\left(\\frac{|V_y|}{|V_x|}\\right)",
+      "descripcion": "Ángulo de dirección del vector en el plano",
       "variables": [
-        { "simbolo": "θ", "descripcion": "Ángulo en el intervalo (0°, 90°)", "unidad": "°" }
+        { "simbolo": "θ", "descripcion": "Ángulo respecto al eje horizontal", "unidad": "°" },
+        { "simbolo": "V_x, V_y", "descripcion": "Componentes rectangulares", "unidad": "u" }
       ]
     }
   ],
-  "unidades": [
-    { "magnitud": "Magnitud Vectorial", "unidad": "Unidad arbitraria / Metro / Newton", "simbolo": "u / m / N" },
-    { "magnitud": "Ángulo Polar y Rumbo", "unidad": "Grado sexagesimal", "simbolo": "°" }
-  ],
   "glosario": [
-    { "termino": "Vector", "definicion": "Magnitud física orientada caracterizada por módulo, dirección y sentido." },
-    { "termino": "Componentes Rectangulares", "definicion": "Proyecciones perpendiculares del vector sobre los ejes cartesianos X e Y." },
-    { "termino": "Ángulo Polar", "definicion": "Ángulo medido en sentido antihorario comenzando en el semieje positivo de las abscisas (+X)." },
-    { "termino": "Rumbo Geográfico", "definicion": "Dirección medida desde la línea Norte-Sur hacia el Este u Oeste (ángulo agudo entre 0° y 90°)." },
-    { "termino": "Azimut", "definicion": "Ángulo medido en sentido horario desde el Norte geográfico de 0° a 360°." }
+    { "termino": "Ángulo Polar (θ)", "definicion": "Ángulo medido en sentido contrario a las agujas del reloj partiendo del semieje positivo +X." },
+    { "termino": "Componente Vectorial", "definicion": "Proyección del vector sobre uno de los ejes cartesianos (horizontal V_x o vertical V_y)." },
+    { "termino": "Coordenadas Geográficas", "definicion": "Sistema que indica la dirección usando puntos cardinales (Norte, Sur, Este, Oeste)." },
+    { "termino": "Coordenadas Polares", "definicion": "Sistema que define un vector mediante su magnitud r y un ángulo θ." },
+    { "termino": "Coordenadas Rectangulares", "definicion": "Sistema que describe un vector mediante sus avances en los ejes X e Y." },
+    { "termino": "Dirección", "definicion": "Inclinación de la recta sobre la que actúa el vector, medida por su ángulo." },
+    { "termino": "Magnitud (Módulo)", "definicion": "Tamaño o longitud del vector; siempre es un valor positivo con su unidad de medida." },
+    { "termino": "Sentido", "definicion": "Hacia dónde apunta la flecha del vector (ejemplo: hacia el Noreste o hacia la derecha)." },
+    { "termino": "Vector", "definicion": "Magnitud física que tiene módulo (tamaño), dirección (inclinación) y sentido." }
   ]
 }

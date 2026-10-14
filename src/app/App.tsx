@@ -1,7 +1,9 @@
-import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import HomePage from './pages/HomePage'
+import TemaDashboard from './pages/TemaDashboard'
 import SimulationShell from './components/SimulationShell'
+import AdminRoutes from './admin/AdminRoutes'
 
 // Code-split por simulación — cada chunk se carga solo cuando se necesita
 const ConstantAcceleration = lazy(
@@ -22,8 +24,11 @@ const DistanciaDesplazamiento = lazy(
 const VelocidadRapidez = lazy(
   () => import('./simulations/velocidad-rapidez/VelocidadRapidez')
 )
-const AlcancesEncuentros = lazy(
-  () => import('./simulations/alcances-encuentros/AlcancesEncuentros')
+const AlcancesMRU = lazy(
+  () => import('./simulations/alcances-mru/alcancesMRU')
+)
+const MRUSimulation = lazy(
+  () => import('./simulations/mru/MRU')
 )
 
 function SimulationLoader() {
@@ -47,9 +52,26 @@ function SimulationLoader() {
 }
 
 export default function App() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
   return (
     <Routes>
+      <Route path="/admin/*" element={<AdminRoutes />} />
       <Route path="/" element={<HomePage />} />
+
+      {/* Dashboard por Tema y sus 4 pestañas (Simulación, Fórmulas, Glosario, Teoría) */}
+      <Route path="/tema/:id" element={<TemaDashboard />} />
+      <Route path="/tema/:id/:seccion" element={<TemaDashboard />} />
+
+      {/* Redirecciones amigables */}
+      <Route path="/alcances-mru" element={<Navigate to="/tema/alcances-mru" replace />} />
+      <Route path="/alcances-encuentros" element={<Navigate to="/tema/alcances-mru" replace />} />
+
+      {/* Rutas directas de simulación para compatibilidad */}
       <Route
         path="/sim/movimiento-aceleracion-constante"
         element={
@@ -123,13 +145,46 @@ export default function App() {
       <Route
         path="/sim/alcances-encuentros"
         element={
-          <SimulationShell slug="alcances-encuentros">
+          <SimulationShell slug="alcances-mru">
             <Suspense fallback={<SimulationLoader />}>
-              <AlcancesEncuentros />
+              <AlcancesMRU />
             </Suspense>
           </SimulationShell>
         }
       />
+      <Route
+        path="/sim/alcances-mru"
+        element={
+          <SimulationShell slug="alcances-mru">
+            <Suspense fallback={<SimulationLoader />}>
+              <AlcancesMRU />
+            </Suspense>
+          </SimulationShell>
+        }
+      />
+
+      <Route
+        path="/sim/mru"
+        element={
+          <SimulationShell slug="mru">
+            <Suspense fallback={<SimulationLoader />}>
+              <MRUSimulation />
+            </Suspense>
+          </SimulationShell>
+        }
+      />
+      <Route
+        path="/sim/movimiento-rectilineo-uniforme"
+        element={
+          <SimulationShell slug="mru">
+            <Suspense fallback={<SimulationLoader />}>
+              <MRUSimulation />
+            </Suspense>
+          </SimulationShell>
+        }
+      />
+
+      {/* Fallback 404 */}
       <Route path="*" element={<HomePage />} />
     </Routes>
   )

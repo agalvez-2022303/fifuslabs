@@ -8,20 +8,42 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=src",
-    "build": "npm run build --workspace=src",
+    "build": "npm run typecheck:backend && npm run build --workspace=src",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "migrate:temas": "tsx scripts/migrate-temas.ts",
+    "typecheck:backend": "tsc --project tsconfig.json",
+    "lint:backend": "eslint backend api packages/shared-types/src scripts src/data/temas/types.ts src/vite.config.ts vitest.config.ts",
+    "verify:panel": "tsx backend/__tests__/panel-integration.ts",
+    "db:migrate": "tsx scripts/database.ts migrate",
+    "db:seed": "tsx scripts/database.ts seed",
+    "db:setup": "tsx scripts/database.ts setup",
+    "users:bootstrap": "tsx scripts/database.ts bootstrap"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.9",
+    "@playwright/test": "^1.64.0",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "@types/sanitize-html": "^2.16.2",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "@vercel/node": "^3.0.0",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "^3.2.5",
+    "tsx": "^4.23.15",
     "typescript": "^5.4.5",
-    "@vercel/node": "^3.0.0",
     "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.17",
+    "dotenv": "^18.0.7",
+    "hono": "^4.13.13",
+    "katex": "^0.18.10",
+    "pg": "^8.23.1",
+    "sanitize-html": "^2.18.0"
   }
 }

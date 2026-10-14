@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useContent } from './ContentContext'
 import { adminApi } from './api'
@@ -104,12 +104,12 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
       }
       setSelected([])
       setNotice(
-        `${completed} ${confirmation.publish ? 'tema(s) publicado(s)' : 'f├│rmula(s) eliminada(s)'}.`
+        `${completed} ${confirmation.publish ? 'tema(s) publicado(s)' : 'fórmula(s) eliminada(s)'}.`
       )
       setConfirmation(null)
     } catch (error: unknown) {
       setFailure(
-        `${completed ? `${completed} operaci├│n(es) completada(s). ` : ''}${error instanceof Error ? error.message : 'No se pudo completar la operaci├│n'}`
+        `${completed ? `${completed} operación(es) completada(s). ` : ''}${error instanceof Error ? error.message : 'No se pudo completar la operación'}`
       )
       setConfirmation(null)
       setSelected([])
@@ -122,7 +122,7 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
     const cell = (value: string) =>
       `"${(/^[=+\-@]/.test(value) ? `'${value}` : value).replace(/"/g, '""')}"`
     const csv = [
-      'Nombre,Tema,Expresi├│n,Estado',
+      'Nombre,Tema,Expresión,Estado',
       ...rows.map(row =>
         [row.formula.nombre, row.tema.titulo, row.formula.expresion, row.tema.status]
           .map(cell)
@@ -144,7 +144,7 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
           <Icon name="home" />
           Inicio
           <Icon name="chevron_right" />
-          {examples ? 'Ejemplos resueltos' : 'F├│rmulas'}
+          {examples ? 'Ejemplos resueltos' : 'Fórmulas'}
         </span>
         <span className="studio-chip">
           <i />
@@ -152,13 +152,13 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
         </span>
       </div>
       <PageHeading
-        title={examples ? 'Ejemplos resueltos de aplicaci├│n' : 'Gesti├│n de F├│rmulas y Ecuaciones'}
+        title={examples ? 'Ejemplos resueltos de aplicación' : 'Gestión de Fórmulas y Ecuaciones'}
         description={
           examples
-            ? 'Problemas, datos, desarrollo y resultados asociados a cada f├│rmula.'
-            : 'Administra definiciones f├¡sico-matem├íticas, variables y ejemplos del cat├ílogo interactivo.'
+            ? 'Problemas, datos, desarrollo y resultados asociados a cada fórmula.'
+            : 'Administra definiciones físico-matemáticas, variables y ejemplos del catálogo interactivo.'
         }
-        eyebrow="M├ôDULO PEDAG├ôGICO"
+        eyebrow="MÓDULO PEDAGÓGICO"
       >
         <button className="studio-button" onClick={exportCsv}>
           <Icon name="file_download" />
@@ -169,13 +169,13 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
           to={`/admin/formulas/nueva${topic ? `?tema=${topic}` : ''}`}
         >
           <Icon name="add" />
-          Nueva f├│rmula
+          Nueva fórmula
         </Link>
       </PageHeading>
       <div className="studio-inline-metrics">
         <span className="studio-chip">
           <Icon name="functions" />
-          {all.length} {examples ? 'ejemplos' : 'f├│rmulas'} totales
+          {all.length} {examples ? 'ejemplos' : 'fórmulas'} totales
         </span>
         <span className="studio-status published">
           {all.filter(row => row.tema.status === 'published').length} publicadas
@@ -220,8 +220,8 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
             <Icon name="search" />
             <input
               type="search"
-              placeholder="Buscar por nombre, s├¡mbolo o expresi├│n LaTeXΓÇª"
-              aria-label="Buscar f├│rmulas"
+              placeholder="Buscar por nombre, símbolo o expresión LaTeX…"
+              aria-label="Buscar fórmulas"
               value={q}
               onChange={event => {
                 setQ(event.target.value)
@@ -230,14 +230,14 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
             />
           </label>
           <select
-            aria-label="Filtrar ├írea"
+            aria-label="Filtrar área"
             value={category}
             onChange={event => {
               setCategory(event.target.value)
               setPage(1)
             }}
           >
-            <option value="">├ürea (Todas)</option>
+            <option value="">Área (Todas)</option>
             {categories.map(cat => (
               <option key={cat.id} value={cat.id}>
                 {cat.nombre}
@@ -282,7 +282,7 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
             }}
           >
             <option value="">Nivel (Todos)</option>
-            <option value="basico">B├ísico</option>
+            <option value="basico">Básico</option>
             <option value="intermedio">Intermedio</option>
             <option value="avanzado">Avanzado</option>
           </select>
@@ -292,7 +292,7 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
             <Icon name="restart_alt" />
             Limpiar filtros
           </button>
-          <span className="studio-muted">La publicaci├│n se hereda del tema.</span>
+          <span className="studio-muted">La publicación se hereda del tema.</span>
           <div className="studio-segmented">
             <button className={view === 'table' ? 'active' : ''} onClick={() => setView('table')}>
               <Icon name="table_rows" />
@@ -300,7 +300,7 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
             </button>
             <button className={view === 'grid' ? 'active' : ''} onClick={() => setView('grid')}>
               <Icon name="grid_view" />
-              Cuadr├¡cula
+              Cuadrícula
             </button>
           </div>
         </div>
@@ -311,7 +311,7 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
             <Icon name="checklist" />
           </span>
           <div>
-            <strong>{selected.length} f├│rmulas seleccionadas</strong>
+            <strong>{selected.length} fórmulas seleccionadas</strong>
             <small>Publicar aplica al tema completo, incluido el resto de su contenido.</small>
           </div>
           <button
@@ -335,7 +335,7 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
         </div>
       )}
       {!rows.length ? (
-        <Empty title="No se encontraron f├│rmulas con estos par├ímetros">
+        <Empty title="No se encontraron fórmulas con estos parámetros">
           <p>Prueba otros filtros o crea contenido para un tema existente.</p>
           <button className="studio-button" onClick={clear}>
             Restablecer filtros
@@ -350,7 +350,7 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
                   <th>
                     <input
                       type="checkbox"
-                      aria-label="Seleccionar todas las f├│rmulas de esta p├ígina"
+                      aria-label="Seleccionar todas las fórmulas de esta página"
                       checked={shown.length > 0 && shown.every(row => selected.includes(row.key))}
                       onChange={event =>
                         setSelected(current =>
@@ -361,12 +361,12 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
                       }
                     />
                   </th>
-                  <th>F├│rmula / Identificador</th>
-                  <th>├ürea y tema</th>
-                  <th>Expresi├│n matem├ítica</th>
+                  <th>Fórmula / Identificador</th>
+                  <th>Área y tema</th>
+                  <th>Expresión matemática</th>
                   <th>Variables</th>
                   <th>Estado</th>
-                  <th>Actualizaci├│n</th>
+                  <th>Actualización</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -391,7 +391,7 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
                     </td>
                     <td>
                       {categories.find(cat => cat.id === tema.categoriaId)?.nombre}
-                      <small>Γå│ {tema.titulo}</small>
+                      <small>↳ {tema.titulo}</small>
                     </td>
                     <td>
                       <div className="studio-equation-cell">
@@ -456,7 +456,7 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
                   <Link
                     className="studio-icon-button"
                     to={`/admin/formulas/${tema.slug}/${formula.id}`}
-                    title="Editar f├│rmula"
+                    title="Editar fórmula"
                   >
                     <Icon name="edit" />
                   </Link>
@@ -494,30 +494,30 @@ export default function FormulaListPage({ examples = false }: { examples?: boole
       )}
       <section className="studio-editorial-banner">
         <div>
-          <span className="studio-chip gold">Consejo pedag├│gico</span>
-          <h2>Notaci├│n clara, aprendizaje preciso</h2>
+          <span className="studio-chip gold">Consejo pedagógico</span>
+          <h2>Notación clara, aprendizaje preciso</h2>
           <p>
-            Declara s├¡mbolos, unidades y un ejemplo resuelto. Usa <code>{'\\vec{F}'}</code> para
+            Declara símbolos, unidades y un ejemplo resuelto. Usa <code>{'\\vec{F}'}</code> para
             magnitudes vectoriales.
           </p>
         </div>
         <div className="studio-chalkboard" aria-hidden="true">
           <span>F = ma</span>
-          <span>Γêæ F = 0</span>
-          <span>v = ╬öx / ╬öt</span>
+          <span>∑ F = 0</span>
+          <span>v = Δx / Δt</span>
         </div>
       </section>
       {confirmation && (
         <Confirm
-          title={confirmation.publish ? 'Publicar temas relacionados' : 'Eliminar f├│rmulas'}
+          title={confirmation.publish ? 'Publicar temas relacionados' : 'Eliminar fórmulas'}
           busy={busy}
           onCancel={() => setConfirmation(null)}
           onConfirm={() => void act()}
         >
           <p>
             {confirmation.publish
-              ? 'Se publicar├ín completos los temas asociados a las f├│rmulas seleccionadas.'
-              : 'Se eliminar├ín las f├│rmulas seleccionadas. El contenido anterior queda disponible en las revisiones de cada tema.'}
+              ? 'Se publicarán completos los temas asociados a las fórmulas seleccionadas.'
+              : 'Se eliminarán las fórmulas seleccionadas. El contenido anterior queda disponible en las revisiones de cada tema.'}
           </p>
         </Confirm>
       )}

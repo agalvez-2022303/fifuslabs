@@ -1,4 +1,4 @@
-﻿import type { CategoryId, DifficultyLevel, SimulationStatus } from './index'
+import type { CategoryId, DifficultyLevel, SimulationStatus } from './index'
 import type { z } from 'zod'
 import type {
   temaSchema,

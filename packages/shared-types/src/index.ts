@@ -1,7 +1,8 @@
-export * from './config'
-export * from './schemas'
 export * from './temas'
+export * from './schemas'
+export * from './config'
 export * from './users'
+export * from './ids'
 export * from './ejercicios'
 
 // ─── Categorías ───────────────────────────────────────────────────────────────

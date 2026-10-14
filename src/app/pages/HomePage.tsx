@@ -1,5 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useLocation, Link } from 'react-router-dom'
 import Header from '../components/Header'
+import Footer from '../components/Footer'
 import HeroCanvas from '../components/HeroCanvas'
 import SimulationCard from '../components/SimulationCard'
 import {
@@ -12,15 +14,15 @@ import {
 import styles from './HomePage.module.css'
 
 const CATEGORY_NAMES: Record<string, string> = {
-  mecanica:             'Mecánica Clásica & Cinemática',
+  mecanica: 'Mecánica Clásica & Cinemática',
   'oscilaciones-ondas': 'Oscilaciones y Ondas',
-  electrodinamica:      'Electrodinámica & Campo Eléctrico',
-  optica:               'Óptica Geométrica',
-  termodinamica:        'Termodinámica',
-  relatividad:          'Teoría de la Relatividad',
-  'fisica-atomica':     'Física Atómica',
-  'fisica-nuclear':     'Física Nuclear',
-  'estado-solido':      'Estado Sólido',
+  electrodinamica: 'Electrodinámica & Campo Eléctrico',
+  optica: 'Óptica Geométrica',
+  termodinamica: 'Termodinámica',
+  relatividad: 'Teoría de la Relatividad',
+  'fisica-atomica': 'Física Atómica',
+  'fisica-nuclear': 'Física Nuclear',
+  'estado-solido': 'Estado Sólido',
 }
 
 const CATEGORIES = Object.keys(CATEGORY_NAMES)
@@ -28,9 +30,27 @@ const CATEGORIES = Object.keys(CATEGORY_NAMES)
 export default function HomePage() {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<string>('todas')
+  const location = useLocation()
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (params.get('buscar') === '1' || location.hash === '#search-simulations') {
+      const timer = setTimeout(() => {
+        const searchInput = document.getElementById('search-simulations') as HTMLInputElement | null
+        if (searchInput) {
+          searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          searchInput.focus()
+        }
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [location.search, location.hash])
 
   const availableSims = useMemo(
-    () => (SHOW_COMING_SOON ? SIMULATIONS_REGISTRY : SIMULATIONS_REGISTRY.filter(s => s.estado === 'active')),
+    () =>
+      SHOW_COMING_SOON
+        ? SIMULATIONS_REGISTRY
+        : SIMULATIONS_REGISTRY.filter(s => s.estado === 'active'),
     []
   )
 
@@ -44,6 +64,14 @@ export default function HomePage() {
   const byCategory = useMemo(() => getByCategory(), [])
   const showSearch = search.trim() || filter !== 'todas'
 
+  const scrollToSection = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault()
+    const element = document.getElementById(id)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   return (
     <div className={styles.page}>
       <Header />
@@ -51,61 +79,137 @@ export default function HomePage() {
       {/* ─── Hero Section ────────────────────────────────────────── */}
       <section className={styles.hero}>
         <HeroCanvas />
+
         <div className={styles.heroContent}>
-          <div className={styles.heroBadge}>
-            <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--gold)' }}>
-              science
-            </span>
-            <span>LABORATORIO VIRTUAL DE FÍSICA FUNDAMENTAL</span>
+          <div className={styles.heroHeaderBlock}>
+            <div className={styles.heroBadge}>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: '16px', color: 'var(--corporate)' }}
+              >
+                science
+              </span>
+              <span>Laboratorio virtual de física</span>
+            </div>
+
+            <h1 className={styles.heroTitle}>
+              Aprende física <span className={styles.heroAccent}>viendo cómo funciona</span>
+            </h1>
+
+            <p className={styles.heroSubtitle}>
+              Practica con simulaciones interactivas, consulta fórmulas, explora el glosario y
+              refuerza tu teoría de cada tema.
+            </p>
+
+            {/* Stats Reales */}
+            <div className={styles.statsRow}>
+              <div className={styles.statCard}>
+                <span className={styles.statNumber}>{availableSims.length}</span>
+                <span className={styles.statLabel}>Temas interactivos</span>
+              </div>
+              <div className={styles.statDivider} />
+              <div className={styles.statCard}>
+                <span className={styles.statNumber}>4</span>
+                <span className={styles.statLabel}>Secciones por tema</span>
+              </div>
+            </div>
+
+            {/* Botones de acción */}
+            <div className={styles.actionButtons}>
+              <a
+                href="#simulaciones"
+                className={styles.btnPrimary}
+                onClick={scrollToSection('simulaciones')}
+              >
+                <span className="material-symbols-outlined">explore</span>
+                <span>Empezar a explorar</span>
+              </a>
+              <a
+                href="#como-funciona"
+                className={styles.btnSecondary}
+                onClick={scrollToSection('como-funciona')}
+              >
+                <span className="material-symbols-outlined">help_outline</span>
+                <span>Ver cómo funciona</span>
+              </a>
+            </div>
+
+            {/* Acceso exclusivo para maestros */}
+            <Link className={styles.teacherAccess} to="/admin/login">
+              <span className="material-symbols-outlined" aria-hidden="true">
+                login
+              </span>
+              <span>
+                <strong>Iniciar sesión</strong>
+                <small>Acceso para maestros y administradores de contenido</small>
+              </span>
+            </Link>
           </div>
+        </div>
+      </section>
 
-          <h1 className={styles.heroTitle}>
-            Simuladores <span className={styles.heroAccent}>Computacionales</span>
-          </h1>
+      {/* ─── Bloque "¿Cómo funciona?" ───────────────────────────── */}
+      <section className={styles.howItWorksSection} id="como-funciona">
+        <div className={styles.howItWorksInner}>
+          <details className={styles.howDetails}>
+            <summary className={styles.howSummary}>
+              <span className={styles.howSummaryText}>
+                <span className={styles.howTitle}>¿Cómo funciona FísicaLab?</span>
+                <span className={styles.howDesc}>
+                  4 pasos sencillos para dominar cualquier concepto a tu ritmo
+                </span>
+              </span>
+              <span className={`material-symbols-outlined ${styles.howChevron}`} aria-hidden="true">
+                expand_more
+              </span>
+            </summary>
 
-          <p className={styles.heroSubtitle}>
-            Modelado analítico en tiempo real con precisión matemática (IEEE 754 Float64),
-            visualización gráfica sincrónica y cálculo vectorial interactivo.
-          </p>
-
-          {/* Telemetry Metrics Bar */}
-          <div className={styles.metricsDeck}>
-            <div className={styles.metricCard}>
-              <div className={styles.metricValue}>
-                <span className={styles.metricNumber}>{availableSims.length}</span>
-                <span className={styles.metricSuffix}>Módulos</span>
+            <div className={styles.stepsGrid}>
+              <div className={styles.stepCard}>
+                <div className={styles.stepBadge}>1</div>
+                <div className={styles.stepIconBox}>
+                  <span className="material-symbols-outlined">touch_app</span>
+                </div>
+                <h3 className={styles.stepTitle}>Elige un tema</h3>
+                <p className={styles.stepText}>
+                  Explora vectores, cinemática, velocidad, alcance de móviles y estática.
+                </p>
               </div>
-              <span className={styles.metricLabel}>Simuladores Disponibles</span>
-            </div>
 
-            <div className={styles.metricDivider} />
-
-            <div className={styles.metricCard}>
-              <div className={styles.metricValue}>
-                <span className={styles.metricNumber}>60.0</span>
-                <span className={styles.metricSuffix}>FPS</span>
+              <div className={styles.stepCard}>
+                <div className={styles.stepBadge}>2</div>
+                <div className={styles.stepIconBox}>
+                  <span className="material-symbols-outlined">tune</span>
+                </div>
+                <h3 className={styles.stepTitle}>Juega con la simulación</h3>
+                <p className={styles.stepText}>
+                  Ajusta variables en tiempo real y observa la respuesta gráfica inmediata.
+                </p>
               </div>
-              <span className={styles.metricLabel}>Renderizado Sincrónico</span>
-            </div>
 
-            <div className={styles.metricDivider} />
-
-            <div className={styles.metricCard}>
-              <div className={styles.metricValue}>
-                <span className={styles.metricNumber}>Float64</span>
+              <div className={styles.stepCard}>
+                <div className={styles.stepBadge}>3</div>
+                <div className={styles.stepIconBox}>
+                  <span className="material-symbols-outlined">functions</span>
+                </div>
+                <h3 className={styles.stepTitle}>Repasa fórmulas y glosario</h3>
+                <p className={styles.stepText}>
+                  Comprueba ecuaciones despejadas y definiciones claras de cada magnitud.
+                </p>
               </div>
-              <span className={styles.metricLabel}>Precisión IEEE 754</span>
-            </div>
 
-            <div className={styles.metricDivider} />
-
-            <div className={styles.metricCard}>
-              <div className={styles.metricValue}>
-                <span className={styles.metricNumber}>100%</span>
+              <div className={styles.stepCard}>
+                <div className={styles.stepBadge}>4</div>
+                <div className={styles.stepIconBox}>
+                  <span className="material-symbols-outlined">menu_book</span>
+                </div>
+                <h3 className={styles.stepTitle}>Lee la teoría</h3>
+                <p className={styles.stepText}>
+                  Consolida tu aprendizaje con explicaciones conceptuales y paso a paso.
+                </p>
               </div>
-              <span className={styles.metricLabel}>Parámetros Dinámicos</span>
             </div>
-          </div>
+          </details>
         </div>
       </section>
 
@@ -136,9 +240,7 @@ export default function HomePage() {
             >
               Todas las áreas
             </button>
-            {CATEGORIES.filter(cat =>
-              availableSims.some(s => s.categoriaId === cat)
-            ).map(cat => (
+            {CATEGORIES.filter(cat => availableSims.some(s => s.categoriaId === cat)).map(cat => (
               <button
                 key={cat}
                 className={`${styles.filterPill} ${filter === cat ? styles.filterPillActive : ''}`}
@@ -157,7 +259,10 @@ export default function HomePage() {
           <section className={styles.categorySection}>
             <div className={styles.sectionHeader}>
               <div className={styles.sectionTitleRow}>
-                <span className="material-symbols-outlined" style={{ color: 'var(--corporate)', fontSize: '20px' }}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ color: 'var(--corporate)', fontSize: '20px' }}
+                >
                   filter_list
                 </span>
                 <h2 className={styles.sectionTitle}>
@@ -176,7 +281,10 @@ export default function HomePage() {
               </div>
             ) : (
               <div className={styles.emptyState}>
-                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--slate-muted)' }}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: '48px', color: 'var(--slate-muted)' }}
+                >
                   search_off
                 </span>
                 <p>No se encontraron simulaciones que coincidan con &quot;{search}&quot;</p>
@@ -188,7 +296,10 @@ export default function HomePage() {
             <section key={catId} className={styles.categorySection}>
               <div className={styles.sectionHeader}>
                 <div className={styles.sectionTitleRow}>
-                  <span className="material-symbols-outlined" style={{ color: 'var(--corporate)', fontSize: '22px' }}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ color: 'var(--corporate)', fontSize: '22px' }}
+                  >
                     token
                   </span>
                   <h2 className={styles.sectionTitle}>{CATEGORY_NAMES[catId] ?? catId}</h2>
@@ -208,23 +319,7 @@ export default function HomePage() {
         )}
       </main>
 
-      {/* ─── Academic & Scientific Footer ────────────────────────── */}
-      <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div className={styles.footerBrand}>
-            <div className={styles.footerLogoIcon}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>science</span>
-            </div>
-            <div>
-              <span className={styles.footerTitle}>FísicaLab Engine v2.4</span>
-              <p className={styles.footerSub}>Plataforma de Simulación y Análisis de Física Fundamental</p>
-            </div>
-          </div>
-          <span className={styles.footerTech}>
-            Modelado Numérico en React & TypeScript
-          </span>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

@@ -190,6 +190,7 @@
 
 .tabDeck {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
   border-bottom: 2px solid var(--border-neutral);

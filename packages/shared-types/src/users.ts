@@ -1,4 +1,4 @@
-﻿import { z } from 'zod'
+import { z } from 'zod'
 import { versionSchema } from './schemas'
 export const userRoleSchema = z.enum(['student', 'teacher'])
 export const userProfileSchema = z
@@ -38,7 +38,7 @@ export const patchUserSchema = z
   .strict()
   .refine(
     value => value.name !== undefined || value.role !== undefined || value.active !== undefined,
-    'Actualizaci├│n vac├¡a'
+    'Actualización vacía'
   )
 export const listUsersSchema = z
   .object({

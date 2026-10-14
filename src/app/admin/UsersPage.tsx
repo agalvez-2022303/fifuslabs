@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { createUserSchema, patchUserSchema, type UserProfile } from '@physicslab/shared-types'
 import { adminApi } from './api'
 import { useAuth } from './AuthContext'
@@ -81,7 +81,7 @@ export default function UsersPage() {
           role: values.role,
         })
     if (!parsed.success) {
-      setError(parsed.error.issues.map(issue => issue.message).join(' ┬╖ '))
+      setError(parsed.error.issues.map(issue => issue.message).join(' · '))
       return
     }
     setBusy(true)
@@ -120,8 +120,8 @@ export default function UsersPage() {
   return (
     <div className="studio-page">
       <PageHeading
-        title="Administraci├│n de usuarios"
-        description="Gestiona maestros y alumnos. La ├║ltima cuenta de maestro activo no puede desactivarse."
+        title="Administración de usuarios"
+        description="Gestiona maestros y alumnos. La última cuenta de maestro activo no puede desactivarse."
       >
         <button className="studio-button primary" onClick={() => edit()}>
           <Icon name="person_add" />
@@ -143,7 +143,7 @@ export default function UsersPage() {
           <input
             type="search"
             aria-label="Buscar usuarios"
-            placeholder="Buscar por nombre o correoΓÇª"
+            placeholder="Buscar por nombre o correo…"
             value={q}
             onChange={event => {
               setQ(event.target.value)
@@ -177,7 +177,7 @@ export default function UsersPage() {
                 onChange={event => setValues(current => ({ ...current, name: event.target.value }))}
               />
             </Field>
-            <Field label="Correo electr├│nico">
+            <Field label="Correo electrónico">
               <input
                 type="email"
                 required
@@ -193,13 +193,13 @@ export default function UsersPage() {
                 value={values.role}
                 onChange={event => setValues(current => ({ ...current, role: event.target.value }))}
               >
-                <option value="student">Alumno ┬╖ Lectura de publicados</option>
-                <option value="teacher">Maestro ┬╖ Contenido y usuarios</option>
+                <option value="student">Alumno · Lectura de publicados</option>
+                <option value="teacher">Maestro · Contenido y usuarios</option>
               </select>
             </Field>
             {!editing && (
               <Field
-                label="Contrase├▒a inicial"
+                label="Contraseña inicial"
                 hint="Al menos 12 caracteres; no se almacena en tablas de contenido."
               >
                 <input
@@ -229,7 +229,7 @@ export default function UsersPage() {
             </label>
           )}
           <button className="studio-button primary" disabled={busy}>
-            {busy ? 'GuardandoΓÇª' : 'Guardar usuario'}
+            {busy ? 'Guardando…' : 'Guardar usuario'}
           </button>
         </form>
       )}
@@ -243,7 +243,7 @@ export default function UsersPage() {
                 <th>Correo</th>
                 <th>Rol</th>
                 <th>Estado</th>
-                <th>Versi├│n</th>
+                <th>Versión</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -311,8 +311,8 @@ export default function UsersPage() {
           onConfirm={() => void remove()}
         >
           <p>
-            ┬½{pending.name || pending.email}┬╗ dejar├í de acceder a las rutas protegidas. Su identidad
-            y auditor├¡a se conservar├ín.
+            «{pending.name || pending.email}» dejará de acceder a las rutas protegidas. Su identidad
+            y auditoría se conservarán.
           </p>
         </Confirm>
       )}

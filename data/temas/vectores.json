@@ -1,0 +1,189 @@
+{
+  "titulo": "Vectores y Coordenadas",
+  "descripcionCorta": "Aprende a representar magnitudes vectoriales en coordenadas rectangulares, polares y geográficas.",
+  "categoriaId": "mecanica",
+  "dificultad": "basico",
+  "estado": "active",
+  "orden": 1,
+  "icono": "↗",
+  "etiquetas": [
+    "vectores",
+    "coordenadas",
+    "polar",
+    "rectangular",
+    "geográfico",
+    "práctica"
+  ],
+  "formulaPrincipal": "V_x = r \\cos\\theta, \\quad V_y = r \\sin\\theta",
+  "simComponentSlug": "vectores",
+  "id": "sim-000",
+  "slug": "vectores",
+  "status": "published",
+  "version": 1,
+  "updatedAt": "1970-01-01T00:00:00.000Z",
+  "teoria": {
+    "introduccion": "¿Te has fijado que decir \"camina 5 metros\" no es suficiente si no sabes hacia dónde ir? Un vector es una flecha que nos indica tamaño, inclinación y sentido.",
+    "secciones": [
+      {
+        "titulo": "¿Qué es un vector y por qué es importante?",
+        "contenido": "Un vector representa cantidades físicas donde la dirección importa, como la fuerza, la velocidad o el desplazamiento.\n\nSe compone de tres partes principales:\n• **Magnitud (Módulo):** El tamaño o longitud de la flecha (ejemplo: 50 N).\n• **Dirección:** La inclinación de la recta (ejemplo: 30° respecto al suelo).\n• **Sentido:** Hacia dónde apunta la flecha (ejemplo: hacia arriba a la derecha).",
+        "id": "4d720021-20f9-52c8-b312-d57285892a80"
+      },
+      {
+        "titulo": "Sistemas de representación de vectores",
+        "contenido": "1. **Coordenadas Rectangulares:** Indican cuánto avanza el vector horizontalmente en X y verticalmente en Y: $\\vec{V} = (V_x, V_y)$.\n2. **Coordenadas Polares:** Indican la longitud total del vector $r$ y su ángulo $\\theta$ desde $+X$: $\\vec{V} = (r, \\theta)$.\n3. **Coordenadas Geográficas:** Indican el tamaño y la dirección usando puntos cardinales (Norte, Sur, Este, Oeste).",
+        "id": "2fb44825-5746-5487-a791-7afd1cba942c"
+      },
+      {
+        "titulo": "Explicación paso a paso con un ejemplo cotidiano",
+        "contenido": "Imagina que caminas $50\\text{ metros}$ hacia el Noreste ($N\\;30^\\circ\\;E$).\n\n**Paso 1: Identifica la magnitud.**\nLa distancia que caminaste ($50\\text{ m}$) es la magnitud $r$.\n\n**Paso 2: Identifica la dirección.**\nLa inclinación de $30^\\circ$ desde el Norte hacia el Este da el sentido.\n\n**Paso 3: Descompón en X e Y.**\nAvanzaste un tramo al Este ($V_x$) y otro al Norte ($V_y$). Usando seno y coseno calculas cuántos metros caminaste exactamente en cada dirección.",
+        "id": "bcf2ac1c-1417-549f-81b3-bbc9b28c8dc7"
+      },
+      {
+        "titulo": "Errores comunes",
+        "contenido": "• Olvidar colocar el signo negativo a las componentes que van hacia la izquierda ($-X$) o abajo ($-Y$).\n• Medir el ángulo polar desde el eje vertical $Y$ en lugar de iniciar desde el eje horizontal $+X$.",
+        "id": "43041b95-c20f-5d87-86ed-08738821ea79"
+      }
+    ],
+    "resumen": [
+      {
+        "contenido": "Un vector queda definido por su magnitud (tamaño), dirección (inclinación) y sentido (flecha).",
+        "id": "9bc359d4-6358-51dd-a72a-24ec5bedd7ed"
+      },
+      {
+        "contenido": "Las componentes rectangulares V_x y V_y permiten trabajar fácilmente en los ejes X e Y.",
+        "id": "e2936283-4d5f-564a-ab04-a96c40411b63"
+      },
+      {
+        "contenido": "Usamos trigonometría para convertir entre coordenadas polares y rectangulares.",
+        "id": "cfac1eca-0ed5-504f-b38b-41ac660b460e"
+      }
+    ]
+  },
+  "formulas": [
+    {
+      "nombre": "Conversión Polar a Rectangular",
+      "expresion": "V_x = r \\cos\\theta, \\quad V_y = r \\sin\\theta",
+      "descripcion": "Calcula las componentes horizontales y verticales a partir de la magnitud y el ángulo del vector.",
+      "variables": [
+        {
+          "simbolo": "r",
+          "descripcion": "Magnitud o tamaño del vector",
+          "unidad": "u / m / N"
+        },
+        {
+          "simbolo": "\\theta",
+          "descripcion": "Ángulo polar medido desde el eje +X",
+          "unidad": "°"
+        },
+        {
+          "simbolo": "V_x, V_y",
+          "descripcion": "Componentes horizontales y verticales",
+          "unidad": "u / m / N"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Un vector de fuerza tiene magnitud r = 10 N y ángulo θ = 60°. Halla sus componentes rectangulares.",
+        "datos": "r = 10 N, θ = 60°",
+        "desarrollo": "V_x = 10 \\cdot \\cos(60°) = 10 \\cdot 0.5 = 5.00 \\text{ N}, \\quad V_y = 10 \\cdot \\sin(60°) = 10 \\cdot 0.866 = 8.66 \\text{ N}",
+        "resultado": "V = (5.00, 8.66) N."
+      },
+      "id": "17207652-694b-5f9e-a562-53439f7c1f99"
+    },
+    {
+      "nombre": "Magnitud del Vector (Teorema de Pitágoras)",
+      "expresion": "r = \\sqrt{V_x^2 + V_y^2}",
+      "descripcion": "Calcula la longitud total de un vector a partir de sus componentes en X e Y.",
+      "variables": [
+        {
+          "simbolo": "r",
+          "descripcion": "Magnitud del vector",
+          "unidad": "u / m / N"
+        },
+        {
+          "simbolo": "V_x, V_y",
+          "descripcion": "Componentes rectangulares",
+          "unidad": "u"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Un vector de desplazamiento tiene componentes V_x = 3 m y V_y = 4 m. Halla su magnitud.",
+        "datos": "V_x = 3 m, V_y = 4 m",
+        "desarrollo": "r = \\sqrt{3^2 + 4^2} = \\sqrt{9 + 16} = \\sqrt{25} = 5 \\text{ m}",
+        "resultado": "La magnitud del vector es r = 5 m."
+      },
+      "id": "ecde4281-f5ba-5970-8165-cddae273ea4c"
+    },
+    {
+      "nombre": "Ángulo de Dirección (Arcotangente)",
+      "expresion": "\\theta = \\arctan\\left(\\frac{|V_y|}{|V_x|}\\right)",
+      "descripcion": "Encuentra la inclinación del vector a partir de sus componentes rectangulares.",
+      "variables": [
+        {
+          "simbolo": "\\theta",
+          "descripcion": "Ángulo respecto al eje horizontal",
+          "unidad": "°"
+        },
+        {
+          "simbolo": "V_x, V_y",
+          "descripcion": "Componentes rectangulares",
+          "unidad": "u"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Calcula el ángulo de un vector con V_x = 4 N y V_y = 4 N.",
+        "datos": "V_x = 4 N, V_y = 4 N",
+        "desarrollo": "\\theta = \\arctan(4 / 4) = \\arctan(1) = 45°",
+        "resultado": "El ángulo de dirección es θ = 45°."
+      },
+      "id": "c3744e13-e196-53e3-a5d4-d285800faf67"
+    }
+  ],
+  "glosario": [
+    {
+      "termino": "Ángulo Polar (θ)",
+      "definicion": "Ángulo medido en sentido contrario a las agujas del reloj partiendo del semieje positivo +X.",
+      "id": "2f420e3a-e478-59a7-b5c7-299f352e10ec"
+    },
+    {
+      "termino": "Componente Vectorial",
+      "definicion": "Proyección del vector sobre uno de los ejes cartesianos (horizontal V_x o vertical V_y).",
+      "id": "93d7fd03-6146-5bc3-a43f-532f23cc60d2"
+    },
+    {
+      "termino": "Coordenadas Geográficas",
+      "definicion": "Sistema que indica la dirección usando puntos cardinales (Norte, Sur, Este, Oeste).",
+      "id": "280a64f9-5be9-5dce-90fc-085f666d184e"
+    },
+    {
+      "termino": "Coordenadas Polares",
+      "definicion": "Sistema que define un vector mediante su magnitud r y un ángulo θ.",
+      "id": "df77cdf3-b93e-5061-9f37-0b98e5d9afca"
+    },
+    {
+      "termino": "Coordenadas Rectangulares",
+      "definicion": "Sistema que describe un vector mediante sus avances en los ejes X e Y.",
+      "id": "4d1be055-7e6b-5d2e-a443-9e9a53ee906a"
+    },
+    {
+      "termino": "Dirección",
+      "definicion": "Inclinación de la recta sobre la que actúa el vector, medida por su ángulo.",
+      "id": "6513513d-8260-51f8-a2c7-26a0da28d4c5"
+    },
+    {
+      "termino": "Magnitud (Módulo)",
+      "definicion": "Tamaño o longitud del vector; siempre es un valor positivo con su unidad de medida.",
+      "id": "8cfb5955-cb19-515f-b521-09b9cc7520a7"
+    },
+    {
+      "termino": "Sentido",
+      "definicion": "Hacia dónde apunta la flecha del vector (ejemplo: hacia el Noreste o hacia la derecha).",
+      "id": "033dc691-cca1-5b6d-92b9-625c80d2297a"
+    },
+    {
+      "termino": "Vector",
+      "definicion": "Magnitud física que tiene módulo (tamaño), dirección (inclinación) y sentido.",
+      "id": "532843d8-5c50-5e13-9522-df690dcab80f"
+    }
+  ]
+}

@@ -1,0 +1,213 @@
+{
+  "titulo": "Movimiento con Aceleración Constante (MRUA)",
+  "descripcionCorta": "Aprende cómo cambia la velocidad de un objeto a un ritmo constante cuando acelera o frena.",
+  "categoriaId": "mecanica",
+  "dificultad": "basico",
+  "estado": "active",
+  "orden": 2,
+  "icono": "→",
+  "etiquetas": [
+    "cinemática",
+    "MRUA",
+    "gráficas",
+    "aceleración",
+    "velocidad"
+  ],
+  "formulaPrincipal": "x(t) = x_0 + v_0 t + \\frac{1}{2} a t^2",
+  "simComponentSlug": "movimiento-aceleracion-constante",
+  "id": "sim-001",
+  "slug": "movimiento-aceleracion-constante",
+  "status": "published",
+  "version": 1,
+  "updatedAt": "1970-01-01T00:00:00.000Z",
+  "teoria": {
+    "introduccion": "Cuando un auto arranca en un semáforo o frena antes de un cruce, su velocidad cambia segundo a segundo. Este cambio de velocidad se llama aceleración.",
+    "secciones": [
+      {
+        "titulo": "¿Qué es el MRUA?",
+        "contenido": "Es un movimiento en línea recta donde la aceleración se mantiene constante.\n\n• Si el cuerpo **acelera** (a > 0), gana velocidad a un ritmo constante.\n• Si el cuerpo **frena** (a < 0), pierde velocidad a un ritmo constante.",
+        "id": "a0b655c5-a6a8-55ce-b60a-66c7d76f821d"
+      },
+      {
+        "titulo": "Explicación paso a paso con un ejemplo cotidiano",
+        "contenido": "Imagina que tu carro arranca cuando el semáforo cambia a verde con una aceleración constante de $2\\text{ m/s}^2$.\n\n• En $t = 0\\text{ s}$, va a $0\\text{ m/s}$.\n• En $t = 1\\text{ s}$, va a $2\\text{ m/s}$.\n• En $t = 2\\text{ s}$, va a $4\\text{ m/s}$.\n• En $t = 3\\text{ s}$, va a $6\\text{ m/s}$.\n\n¡Cada segundo que transcurre gana exactamente $2\\text{ m/s}$ de rapidez!",
+        "id": "8217cbbf-594b-5162-ad3f-f389d88987de"
+      },
+      {
+        "titulo": "Errores comunes",
+        "contenido": "• Confundir velocidad con aceleración (mucha aceleración significa ganar velocidad rápidamente, no necesariamente ir rápido en el origen).\n• Olvidar elevar el tiempo al cuadrado ($t^2$) en la fórmula de posición.",
+        "id": "95326e8f-a930-5367-b85f-a61a4f98b6e2"
+      }
+    ],
+    "resumen": [
+      {
+        "contenido": "En el MRUA la aceleración es constante y distinta de cero.",
+        "id": "3b532e61-e0b4-5f2c-a879-83b1eec69c7a"
+      },
+      {
+        "contenido": "La velocidad cambia de forma lineal con el tiempo (v = v₀ + a·t).",
+        "id": "81333ebe-00ac-5009-9384-ced8a8cd9e5d"
+      },
+      {
+        "contenido": "La posición cambia en forma de parábola cuadrática (x = x₀ + v₀·t + ½·a·t²).",
+        "id": "3f7f9869-b8c6-51cf-8b16-c90516acbea9"
+      }
+    ]
+  },
+  "formulas": [
+    {
+      "nombre": "Ecuación Horaria de la Posición en MRUA",
+      "expresion": "x(t) = x_0 + v_0 t + \\frac{1}{2} a t^2",
+      "descripcion": "Calcula la posición final de un cuerpo que acelera o frena uniformemente.",
+      "variables": [
+        {
+          "simbolo": "x(t)",
+          "descripcion": "Posición final en el instante t",
+          "unidad": "m"
+        },
+        {
+          "simbolo": "x_0",
+          "descripcion": "Posición inicial",
+          "unidad": "m"
+        },
+        {
+          "simbolo": "v_0",
+          "descripcion": "Velocidad inicial",
+          "unidad": "m/s"
+        },
+        {
+          "simbolo": "a",
+          "descripcion": "Aceleración constante",
+          "unidad": "m/s²"
+        },
+        {
+          "simbolo": "t",
+          "descripcion": "Tiempo transcurrido",
+          "unidad": "s"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Un automóvil parte del reposo (x₀ = 0 m, v₀ = 0 m/s) con aceleración constante de 2 m/s². ¿Dónde está a los 4 segundos?",
+        "datos": "x₀ = 0 m, v₀ = 0 m/s, a = 2 m/s², t = 4 s",
+        "desarrollo": "x(4) = 0 + (0 \\cdot 4) + \\frac{1}{2}(2)(4^2) = 1 \\cdot 16 = 16 \\text{ m}",
+        "resultado": "El automóvil se encuentra en la posición x = 16 m."
+      },
+      "id": "2b49b8c5-9666-5606-bc90-dcff614fcecb"
+    },
+    {
+      "nombre": "Ecuación de la Velocidad",
+      "expresion": "v(t) = v_0 + a t",
+      "descripcion": "Calcula la velocidad alcanzada tras acelerar o frenar durante cierto tiempo.",
+      "variables": [
+        {
+          "simbolo": "v(t)",
+          "descripcion": "Velocidad final en el instante t",
+          "unidad": "m/s"
+        },
+        {
+          "simbolo": "v_0",
+          "descripcion": "Velocidad inicial",
+          "unidad": "m/s"
+        },
+        {
+          "simbolo": "a",
+          "descripcion": "Aceleración constante",
+          "unidad": "m/s²"
+        },
+        {
+          "simbolo": "t",
+          "descripcion": "Tiempo transcurrido",
+          "unidad": "s"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Un autobús viaja a 10 m/s y acelera a 3 m/s² durante 5 segundos. ¿Cuál es su velocidad final?",
+        "datos": "v₀ = 10 m/s, a = 3 m/s², t = 5 s",
+        "desarrollo": "v(5) = 10 + (3 \\cdot 5) = 10 + 15 = 25 \\text{ m/s}",
+        "resultado": "La velocidad final del autobús es 25 m/s."
+      },
+      "id": "330446fc-ec3b-55a5-8846-6994dbfb0696"
+    },
+    {
+      "nombre": "Ecuación Independiente del Tiempo (Torricelli)",
+      "expresion": "v_f^2 = v_0^2 + 2 a \\Delta x",
+      "descripcion": "Relaciona velocidades y distancia recorrida sin necesidad de conocer el tiempo.",
+      "variables": [
+        {
+          "simbolo": "v_f",
+          "descripcion": "Velocidad final",
+          "unidad": "m/s"
+        },
+        {
+          "simbolo": "v_0",
+          "descripcion": "Velocidad inicial",
+          "unidad": "m/s"
+        },
+        {
+          "simbolo": "a",
+          "descripcion": "Aceleración constante",
+          "unidad": "m/s²"
+        },
+        {
+          "simbolo": "\\Delta x",
+          "descripcion": "Distancia recorrida",
+          "unidad": "m"
+        }
+      ],
+      "ejemploResuelto": {
+        "enunciado": "Un auto frena a v₀ = 10 m/s con a = -2 m/s² hasta detenerse (v_f = 0). Halla la distancia de frenado.",
+        "datos": "v_f = 0 m/s, v₀ = 10 m/s, a = -2 m/s²",
+        "desarrollo": "0 = 10^2 + 2(-2)\\Delta x \\implies 0 = 100 - 4\\Delta x \\implies 4\\Delta x = 100 \\implies \\Delta x = 25 \\text{ m}",
+        "resultado": "El automóvil necesita 25 metros para detenerse por completo."
+      },
+      "id": "23b59867-2043-517e-9de3-ecb76d6e0e87"
+    }
+  ],
+  "glosario": [
+    {
+      "termino": "Aceleración (a)",
+      "definicion": "Ritmo de cambio de la velocidad por unidad de tiempo, medida en m/s².",
+      "id": "55a617e3-f2ab-58eb-bc67-604e69f5be16"
+    },
+    {
+      "termino": "Aceleración de la Gravedad (g)",
+      "definicion": "Aceleración constante con la que caen los cuerpos cerca de la Tierra (9.8 m/s²).",
+      "id": "6cb8bdef-90d3-5892-88dd-24b2bfebdd89"
+    },
+    {
+      "termino": "Desaceleración (Frenado)",
+      "definicion": "Aceleración con signo opuesto a la velocidad que reduce la rapidez del móvil.",
+      "id": "1000476f-0979-5d4d-8b17-07f93e1c27ce"
+    },
+    {
+      "termino": "MRUA",
+      "definicion": "Movimiento Rectilíneo Uniformemente Acelerado con aceleración constante y recta.",
+      "id": "a351af9a-b762-5dc0-aaa0-37c8ae7c018b"
+    },
+    {
+      "termino": "Parábola",
+      "definicion": "Curva característica que forma la gráfica posición-tiempo en el MRUA.",
+      "id": "6f49d53e-7b4e-501c-a281-430dfb03b7ac"
+    },
+    {
+      "termino": "Pendiente en gráfica v-t",
+      "definicion": "La inclinación de la recta velocidad-tiempo representa la aceleración.",
+      "id": "f21fe515-bb7c-54c8-93d2-9932e7367a57"
+    },
+    {
+      "termino": "Reposo",
+      "definicion": "Estado de un móvil cuya velocidad inicial es cero (v₀ = 0 m/s).",
+      "id": "c93903be-0317-5ba2-81ce-4829c674a7a4"
+    },
+    {
+      "termino": "Velocidad Final (v_f)",
+      "definicion": "Velocidad alcanzada al concluir el tramo de tiempo analizado.",
+      "id": "536ffd27-7d54-5184-8a39-482e6f2b6394"
+    },
+    {
+      "termino": "Velocidad Inicial (v_0)",
+      "definicion": "Velocidad que llevaba el móvil al comenzar el tiempo (t = 0 s).",
+      "id": "e90f64be-91d4-5e48-bae7-323db98e0fa0"
+    }
+  ]
+}

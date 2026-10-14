@@ -1202,7 +1202,7 @@ export default function DistanciaDesplazamiento() {
               </div>
               <div style={{ fontSize: '11px', color: '#14532d', lineHeight: 1.5 }}>
                 Ingresa tus propias coordenadas para explorar cómo cambia la relación entre distancia y desplazamiento.
-                Prueba con <strong>Ida y Vuelta</strong> para ver cómo el desplazamiento puede ser 0.
+                Explora el caso de <strong>Ida y Vuelta</strong> para ver cómo el desplazamiento puede ser 0.
               </div>
             </div>
           )}

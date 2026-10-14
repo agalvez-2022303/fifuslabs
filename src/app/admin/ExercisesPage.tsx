@@ -1496,7 +1496,7 @@ export default function ExercisesPage() {
         >
           <p>
             ¿Estás seguro de que deseas eliminar permanentemente el ejercicio{' '}
-            <strong>"{pendingDelete.titulo}"</strong>?
+            <strong>&ldquo;{pendingDelete.titulo}&rdquo;</strong>?
           </p>
           <p style={{ marginTop: 8, fontSize: 12, color: 'var(--s-ink-2)' }}>
             Esta acción no se puede deshacer y desvinculará este ejercicio del módulo{' '}
